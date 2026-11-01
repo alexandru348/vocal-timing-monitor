@@ -1,0 +1,31 @@
+{
+  "version": "0.7 RC2 Compact",
+  "tests_run": 108,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": true,
+  "python": "3.12.14",
+  "runtime": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "scope": [
+    "Gen arithmetic via C++17 harness, not Cycling74 compiler",
+    "Generated message graph, mocked API and synthetic PCM integration",
+    "Parent audio/API/control graph unchanged from RC1 excluding version and popup contents",
+    "Waveform input isolation, menu protocol, gain isolation, grid phase and display duration",
+    "Compact and expanded bounds, control hit areas and moved-window origin preservation",
+    "Settings expansion does not modify source, analysis or explicit Auto Stop intent",
+    "AMXD container parsed independently and deterministic build"
+  ],
+  "real_host_evidence": {
+    "0.6 RC6": "User previously confirmed first-event Stop in Ableton",
+    "0.7 RC1": "Provided conversation confirms both histories and independent real beat input",
+    "0.7 RC2 Compact": "Not executed in Max/Ableton"
+  },
+  "not_executed": [
+    "RC2 Compact Max loading/Gen compilation",
+    "Native GUI rendering and system scaling",
+    "Actual thispatcher expansion/collapse and position after close/reopen",
+    "Actual Stop regression in this compact version",
+    "Microphone and physical latency calibration"
+  ]
+}

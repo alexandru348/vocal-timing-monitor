@@ -1,0 +1,137 @@
+{
+  "date": "2026-11-01",
+  "host": "Ableton Live 12 Suite / Windows 11",
+  "tempo_bpm": 100,
+  "sample_rate_hz": 44100,
+  "grid": "1/4",
+  "threshold_ms": 100,
+  "source": "Puls_calibrare MIDI/Simpler to Track 6 Audio, user screenshots",
+  "real_observations": [
+    {
+      "device": "0.6 RC4",
+      "test": "single pass of known 8-note clip, Auto Stop OFF, compensation 0",
+      "observed_audio_count": 8,
+      "last_deviation_ms": 0.9,
+      "result": "passed for this test",
+      "evidence": "image(20261101-114158).png"
+    },
+    {
+      "device": "0.6 RC4",
+      "test": "provoked deviation, Auto Stop OFF, compensation -120 ms",
+      "observed_audio_count": 8,
+      "last_deviation_ms": 120.9,
+      "live_playing": true,
+      "result": "passed for this test",
+      "evidence": "image(20261101-114536).png"
+    },
+    {
+      "device": "0.6 RC4",
+      "test": "Auto Stop ON after synchronization, before clip, compensation +120 ms",
+      "before": {
+        "audio_count": 0,
+        "clock_synchronized": true,
+        "autostop_on": true,
+        "evidence": "image(20261101-115250).png"
+      },
+      "after": {
+        "audio_count": 6,
+        "last_deviation_ms": -119.1,
+        "live_playing": true,
+        "autostop_on": false,
+        "evidence": "image(20261101-115301).png"
+      },
+      "result": "failed; toggled OFF without stopping at first large event",
+      "cause": "not yet established from runtime guard values or executor readback"
+    },
+    {
+      "device": "0.6 RC5",
+      "test": "Auto Stop ON after synchronization, compensation +120 ms",
+      "before": {
+        "audio_count": 0,
+        "clock_synchronized": true,
+        "autostop_on": true,
+        "evidence": "image(20261101-121048).png"
+      },
+      "after": {
+        "audio_count": 3,
+        "last_deviation_ms": -119.1,
+        "live_playing": true,
+        "autostop_on": false,
+        "stop_note": "Ultimul Stop: blocat - preview Max",
+        "evidence": "image(20261101-121109).png"
+      },
+      "result": "failed; specific preview veto is reported by the native Stop path",
+      "cause": "unconditional preview guard rejects the explicitly armed request; removed in RC6 based on official Preview Mode contract"
+    },
+    {
+      "device": "0.6 RC6",
+      "test": "first provoked large event, Auto Stop explicitly ON, compensation +120 ms",
+      "before": {
+        "clock_synchronized": true,
+        "audio_count": 0,
+        "autostop_on": true,
+        "evidence": "image(20261101-122610).png"
+      },
+      "after": {
+        "audio_count": 1,
+        "last_deviation_ms": -119.1,
+        "live_playing": false,
+        "autostop_on": false,
+        "stop_note": "Ultimul Stop: oprire confirmata de Live",
+        "evidence": "image(20261101-122629).png"
+      },
+      "user_report": "a mers",
+      "result": "passed in this host calibration test"
+    },
+    {
+      "device": "0.7 RC1",
+      "source": "Provided conversation messages 64-75; screenshots not newly inspected in this change",
+      "result": "User confirmed both waves; provided conversation reports successful No Input isolation and separate real instrumental selection",
+      "scope": [
+        "Two visible signal histories",
+        "No Input leaves beat flat while main input remains active",
+        "Main calibration input and actual instrumental source are independent"
+      ]
+    },
+    {
+      "device": "0.7 RC2 Compact",
+      "date": "2026-11-01",
+      "test": "compact/expanded UI, microphone and real instrumental waveforms, separate track 3 recording",
+      "result": "confirmed by owner reports and screenshots in development session",
+      "settings": {
+        "grid": "1/4",
+        "threshold_ms": 100,
+        "offset_ms": 92.2,
+        "speech_detection_db": -14,
+        "windows_output_volume": 15
+      }
+    },
+    {
+      "device": "0.7 RC2 Compact",
+      "test": "8 aligned speaker/microphone reference impulses",
+      "before_offset_ms": 92.2,
+      "after_offset_ms": 0.0,
+      "result": "owner reported constant values across eight impulses",
+      "reference_detection_db": -26,
+      "limitation": "Normal speech later used -14 dB; vocal timing precision remains approximate"
+    },
+    {
+      "device": "0.7 RC2 Compact",
+      "test": "Auto Stop during vocal recording",
+      "audio_count": 2,
+      "last_deviation_ms": -240.2,
+      "live_playing": false,
+      "autostop_on": false,
+      "recorded_clip_retained": true,
+      "stop_note": "Ultimul Stop: oprire confirmata de Live",
+      "result": "passed in the owner setup",
+      "evidence": "Owner report and screenshot image(20261101-155011).png; screenshot not redistributed"
+    }
+  ],
+  "not_real_host_validated": [
+    "Other grids, tempos, sample rates and operating systems beyond the reported setup",
+    "Precise musical vocal timing accuracy and automatic separation of speaker bleed",
+    "Control persistence (not implemented)"
+  ],
+  "note": "Static and simulated test results are in TEST_RESULTS.json; they are not host observations."
+}

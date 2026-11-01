@@ -1,0 +1,220 @@
+// Vocal Timing Monitor 0.6 RC6. Embedded GenExpr, no external dependencies.
+// in1/in2 = stereo audio; in3 = plugphasor~ (one ramp per quarter note).
+// History reads are previous-sample values. Commit all histories at the end.
+Param enabled(1);
+Param autostop(0);
+Param apiready(0);
+Param grid(4);
+Param redms(100);
+Param offsetms(0);
+Param gateamp(0.0251188643);
+Param testseq(0);
+Param resetseq(0);
+History prevphase(0);
+History validrun(0);
+History periodms(600);
+History prevleft(0);
+History prevright(0);
+History hpleft(0);
+History hpright(0);
+History envelope(0);
+History noise(0.001);
+History quiet(0);
+History armed(0);
+History candidate(0);
+History candidatedelta(0);
+History candidateperiod(600);
+History cooldown(0);
+History total(0);
+History lastdelta(0);
+History lastraw(0);
+History lastclass(3);
+History stopheld(0);
+History prevauto(0);
+History lasttestseq(0);
+History testtotal(0);
+History testhold(0);
+History lastresetseq(0);
+History prevgrid(4);
+History prevoffset(0);
+History prevenabled(1);
+History hasmeasurement(0);
+History sampleclock(0);
+
+// Decode and validate the actual audio clock. Never timestamp in the UI thread.
+phase = clamp(in3, 0, 1);
+pd = phase - prevphase;
+inc = pd < -0.5 ? pd + 1 : pd;
+incrementok = (inc >= 19.8 / (60 * samplerate)) && (inc <= 404 / (60 * samplerate));
+nvalid = incrementok ? min(validrun + 1, samplerate) : 0;
+synced = nvalid >= samplerate * 0.010;
+nperiod = incrementok ? 1000 / (inc * samplerate) : periodms;
+denom = grid == 16 ? 16 : (grid == 8 ? 8 : 4);
+steps = denom / 4;
+stepms = nperiod / steps;
+maxdeviation = stepms * 0.5;
+resetnow = resetseq != lastresetseq;
+settingschanged = (denom != prevgrid) || (offsetms != prevoffset) || (enabled != prevenabled);
+// Only the validated audio clock and the user's analysis switch gate detection.
+// Host lifecycle flags remain in the native Auto Stop safety gate.
+operating = (enabled > 0) && synced;
+
+// Independent high-pass for each channel; max(abs(L),abs(R)) avoids phase cancellation.
+hpcoef = exp(-6.28318530718 * 65 / samplerate);
+nl = in1 - prevleft + hpcoef * hpleft;
+nr = in2 - prevright + hpcoef * hpright;
+level = max(abs(nl), abs(nr));
+envcoef = exp(-1 / (samplerate * (level > envelope ? 0.0002 : 0.008)));
+nenv = level + envcoef * (envelope - level);
+triggerlevel = max(clamp(gateamp, 0.001, 0.5), max(noise * 3.5, noise + 0.008));
+releaselevel = triggerlevel * 0.45;
+nnoise = nenv < releaselevel ? noise + (nenv - noise) / samplerate : noise;
+nquiet = nenv < releaselevel ? min(quiet + 1, samplerate) : 0;
+narmed = armed;
+ncandidate = candidate;
+ncdelta = candidatedelta;
+ncperiod = candidateperiod;
+ncool = max(0, cooldown - 1);
+ntotal = total;
+ndelta = lastdelta;
+nraw = lastraw;
+nclass = lastclass;
+nstop = stopheld;
+ntests = testtotal;
+nmeasurement = hasmeasurement;
+nthold = max(0, testhold - 1);
+
+if (nquiet >= samplerate * 0.012) {
+    narmed = 1;
+}
+if (!operating || resetnow || settingschanged) {
+    ncandidate = 0;
+    narmed = 0;
+    nquiet = 0;
+    ncool = 0;
+}
+if (resetnow || settingschanged) {
+    nclass = 3;
+    nthold = 0;
+    nmeasurement = 0;
+}
+if (resetnow) {
+    ntotal = 0;
+    ntests = 0;
+    ndelta = 0;
+    nraw = 0;
+}
+
+// Mark first threshold crossing, then confirm 2 ms of continuous envelope.
+// Timestamp remains the crossing, never the later confirmation instant.
+if (operating && !resetnow && !settingschanged) {
+    if ((candidate == 0) && narmed && (ncool == 0) && (nenv >= triggerlevel)) {
+        ncandidate = 1;
+        ncdelta = phase * nperiod;
+        ncperiod = nperiod;
+        narmed = 0;
+    } else if (candidate > 0) {
+        if (nenv < releaselevel) {
+            ncandidate = 0;
+        } else {
+            ncandidate = candidate + 1;
+        }
+    }
+    if (ncandidate >= samplerate * 0.002) {
+        rawpos = ncdelta / ncperiod * steps;
+        rawdelta = (rawpos - floor(rawpos + 0.5)) * ncperiod / steps;
+        adjusted = (ncdelta - clamp(offsetms, -500, 500)) / ncperiod * steps;
+        measured = (adjusted - floor(adjusted + 0.5)) * ncperiod / steps;
+        ndelta = measured;
+        nraw = rawdelta;
+        ntotal = total + 1;
+        nmeasurement = 1;
+        nclass = abs(measured) >= clamp(redms, 10, 300) ? 6 : (abs(measured) >= min(45, redms * 0.5) ? 5 : 4);
+        nthold = 0;
+        ncandidate = 0;
+        ncool = samplerate * max(0.020, min(0.080, stepms * 0.00045));
+        if ((nclass == 6) && (autostop > 0) && (prevauto > 0) && (apiready > 0)) {
+            nstop = 1;
+        }
+    }
+}
+
+// UI test is a separate, labelled synthetic timestamp; it cannot arm Auto Stop.
+if (testseq != lasttestseq) {
+    ntests = testtotal + 1;
+    nthold = samplerate * 0.8;
+    if (operating) {
+        testpos = (phase * nperiod - clamp(offsetms, -500, 500)) / stepms;
+        ndelta = (testpos - floor(testpos + 0.5)) * stepms;
+        nclass = 7;
+        nmeasurement = 1;
+    } else {
+        nclass = 8;
+    }
+}
+
+// DSP-side cancellation. Lifecycle/preview flags are checked by the native gate
+// and also disarm autostop; they do not gate read-only audio analysis here.
+if ((autostop <= 0) || (enabled <= 0) || (apiready <= 0) || resetnow || settingschanged || !synced) {
+    nstop = 0;
+}
+state = nclass;
+if (nthold > 0) {
+    // Retain the result AT THE TEST instant; later sync must not upgrade it.
+    state = nclass;
+} else if (enabled <= 0) {
+    state = 0;
+} else if (!synced) {
+    state = incrementok ? 2 : 1;
+}
+if (nstop > 0) {
+    state = 9;
+}
+
+out1 = ndelta;
+out2 = ntotal;
+out3 = nstop;
+out4 = state;
+out5 = nenv;
+out6 = ntests;
+out7 = nraw;
+out8 = synced;
+out9 = maxdeviation;
+out10 = nmeasurement;
+// DSP activity is measured independently from transport and input amplitude.
+nextclock = sampleclock + 1;
+if (nextclock >= 1000000000) {
+    nextclock = 0;
+}
+out11 = nextclock;
+
+prevphase = phase;
+validrun = nvalid;
+periodms = nperiod;
+prevleft = in1;
+prevright = in2;
+hpleft = nl;
+hpright = nr;
+envelope = nenv;
+noise = nnoise;
+quiet = nquiet;
+armed = narmed;
+candidate = ncandidate;
+candidatedelta = ncdelta;
+candidateperiod = ncperiod;
+cooldown = ncool;
+total = ntotal;
+lastdelta = ndelta;
+lastraw = nraw;
+lastclass = nclass;
+stopheld = nstop;
+prevauto = autostop;
+lasttestseq = testseq;
+testtotal = ntests;
+testhold = nthold;
+lastresetseq = resetseq;
+prevgrid = denom;
+prevoffset = offsetms;
+prevenabled = enabled;
+hasmeasurement = nmeasurement;
+sampleclock = nextclock;

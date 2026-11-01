@@ -1,0 +1,32 @@
+{
+  "bpm": 100,
+  "placement": "1.1.1",
+  "warp": false,
+  "grid": "1/4",
+  "threshold_ms": 100,
+  "compensation_ms": 0,
+  "duration_seconds": 6.2,
+  "onset_times_seconds": [
+    1.2,
+    1.7999999999999998,
+    2.4,
+    3.0,
+    3.5999999999999996,
+    4.2,
+    4.8,
+    5.52
+  ],
+  "expected_deviations_ms": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    120
+  ],
+  "expected_audio_count": 8,
+  "stop_expected_at_seconds": 5.52,
+  "note": "Expected values before Live routing/latency offsets. NOT measured in Ableton."
+}
