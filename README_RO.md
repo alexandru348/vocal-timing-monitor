@@ -57,4 +57,12 @@ Opt impulsuri de referință au dat +92.2 ms constant înainte de compensare și
 
 Python 3, NumPy, g++ C++17: `python3 -m pip install -r requirements-dev.txt`, apoi `python3 build.py` și `python3 -m unittest discover -s tests -v`.
 
-Motor: src/vtm_engine.genexpr; construcție: build.py; rezultate: dist/. AMXD este generat programatic, nu prin Save/Freeze. Fișierul distribuit este identic cu RC2 testat; s-a actualizat documentația. Licența urmează să fie aleasă de autor.
+Motor: src/vtm_engine.genexpr; construcție: build.py; rezultate: dist/. AMXD este generat programatic, nu prin Save/Freeze. Fișierul distribuit este identic cu RC2 testat; s-a actualizat documentația.
+
+## Licență
+
+Codul proiectului și dispozitivul Vocal Timing Monitor AMXD distribuit sunt oferite sub [licența MIT](LICENSE). Copyright (c) 2026 alexandru348.
+
+Sunt permise utilizarea, modificarea și redistribuirea, inclusiv comercială, cu păstrarea mențiunilor de copyright și a licenței. Software-ul este oferit fără garanție. Ableton Live, Max și alte programe terțe furnizate separat își păstrează propriile licențe.
+
+Tagul original v0.7-rc2 rămâne punctul testat. Release-ul include separat LICENSE și o arhivă de surse cu licența inclusă; fișierele de execuție sunt neschimbate.

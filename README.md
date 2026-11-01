@@ -6,7 +6,7 @@ Max for Live audio device for visual timing feedback and optional automatic tran
 
 ## Download and requirements
 
-Download `Vocal_Timing_Monitor_v0_7_RC2_Compact.amxd` from [Releases](https://github.com/alexandru348/vocal-timing-monitor/releases) after publication. Until then, the same file is in [dist](dist/).
+Download `Vocal_Timing_Monitor_v0_7_RC2_Compact.amxd` from [Releases](https://github.com/alexandru348/vocal-timing-monitor/releases). The same file is also in [dist](dist/).
 
 - Ableton Live with Max for Live available; validated in Live 12 Suite.
 - Tested on Windows 11, 44.1 kHz, at 100 BPM. Other configurations are unverified.
@@ -74,4 +74,10 @@ python3 -m unittest discover -s tests -v
 
 Preserve tag `v0.7-rc2` as the tested checkpoint when publishing. Develop persistence on a separate branch and validate it in Ableton before merging. Earlier engineering notes in [docs/history](docs/history/) describe historical stages.
 
-The owner has not selected a project license yet.
+## License
+
+The project source code and the distributed Vocal Timing Monitor AMXD device are licensed under the [MIT License](LICENSE). Copyright (c) 2026 alexandru348.
+
+Use, modification and redistribution, including commercial use, are permitted subject to preserving the copyright and license notices. The software is provided without warranty. Ableton Live, Max and other separately supplied third-party software retain their own licenses.
+
+The original v0.7-rc2 tag remains the tested checkpoint. The release also provides LICENSE and a source ZIP including this license; runtime files are unchanged.
