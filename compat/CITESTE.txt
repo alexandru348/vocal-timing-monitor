@@ -1,0 +1,7 @@
+ACTUALIZARE RC3.3 PENTRU PROIECTE CARE REFERA FISIERUL RC3_2
+
+Acest AMXD contine patch-ul RC3.3 testat, dar pastreaza numele RC3_2 pentru proiectul existent. Pentru instalari noi folositi fisierul canonic RC3_3 din dist/release.
+
+Salvati proiectul in Ableton. Inchideti complet Ableton. Faceti o copie a fisierului vechi, apoi inlocuiti AMXD RC3_2 din User Library cu acest fisier cu acelasi nume. Redeschideti proiectul si pastrati instanta existenta; monitorul trebuie sa arate RC3.3. Nu redenumiti/stergeti referinta veche in Explorer fara actualizarea proiectului.
+
+Setarile se salveaza in Live Set prin Ctrl+S, nu global. Auto Stop porneste OFF. Patch-ul JSON este identic cu varianta canonica; numele intern al containerului si hash-ul difera. Sursa si dispozitivul sunt sub licenta MIT; vedeti LICENSE.

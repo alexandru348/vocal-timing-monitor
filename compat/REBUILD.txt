@@ -1,0 +1,2 @@
+From repository root:
+python3 -c "import build; from pathlib import Path; Path('compat/Vocal_Timing_Monitor_v0_7_RC3_2_Persistent.amxd').write_bytes(build.amxd_bytes(build.make_patch(), 'Vocal_Timing_Monitor_v0_7_RC3_2_Persistent.amxd'))"

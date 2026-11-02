@@ -87,7 +87,7 @@
             0.77,
             1.0
           ],
-          "text": "0.7 RC2 Compact | fereastra separata",
+          "text": "0.7 RC3.3 Persistent | fereastra separata",
           "presentation": 1,
           "presentation_rect": [
             16.0,
@@ -171,7 +171,7 @@
             0.77,
             1.0
           ],
-          "text": "ANALIZA ON / AUTO STOP OFF la incarcare",
+          "text": "Setari salvate in proiect / AUTO STOP OFF",
           "presentation": 1,
           "presentation_rect": [
             16.0,
@@ -445,7 +445,7 @@
                     0.77,
                     1.0
                   ],
-                  "text": "0.7 RC2 / COMPACT",
+                  "text": "0.7 RC3.3 / SALVARE",
                   "presentation": 1,
                   "presentation_rect": [
                     367.0,
@@ -850,7 +850,7 @@
                   ],
                   "texton": "ANALIZA ON",
                   "mode": 1,
-                  "parameter_enable": 0,
+                  "parameter_enable": 1,
                   "rounded": 7.0,
                   "fontsize": 10.0,
                   "fontface": 1,
@@ -888,7 +888,24 @@
                     116.0,
                     100.0,
                     28.0
-                  ]
+                  ],
+                  "parameter_mappable": 0,
+                  "varname": "vtm_enabled",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Analysis",
+                      "parameter_shortname": "VTM Analysis",
+                      "parameter_type": 1,
+                      "parameter_invisible": 1,
+                      "parameter_initial_enable": 1,
+                      "parameter_initial": [
+                        1
+                      ],
+                      "parameter_order": 0,
+                      "parameter_mmin": 0.0,
+                      "parameter_mmax": 1.0
+                    }
+                  }
                 }
               },
               {
@@ -1147,7 +1164,7 @@
                     0.98,
                     1.0
                   ],
-                  "parameter_enable": 0,
+                  "parameter_enable": 1,
                   "presentation": 1,
                   "presentation_rect": [
                     24.0,
@@ -1155,7 +1172,24 @@
                     80.0,
                     26.0
                   ],
-                  "fontsize": 11.0
+                  "fontsize": 11.0,
+                  "parameter_mappable": 0,
+                  "varname": "vtm_grid_ui",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Grid",
+                      "parameter_shortname": "VTM Grid",
+                      "parameter_type": 1,
+                      "parameter_invisible": 1,
+                      "parameter_initial_enable": 1,
+                      "parameter_initial": [
+                        0
+                      ],
+                      "parameter_order": 1,
+                      "parameter_mmin": 0.0,
+                      "parameter_mmax": 2.0
+                    }
+                  }
                 }
               },
               {
@@ -1244,7 +1278,7 @@
                     1.0
                   ],
                   "triangle": 0,
-                  "parameter_enable": 0,
+                  "parameter_enable": 1,
                   "format": 0,
                   "presentation": 1,
                   "presentation_rect": [
@@ -1253,7 +1287,25 @@
                     100.0,
                     26.0
                   ],
-                  "fontsize": 11.0
+                  "fontsize": 11.0,
+                  "parameter_mappable": 0,
+                  "varname": "vtm_redms",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Threshold ms",
+                      "parameter_shortname": "VTM Threshold ms",
+                      "parameter_type": 0,
+                      "parameter_invisible": 1,
+                      "parameter_initial_enable": 1,
+                      "parameter_initial": [
+                        100
+                      ],
+                      "parameter_order": 2,
+                      "parameter_mmin": 10.0,
+                      "parameter_mmax": 300.0,
+                      "parameter_unitstyle": 0
+                    }
+                  }
                 }
               },
               {
@@ -1327,7 +1379,7 @@
                     1.0
                   ],
                   "triangle": 0,
-                  "parameter_enable": 0,
+                  "parameter_enable": 1,
                   "format": 6,
                   "presentation": 1,
                   "presentation_rect": [
@@ -1336,7 +1388,24 @@
                     108.0,
                     26.0
                   ],
-                  "fontsize": 11.0
+                  "fontsize": 11.0,
+                  "parameter_mappable": 0,
+                  "varname": "vtm_offsetms",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Compensation ms",
+                      "parameter_shortname": "VTM Compensation ms",
+                      "parameter_type": 0,
+                      "parameter_invisible": 1,
+                      "parameter_initial_enable": 1,
+                      "parameter_initial": [
+                        0.0
+                      ],
+                      "parameter_order": 3,
+                      "parameter_mmin": -500.0,
+                      "parameter_mmax": 500.0
+                    }
+                  }
                 }
               },
               {
@@ -1410,7 +1479,7 @@
                     1.0
                   ],
                   "triangle": 0,
-                  "parameter_enable": 0,
+                  "parameter_enable": 1,
                   "format": 6,
                   "presentation": 1,
                   "presentation_rect": [
@@ -1419,7 +1488,24 @@
                     100.0,
                     26.0
                   ],
-                  "fontsize": 11.0
+                  "fontsize": 11.0,
+                  "parameter_mappable": 0,
+                  "varname": "vtm_gatedb",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Detection dB",
+                      "parameter_shortname": "VTM Detection dB",
+                      "parameter_type": 0,
+                      "parameter_invisible": 1,
+                      "parameter_initial_enable": 1,
+                      "parameter_initial": [
+                        -32.0
+                      ],
+                      "parameter_order": 4,
+                      "parameter_mmin": -60.0,
+                      "parameter_mmax": -6.0
+                    }
+                  }
                 }
               },
               {
@@ -1586,7 +1672,7 @@
                     0.77,
                     1.0
                   ],
-                  "text": "Timing fata de grila Live. Auto Stop opreste si redarea. Iesire microfon muta.",
+                  "text": "Setari in proiect (Ctrl+S). Auto Stop se activeaza manual. Iesire microfon muta.",
                   "presentation": 1,
                   "presentation_rect": [
                     24.0,
@@ -2688,7 +2774,7 @@
                     185.0,
                     22.0
                   ],
-                  "text": "1"
+                  "text": "bang"
                 }
               },
               {
@@ -2718,7 +2804,7 @@
                     185.0,
                     22.0
                   ],
-                  "text": "0"
+                  "text": "bang"
                 }
               },
               {
@@ -2733,7 +2819,7 @@
                     185.0,
                     22.0
                   ],
-                  "text": "100"
+                  "text": "bang"
                 }
               },
               {
@@ -2748,7 +2834,7 @@
                     185.0,
                     22.0
                   ],
-                  "text": "0."
+                  "text": "bang"
                 }
               },
               {
@@ -2763,7 +2849,7 @@
                     185.0,
                     22.0
                   ],
-                  "text": "-32."
+                  "text": "bang"
                 }
               },
               {
@@ -3098,7 +3184,7 @@
                     0.98,
                     1.0
                   ],
-                  "parameter_enable": 0,
+                  "parameter_enable": 1,
                   "triangle": 0,
                   "format": 6,
                   "presentation": 1,
@@ -3108,7 +3194,24 @@
                     60.0,
                     25.0
                   ],
-                  "fontsize": 11.0
+                  "fontsize": 11.0,
+                  "parameter_mappable": 0,
+                  "varname": "vtm_voice_gain",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Voice zoom",
+                      "parameter_shortname": "VTM Voice zoom",
+                      "parameter_type": 0,
+                      "parameter_invisible": 1,
+                      "parameter_initial_enable": 1,
+                      "parameter_initial": [
+                        1.0
+                      ],
+                      "parameter_order": 5,
+                      "parameter_mmin": 1.0,
+                      "parameter_mmax": 8.0
+                    }
+                  }
                 }
               },
               {
@@ -3141,7 +3244,7 @@
                     185.0,
                     22.0
                   ],
-                  "text": "1."
+                  "text": "bang"
                 }
               },
               {
@@ -3327,7 +3430,7 @@
                     0.98,
                     1.0
                   ],
-                  "parameter_enable": 0,
+                  "parameter_enable": 1,
                   "triangle": 0,
                   "format": 6,
                   "presentation": 1,
@@ -3337,7 +3440,24 @@
                     60.0,
                     25.0
                   ],
-                  "fontsize": 11.0
+                  "fontsize": 11.0,
+                  "parameter_mappable": 0,
+                  "varname": "vtm_beat_gain",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Beat zoom",
+                      "parameter_shortname": "VTM Beat zoom",
+                      "parameter_type": 0,
+                      "parameter_invisible": 1,
+                      "parameter_initial_enable": 1,
+                      "parameter_initial": [
+                        1.0
+                      ],
+                      "parameter_order": 6,
+                      "parameter_mmin": 1.0,
+                      "parameter_mmax": 8.0
+                    }
+                  }
                 }
               },
               {
@@ -3370,7 +3490,7 @@
                     185.0,
                     22.0
                   ],
-                  "text": "1."
+                  "text": "bang"
                 }
               },
               {
@@ -3544,9 +3664,9 @@
               },
               {
                 "box": {
-                  "id": "beat-type-select",
+                  "id": "beat-type-selected-index",
                   "maxclass": "newobj",
-                  "numinlets": 1,
+                  "numinlets": 2,
                   "numoutlets": 1,
                   "patching_rect": [
                     420.0,
@@ -3554,7 +3674,22 @@
                     185.0,
                     22.0
                   ],
-                  "text": "prepend setsymbol"
+                  "text": "i 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "beat-type-select",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    620.0,
+                    1540.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "prepend set"
                 }
               },
               {
@@ -3564,7 +3699,7 @@
                   "numinlets": 1,
                   "numoutlets": 2,
                   "patching_rect": [
-                    620.0,
+                    820.0,
                     1540.0,
                     185.0,
                     22.0
@@ -3579,7 +3714,7 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    820.0,
+                    1020.0,
                     1540.0,
                     185.0,
                     22.0
@@ -3594,12 +3729,27 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    1020.0,
-                    1540.0,
+                    20.0,
+                    1585.0,
                     185.0,
                     22.0
                   ],
                   "text": "prepend append"
+                }
+              },
+              {
+                "box": {
+                  "id": "beat-type-reselect",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    220.0,
+                    1585.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t b"
                 }
               },
               {
@@ -3609,7 +3759,7 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    20.0,
+                    420.0,
                     1585.0,
                     185.0,
                     22.0
@@ -3624,7 +3774,7 @@
                   "numinlets": 1,
                   "numoutlets": 3,
                   "patching_rect": [
-                    220.0,
+                    620.0,
                     1585.0,
                     185.0,
                     22.0
@@ -3657,17 +3807,32 @@
               },
               {
                 "box": {
+                  "id": "beat-channel-selected-index",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    820.0,
+                    1585.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "i 0"
+                }
+              },
+              {
+                "box": {
                   "id": "beat-channel-select",
                   "maxclass": "newobj",
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    420.0,
+                    1020.0,
                     1585.0,
                     185.0,
                     22.0
                   ],
-                  "text": "prepend setsymbol"
+                  "text": "prepend set"
                 }
               },
               {
@@ -3677,8 +3842,8 @@
                   "numinlets": 1,
                   "numoutlets": 2,
                   "patching_rect": [
-                    620.0,
-                    1585.0,
+                    20.0,
+                    1630.0,
                     185.0,
                     22.0
                   ],
@@ -3692,8 +3857,8 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    820.0,
-                    1585.0,
+                    220.0,
+                    1630.0,
                     185.0,
                     22.0
                   ],
@@ -3707,12 +3872,27 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    1020.0,
-                    1585.0,
+                    420.0,
+                    1630.0,
                     185.0,
                     22.0
                   ],
                   "text": "prepend append"
+                }
+              },
+              {
+                "box": {
+                  "id": "beat-channel-reselect",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    620.0,
+                    1630.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t b"
                 }
               },
               {
@@ -3722,7 +3902,7 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    20.0,
+                    820.0,
                     1630.0,
                     185.0,
                     22.0
@@ -3737,7 +3917,7 @@
                   "numinlets": 1,
                   "numoutlets": 3,
                   "patching_rect": [
-                    220.0,
+                    1020.0,
                     1630.0,
                     185.0,
                     22.0
@@ -3792,8 +3972,8 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    420.0,
-                    1630.0,
+                    20.0,
+                    1675.0,
                     185.0,
                     22.0
                   ],
@@ -3807,8 +3987,8 @@
                   "numinlets": 2,
                   "numoutlets": 1,
                   "patching_rect": [
-                    620.0,
-                    1630.0,
+                    220.0,
+                    1675.0,
                     185.0,
                     22.0
                   ],
@@ -3822,8 +4002,8 @@
                   "numinlets": 1,
                   "numoutlets": 0,
                   "patching_rect": [
-                    820.0,
-                    1630.0,
+                    420.0,
+                    1675.0,
                     185.0,
                     22.0
                   ],
@@ -3851,8 +4031,8 @@
                   "numinlets": 2,
                   "numoutlets": 1,
                   "patching_rect": [
-                    1020.0,
-                    1630.0,
+                    620.0,
+                    1675.0,
                     185.0,
                     22.0
                   ],
@@ -3866,7 +4046,7 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    20.0,
+                    820.0,
                     1675.0,
                     185.0,
                     22.0
@@ -3881,7 +4061,7 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    220.0,
+                    1020.0,
                     1675.0,
                     185.0,
                     22.0
@@ -3896,8 +4076,8 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    420.0,
-                    1675.0,
+                    20.0,
+                    1720.0,
                     185.0,
                     22.0
                   ],
@@ -3911,8 +4091,8 @@
                   "numinlets": 1,
                   "numoutlets": 0,
                   "patching_rect": [
-                    620.0,
-                    1675.0,
+                    220.0,
+                    1720.0,
                     185.0,
                     22.0
                   ],
@@ -3942,8 +4122,8 @@
                   "numinlets": 1,
                   "numoutlets": 3,
                   "patching_rect": [
-                    820.0,
-                    1675.0,
+                    420.0,
+                    1720.0,
                     185.0,
                     22.0
                   ],
@@ -3997,8 +4177,8 @@
                   "numinlets": 1,
                   "numoutlets": 2,
                   "patching_rect": [
-                    1020.0,
-                    1675.0,
+                    620.0,
+                    1720.0,
                     185.0,
                     22.0
                   ],
@@ -4012,7 +4192,7 @@
                   "numinlets": 1,
                   "numoutlets": 1,
                   "patching_rect": [
-                    20.0,
+                    820.0,
                     1720.0,
                     185.0,
                     22.0
@@ -4027,7 +4207,7 @@
                   "numinlets": 2,
                   "numoutlets": 1,
                   "patching_rect": [
-                    220.0,
+                    1020.0,
                     1720.0,
                     185.0,
                     22.0
@@ -4042,8 +4222,8 @@
                   "numinlets": 1,
                   "numoutlets": 2,
                   "patching_rect": [
-                    420.0,
-                    1720.0,
+                    20.0,
+                    1765.0,
                     185.0,
                     22.0
                   ],
@@ -4057,8 +4237,8 @@
                   "numinlets": 1,
                   "numoutlets": 2,
                   "patching_rect": [
-                    620.0,
-                    1720.0,
+                    220.0,
+                    1765.0,
                     185.0,
                     22.0
                   ],
@@ -4072,8 +4252,8 @@
                   "numinlets": 1,
                   "numoutlets": 4,
                   "patching_rect": [
-                    820.0,
-                    1720.0,
+                    420.0,
+                    1765.0,
                     185.0,
                     22.0
                   ],
@@ -4087,8 +4267,8 @@
                   "numinlets": 1,
                   "numoutlets": 2,
                   "patching_rect": [
-                    1020.0,
-                    1720.0,
+                    620.0,
+                    1765.0,
                     185.0,
                     22.0
                   ],
@@ -4102,7 +4282,7 @@
                   "numinlets": 2,
                   "numoutlets": 1,
                   "patching_rect": [
-                    20.0,
+                    820.0,
                     1765.0,
                     185.0,
                     22.0
@@ -4117,7 +4297,7 @@
                   "numinlets": 2,
                   "numoutlets": 1,
                   "patching_rect": [
-                    220.0,
+                    1020.0,
                     1765.0,
                     185.0,
                     22.0
@@ -4132,8 +4312,8 @@
                   "numinlets": 4,
                   "numoutlets": 1,
                   "patching_rect": [
-                    420.0,
-                    1765.0,
+                    20.0,
+                    1810.0,
                     185.0,
                     22.0
                   ],
@@ -4147,12 +4327,771 @@
                   "numinlets": 2,
                   "numoutlets": 1,
                   "patching_rect": [
-                    620.0,
-                    1765.0,
+                    220.0,
+                    1810.0,
                     185.0,
                     22.0
                   ],
                   "text": "window size $1 $2 $3 $4, window exec"
+                }
+              },
+              {
+                "box": {
+                  "id": "enabled-replay",
+                  "maxclass": "newobj",
+                  "numinlets": 3,
+                  "numoutlets": 3,
+                  "patching_rect": [
+                    420.0,
+                    1810.0,
+                    185.0,
+                    22.0
+                  ],
+                  "saved_object_attributes": {
+                    "parameter_enable": 0
+                  },
+                  "text": "pattr @bindto vtm_enabled @thru 0 @autorestore 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-reset",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    620.0,
+                    1810.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t b b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-restore-on",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    820.0,
+                    1810.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "1"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-capture-off",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    1020.0,
+                    1810.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-retry",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    20.0,
+                    1855.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "set -1"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-manual",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    220.0,
+                    1855.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t b b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-restore-off",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    420.0,
+                    1855.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-capture-on",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    620.0,
+                    1855.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "1"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type",
+                  "maxclass": "newobj",
+                  "numinlets": 3,
+                  "numoutlets": 3,
+                  "patching_rect": [
+                    820.0,
+                    1855.0,
+                    185.0,
+                    22.0
+                  ],
+                  "saved_object_attributes": {
+                    "parameter_enable": 1,
+                    "parameter_mappable": 0
+                  },
+                  "restore": [
+                    "__vtm_unset__"
+                  ],
+                  "varname": "vtm_saved_beat_type",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Instrumental type",
+                      "parameter_shortname": "VTM Instrumental type",
+                      "parameter_type": 3,
+                      "parameter_invisible": 1,
+                      "parameter_order": 10,
+                      "parameter_linknames": 0
+                    }
+                  },
+                  "text": "pattr vtm_beat_type @thru 0 @autorestore 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-capture",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    1020.0,
+                    1855.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "gate 1 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-index-map",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 4,
+                  "patching_rect": [
+                    20.0,
+                    1900.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "coll @embed 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-manual",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    220.0,
+                    1900.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t i b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-list",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 3,
+                  "patching_rect": [
+                    420.0,
+                    1900.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t b l b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-map",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 4,
+                  "patching_rect": [
+                    620.0,
+                    1900.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "coll @embed 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-clear",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    820.0,
+                    1900.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "clear"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-zero",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    1020.0,
+                    1900.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "set 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-iter",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    20.0,
+                    1945.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "iter"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-list-key",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    220.0,
+                    1945.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "prepend vtm"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-list-symbol",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    420.0,
+                    1945.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "tosymbol"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-entry",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    620.0,
+                    1945.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t s b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-index",
+                  "maxclass": "newobj",
+                  "numinlets": 5,
+                  "numoutlets": 4,
+                  "patching_rect": [
+                    820.0,
+                    1945.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "counter 0 1000000000"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-pair",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    1020.0,
+                    1945.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "pack s 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-store",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    20.0,
+                    1990.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "prepend store"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-reverse",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    220.0,
+                    1990.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "zl rev"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-defer",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    420.0,
+                    1990.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "deferlow"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-restore",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    620.0,
+                    1990.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "gate 1 1"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-change",
+                  "maxclass": "newobj",
+                  "numinlets": 3,
+                  "numoutlets": 3,
+                  "patching_rect": [
+                    820.0,
+                    1990.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "change -1"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-type-apply",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    1020.0,
+                    1990.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t i b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-retry",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    20.0,
+                    2035.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "set -1"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel",
+                  "maxclass": "newobj",
+                  "numinlets": 3,
+                  "numoutlets": 3,
+                  "patching_rect": [
+                    220.0,
+                    2035.0,
+                    185.0,
+                    22.0
+                  ],
+                  "saved_object_attributes": {
+                    "parameter_enable": 1,
+                    "parameter_mappable": 0
+                  },
+                  "restore": [
+                    "__vtm_unset__"
+                  ],
+                  "varname": "vtm_saved_beat_channel",
+                  "saved_attribute_attributes": {
+                    "valueof": {
+                      "parameter_longname": "VTM Instrumental channel",
+                      "parameter_shortname": "VTM Instrumental channel",
+                      "parameter_type": 3,
+                      "parameter_invisible": 1,
+                      "parameter_order": 11,
+                      "parameter_linknames": 0
+                    }
+                  },
+                  "text": "pattr vtm_beat_channel @thru 0 @autorestore 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-capture",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    420.0,
+                    2035.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "gate 1 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-index-map",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 4,
+                  "patching_rect": [
+                    620.0,
+                    2035.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "coll @embed 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-manual",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    820.0,
+                    2035.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t i b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-list",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 3,
+                  "patching_rect": [
+                    1020.0,
+                    2035.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t b l b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-map",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 4,
+                  "patching_rect": [
+                    20.0,
+                    2080.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "coll @embed 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-clear",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    220.0,
+                    2080.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "clear"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-zero",
+                  "maxclass": "message",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    420.0,
+                    2080.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "set 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-iter",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    620.0,
+                    2080.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "iter"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-list-key",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    820.0,
+                    2080.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "prepend vtm"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-list-symbol",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    1020.0,
+                    2080.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "tosymbol"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-entry",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    20.0,
+                    2125.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "t s b"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-index",
+                  "maxclass": "newobj",
+                  "numinlets": 5,
+                  "numoutlets": 4,
+                  "patching_rect": [
+                    220.0,
+                    2125.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "counter 0 1000000000"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-pair",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    420.0,
+                    2125.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "pack s 0"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-store",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    620.0,
+                    2125.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "prepend store"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-reverse",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 2,
+                  "patching_rect": [
+                    820.0,
+                    2125.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "zl rev"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-defer",
+                  "maxclass": "newobj",
+                  "numinlets": 1,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    1020.0,
+                    2125.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "deferlow"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-restore",
+                  "maxclass": "newobj",
+                  "numinlets": 2,
+                  "numoutlets": 1,
+                  "patching_rect": [
+                    20.0,
+                    2170.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "gate 1 1"
+                }
+              },
+              {
+                "box": {
+                  "id": "persist-channel-change",
+                  "maxclass": "newobj",
+                  "numinlets": 3,
+                  "numoutlets": 3,
+                  "patching_rect": [
+                    220.0,
+                    2170.0,
+                    185.0,
+                    22.0
+                  ],
+                  "text": "change -1"
                 }
               }
             ],
@@ -4178,8 +5117,7 @@
                   "destination": [
                     "window-config",
                     0
-                  ],
-                  "order": 0
+                  ]
                 }
               },
               {
@@ -6013,18 +6951,6 @@
               {
                 "patchline": {
                   "source": [
-                    "initial-0",
-                    0
-                  ],
-                  "destination": [
-                    "enabled",
-                    0
-                  ]
-                }
-              },
-              {
-                "patchline": {
-                  "source": [
                     "initialize",
                     1
                   ],
@@ -6151,7 +7077,8 @@
                   "destination": [
                     "initial-6",
                     0
-                  ]
+                  ],
+                  "order": 0
                 }
               },
               {
@@ -6205,31 +7132,6 @@
               {
                 "patchline": {
                   "source": [
-                    "load",
-                    0
-                  ],
-                  "destination": [
-                    "voice-initial-gain",
-                    0
-                  ],
-                  "order": 1
-                }
-              },
-              {
-                "patchline": {
-                  "source": [
-                    "voice-initial-gain",
-                    0
-                  ],
-                  "destination": [
-                    "voice-gain",
-                    0
-                  ]
-                }
-              },
-              {
-                "patchline": {
-                  "source": [
                     "grid-signal",
                     0
                   ],
@@ -6271,31 +7173,6 @@
                   ],
                   "destination": [
                     "beat-scope",
-                    0
-                  ]
-                }
-              },
-              {
-                "patchline": {
-                  "source": [
-                    "load",
-                    0
-                  ],
-                  "destination": [
-                    "beat-initial-gain",
-                    0
-                  ],
-                  "order": 2
-                }
-              },
-              {
-                "patchline": {
-                  "source": [
-                    "beat-initial-gain",
-                    0
-                  ],
-                  "destination": [
-                    "beat-gain",
                     0
                   ]
                 }
@@ -6358,9 +7235,22 @@
                     13
                   ],
                   "destination": [
-                    "beat-type-select",
+                    "beat-type-selected-index",
                     0
                   ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-type-selected-index",
+                    0
+                  ],
+                  "destination": [
+                    "beat-type-select",
+                    0
+                  ],
+                  "order": 0
                 }
               },
               {
@@ -6384,7 +7274,8 @@
                   "destination": [
                     "beat-type-list",
                     0
-                  ]
+                  ],
+                  "order": 0
                 }
               },
               {
@@ -6408,7 +7299,8 @@
                   "destination": [
                     "beat-type-iter",
                     0
-                  ]
+                  ],
+                  "order": 0
                 }
               },
               {
@@ -6438,11 +7330,24 @@
               {
                 "patchline": {
                   "source": [
-                    "beat-type",
+                    "beat-type-list",
                     0
                   ],
                   "destination": [
-                    "beat-type-command",
+                    "beat-type-reselect",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-type-reselect",
+                    0
+                  ],
+                  "destination": [
+                    "beat-type-selected-index",
                     0
                   ]
                 }
@@ -6466,9 +7371,22 @@
                     14
                   ],
                   "destination": [
-                    "beat-channel-select",
+                    "beat-channel-selected-index",
                     0
                   ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-channel-selected-index",
+                    0
+                  ],
+                  "destination": [
+                    "beat-channel-select",
+                    0
+                  ],
+                  "order": 0
                 }
               },
               {
@@ -6492,7 +7410,8 @@
                   "destination": [
                     "beat-channel-list",
                     0
-                  ]
+                  ],
+                  "order": 0
                 }
               },
               {
@@ -6516,7 +7435,8 @@
                   "destination": [
                     "beat-channel-iter",
                     0
-                  ]
+                  ],
+                  "order": 0
                 }
               },
               {
@@ -6546,11 +7466,24 @@
               {
                 "patchline": {
                   "source": [
-                    "beat-channel",
+                    "beat-channel-list",
                     0
                   ],
                   "destination": [
-                    "beat-channel-command",
+                    "beat-channel-reselect",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-channel-reselect",
+                    0
+                  ],
+                  "destination": [
+                    "beat-channel-selected-index",
                     0
                   ]
                 }
@@ -6868,10 +7801,1065 @@
                     0
                   ]
                 }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "initial-0",
+                    0
+                  ],
+                  "destination": [
+                    "enabled-replay",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "enabled-replay",
+                    0
+                  ],
+                  "destination": [
+                    "enabled-tag",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "initialize",
+                    6
+                  ],
+                  "destination": [
+                    "voice-initial-gain",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "voice-initial-gain",
+                    0
+                  ],
+                  "destination": [
+                    "voice-gain",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "initialize",
+                    6
+                  ],
+                  "destination": [
+                    "beat-initial-gain",
+                    0
+                  ],
+                  "order": 2
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-initial-gain",
+                    0
+                  ],
+                  "destination": [
+                    "beat-gain",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "initialize",
+                    6
+                  ],
+                  "destination": [
+                    "persist-reset",
+                    0
+                  ],
+                  "order": 3
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-reset",
+                    1
+                  ],
+                  "destination": [
+                    "persist-restore-on",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-reset",
+                    0
+                  ],
+                  "destination": [
+                    "persist-capture-off",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-reset",
+                    1
+                  ],
+                  "destination": [
+                    "persist-retry",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-manual",
+                    1
+                  ],
+                  "destination": [
+                    "persist-restore-off",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-manual",
+                    0
+                  ],
+                  "destination": [
+                    "persist-capture-on",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-type-selected-index",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-capture",
+                    1
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-capture-off",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-capture",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-capture-on",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-capture",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-capture",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-index-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-index-map",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-type",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-manual",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-manual",
+                    1
+                  ],
+                  "destination": [
+                    "persist-manual",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-manual",
+                    0
+                  ],
+                  "destination": [
+                    "beat-type-command",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "route",
+                    15
+                  ],
+                  "destination": [
+                    "persist-type-list",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-list",
+                    2
+                  ],
+                  "destination": [
+                    "persist-type-clear",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-clear",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-map",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-clear",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-index-map",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-list",
+                    2
+                  ],
+                  "destination": [
+                    "persist-type-zero",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-zero",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-index",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-list",
+                    1
+                  ],
+                  "destination": [
+                    "persist-type-iter",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-iter",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-list-key",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-list-key",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-list-symbol",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-list-symbol",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-entry",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-entry",
+                    1
+                  ],
+                  "destination": [
+                    "persist-type-index",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-index",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-pair",
+                    1
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-entry",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-pair",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-pair",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-store",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-store",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-pair",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-reverse",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-reverse",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-index-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-list",
+                    0
+                  ],
+                  "destination": [
+                    "beat-type-selected-index",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-list",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-defer",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-defer",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-restore",
+                    1
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-restore-on",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-restore",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-restore-off",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-restore",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-restore",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-retry",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-change",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-map",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-change",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-change",
+                    0
+                  ],
+                  "destination": [
+                    "persist-type-apply",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-apply",
+                    1
+                  ],
+                  "destination": [
+                    "persist-channel-retry",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-retry",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-change",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-type-apply",
+                    0
+                  ],
+                  "destination": [
+                    "beat-type-command",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-channel-selected-index",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-capture",
+                    1
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-capture-off",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-capture",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-capture-on",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-capture",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-capture",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-index-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-index-map",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "beat-channel",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-manual",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-manual",
+                    1
+                  ],
+                  "destination": [
+                    "persist-manual",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-manual",
+                    0
+                  ],
+                  "destination": [
+                    "beat-channel-command",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "route",
+                    16
+                  ],
+                  "destination": [
+                    "persist-channel-list",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-list",
+                    2
+                  ],
+                  "destination": [
+                    "persist-channel-clear",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-clear",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-map",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-clear",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-index-map",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-list",
+                    2
+                  ],
+                  "destination": [
+                    "persist-channel-zero",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-zero",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-index",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-list",
+                    1
+                  ],
+                  "destination": [
+                    "persist-channel-iter",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-iter",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-list-key",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-list-key",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-list-symbol",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-list-symbol",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-entry",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-entry",
+                    1
+                  ],
+                  "destination": [
+                    "persist-channel-index",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-index",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-pair",
+                    1
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-entry",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-pair",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-pair",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-store",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-store",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-pair",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-reverse",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-reverse",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-index-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-list",
+                    0
+                  ],
+                  "destination": [
+                    "beat-channel-selected-index",
+                    0
+                  ],
+                  "order": 0
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-list",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-defer",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-defer",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-restore",
+                    1
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-restore-on",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-restore",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-restore-off",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-restore",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-restore",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-map",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-retry",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-change",
+                    0
+                  ],
+                  "order": 1
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-map",
+                    0
+                  ],
+                  "destination": [
+                    "persist-channel-change",
+                    0
+                  ]
+                }
+              },
+              {
+                "patchline": {
+                  "source": [
+                    "persist-channel-change",
+                    0
+                  ],
+                  "destination": [
+                    "beat-channel-command",
+                    0
+                  ]
+                }
               }
             ],
             "autosave": 0,
-            "title": "Vocal Timing Monitor | 0.7 RC2 Compact",
+            "title": "Vocal Timing Monitor | 0.7 RC3.3 Persistent",
             "openrect": [
               60.0,
               50.0,
@@ -8683,7 +10671,7 @@
             185.0,
             22.0
           ],
-          "text": "change"
+          "text": "change -1"
         }
       },
       {
@@ -13295,7 +15283,7 @@
     "autosave": 0,
     "devicewidth": 360.0,
     "description": "Audio onset grid proximity monitor",
-    "digest": "Vocal Timing Monitor 0.7 RC2 Compact - native embedded engine",
+    "digest": "Vocal Timing Monitor 0.7 RC3.3 Persistent - native embedded engine",
     "tags": "audio timing monitor",
     "latency": 0,
     "is_mpe": 0,
@@ -13303,7 +15291,52 @@
     "minimum_max_version": "8.6.0",
     "dependency_cache": [],
     "parameters": {
-      "inherited_shortname": 1
+      "inherited_shortname": 1,
+      "popup::enabled": [
+        "VTM Analysis",
+        "VTM Analysis",
+        0
+      ],
+      "popup::grid-ui": [
+        "VTM Grid",
+        "VTM Grid",
+        0
+      ],
+      "popup::redms": [
+        "VTM Threshold ms",
+        "VTM Threshold ms",
+        0
+      ],
+      "popup::offsetms": [
+        "VTM Compensation ms",
+        "VTM Compensation ms",
+        0
+      ],
+      "popup::gatedb": [
+        "VTM Detection dB",
+        "VTM Detection dB",
+        0
+      ],
+      "popup::voice-gain": [
+        "VTM Voice zoom",
+        "VTM Voice zoom",
+        0
+      ],
+      "popup::beat-gain": [
+        "VTM Beat zoom",
+        "VTM Beat zoom",
+        0
+      ],
+      "popup::persist-type": [
+        "VTM Instrumental type",
+        "VTM Instrumental type",
+        0
+      ],
+      "popup::persist-channel": [
+        "VTM Instrumental channel",
+        "VTM Instrumental channel",
+        0
+      ]
     },
     "project": {
       "version": 1,

@@ -1,68 +1,71 @@
-# Vocal Timing Monitor — 0.7 RC2 Compact
+# Vocal Timing Monitor — 0.7 RC3.3 Persistent
 
-Max for Live audio device for visual timing feedback and optional automatic transport stop in Ableton Live. [Documentație în română](README_RO.md).
+Max for Live audio device for visual attack timing feedback and optional automatic transport stop in Ableton Live. **RC3.3 saves controls with your Live Set and restores them when it reopens.** [Documentație în română](README_RO.md).
 
-**Early release candidate validated in one Windows/Ableton setup.** Measures audio attacks against the nearest Ableton grid point. It does not judge musical flow or match syllables to individual drum hits.
+## Download
 
-## Download and requirements
+Get `Vocal_Timing_Monitor_v0_7_RC3_3_Persistent.amxd` from [release v0.7-rc3.3](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc3.3), or from [dist](dist/). Requires Ableton Live with Max for Live available; this is an AMXD device, not a VST/AU. Runtime components are embedded. No Python or compiler is needed to use it. UI labels currently use Romanian.
 
-Download `Vocal_Timing_Monitor_v0_7_RC2_Compact.amxd` from [Releases](https://github.com/alexandru348/vocal-timing-monitor/releases). The same file is also in [dist](dist/).
-
-- Ableton Live with Max for Live available; validated in Live 12 Suite.
-- Tested on Windows 11, 44.1 kHz, at 100 BPM. Other configurations are unverified.
-- This is an AMXD device, not a VST/AU or standalone application.
-- Runtime components are embedded. Python, NumPy and C++ are only needed for development.
-- Current UI labels use Romanian.
+The previous [v0.7-rc2 release](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc2) and its tag remain available as the original tested checkpoint.
 
 ## Features
 
-- Compact floating monitor (600 × 340 logical pixels) with expandable settings.
-- Separate voice/input and instrumental waveforms, six seconds of history and grid markers.
-- Signed deviation in milliseconds, color feedback and attack counter.
-- Quarter, eighth and sixteenth note grids; adjustable threshold, compensation and detection.
-- Independent visual magnification for each waveform.
-- Optional Auto Stop with host confirmation; recorded clips are retained.
+- Compact floating monitor with expandable settings, separate input/voice and instrumental waveforms, six seconds of history and grid markers.
+- Attack counter, signed deviation in milliseconds and color feedback against the selected Live grid (1/4, 1/8 or 1/16).
+- Adjustable detection, timing threshold and compensation; independent visual zoom for the two waves.
+- Optional Auto Stop stops the entire Live transport, including recording, while retaining the recorded clip.
+- Nine per-instance settings restored with the saved Live Set: analysis, grid, threshold, compensation, detection, both waveform zooms, instrumental source and channel.
 
 ## Setup
 
-1. Drag the AMXD onto a dedicated audio analysis track and click OPEN MONITOR.
-2. Route the microphone to that track: Ext. In, the appropriate input and Monitor In.
-3. Set the analysis track output to Sends Only and turn its sends fully down. The active device outputs silence. Use a separate track for recording.
-4. Under SETARI → SURSA INSTRUMENTALULUI, select the instrumental track and Post Mixer. It feeds a separate additional input bus.
-5. On the separate recording track choose the microphone input and arm it when recording. The validated speaker setup uses Monitor Off on this recording track.
-6. Start playback with ANALIZA ON and AUTO STOP OFF. Check the two waveforms and synchronized clock, then explicitly enable Auto Stop for the attempt.
+1. Load the AMXD on a dedicated audio analysis track and click OPEN MONITOR.
+2. On that track select the microphone under Ext. In, the appropriate input and Monitor In. Set its output to Sends Only and all sends fully down. The active device outputs silence.
+3. In SETARI → SURSA INSTRUMENTALULUI, manually choose the instrumental track and Post Mixer. This feeds a separate input bus.
+4. Record on a separate audio track using the microphone input; arm it when recording. The tested laptop speaker setup uses Monitor Off on the recording track.
+5. Start playback with ANALIZA ON and AUTO STOP OFF. Check both waves, clock synchronization and speech detection. Then explicitly enable Auto Stop if wanted.
+6. **Save the Live Set with Ctrl+S.** Reopen that saved instance to restore its settings. This does not periodically save the project to disk. New instances start with factory defaults.
 
-Track names and input numbers depend on your project. Adjust detection and compensation for your signal path. Defaults are not a universal calibration. MĂRIRE affects only the drawing.
+Input numbers, detection sensitivity and compensation depend on your setup. Keep the microphone input below overload while speaking normally, then adjust DETECTIE to register speech without continuous unwanted triggers during silence. MARIRE only changes the drawing. Windows volume, microphone level and Live tempo are outside this device's saved controls.
 
 ## Timing and Auto Stop
 
-Minus means early; plus means late, after compensation. At a 100 ms threshold: green below 45 ms absolute deviation, amber from 45 to below 100 ms, red at or above 100 ms. The general green boundary is `min(45 ms, threshold / 2)`.
+Minus means early and plus means late, after compensation. Timing is measured against the nearest selected Live grid point. It does not identify syllables, match each sound to a drum hit or judge musical flow.
 
-After synchronization, turn AUTO STOP ON. The first confirmed red event requests a stop of **the entire Live transport, including recording**. It does not delete the clip. Auto Stop disarms after the request; enable it again for each new attempt. Reset, parameter changes or sync loss can also disarm it. Diagnostics are in SETARI.
+At a 100 ms threshold: green below 45 ms absolute deviation, amber from 45 to below 100 ms, red at or above 100 ms. The general green boundary is `min(45 ms, threshold / 2)`. At 100 BPM the nearest-grid range is ±300 ms on 1/4, ±150 ms on 1/8 and ±75 ms on 1/16, so a 100 ms threshold cannot be reached on 1/16.
 
-At 100 BPM, the nearest-grid range is ±300 ms on 1/4, ±150 ms on 1/8 and ±75 ms on 1/16. A 100 ms threshold cannot be reached on 1/16 at that tempo.
+After synchronization, explicitly set AUTO STOP ON for an attempt. The first confirmed red event requests a stop of the **entire transport and recording**. Auto Stop disarms after its request. Reset, relevant parameter changes or sync loss may also disarm it. Diagnostics appear in SETARI. **Auto Stop always loads OFF, including when the project was saved with it ON.**
 
-## Known limitations and calibration
+## Persistence and updating
 
-- **Controls reset on load.** Note their values separately and reapply after reopening. Persistence is planned, not implemented here.
-- The amplitude attack detector can respond to keyboard clicks, room noise and speaker bleed. It does not isolate speech or cancel acoustic echo.
-- Compensation corrects the numeric result, not the recording or waveform position.
-- CALIBREAZA copies the last raw audio deviation into compensation on the 1/4 grid. Use an aligned reference impulse; a later noise event can overwrite that reading.
-- TEST IMPULS tests display messages: no audio is produced and Auto Stop cannot be requested by it.
-- Impulse calibration does not establish precise vocal timing accuracy.
-- Closing the monitor hides the UI; the device remains on its track.
+Source/channel selections are stored as exact labels and resolved against current routing lists; they are captured after a manual menu selection. If a source is missing, renamed or renumbered in its displayed label, reselect it and save. Counts, waveform history, action buttons, transport state and temporary diagnostics are not restored. See [persistence design](docs/PERSISTENCE.md).
 
-## Validation
+From RC2, enter your preferred settings once in the new instance; RC2 did not save them. Keep a copy of your project before replacing a device.
 
-On 1 November 2026 the owner confirmed in Ableton Live 12 Suite: compact/expanded UI, both waveforms, microphone attack detection, separate vocal recording and actual Auto Stop during recording with the clip retained. The final stop test showed two attacks, −240.20 ms and `Ultimul Stop: oprire confirmata de Live`.
+For the existing RC3.2 test project only, [compat](compat/) contains the same RC3.3 patch under the RC3_2 filename already referenced by the saved project. This preserves the existing instance. Do not rename or remove that referenced file in Explorer without updating the project's reference. New installations should use the canonical RC3_3 file in dist. The patch JSON is identical; container filename bytes and SHA-256 differ.
 
-A speaker/microphone reference test gave +92.2 ms across eight impulses. After compensation the owner reported 0.00 ms across the eight impulses. The reference used detection −26 dB, then normal speech used −14 dB; vocal compensation remains approximate. These observations describe one setup, not broad compatibility tests.
+## Validation and limitations
 
-108 automated checks cover static structure and simulated arithmetic/messages. They do not execute Max or replace native host testing. See [host validation](docs/HOST_VALIDATION.json) and [test results](docs/TEST_RESULTS.json).
+On 2 November 2026, the owner tested RC3.3 in Ableton Live 12 Suite / Windows 11, 44.1 kHz, 100 BPM:
 
-## Build and development
+- Full restart restored controls, including non-default analysis OFF, grid 1/8, threshold 80 ms, zoom 2/3 and instrumental source/Post Mixer. Initial OFF header was corrected.
+- Both waves, synchronized clock and ordinary speech attacks worked; the count stayed stable during silence in the short tested passage.
+- A separate vocal recording was retained after actual Auto Stop; Live reported `Ultimul Stop: oprire confirmata de Live`, then Auto Stop was OFF.
+- Saving with Auto Stop ON and reopening resulted in OFF, with other settings retained.
 
-Requires Python 3, NumPy and a C++17 compiler (`g++` for the harness).
+Final speech/recording tests used microphone level 70%, Windows speaker volume 15%, detection −26 dB, compensation +92.2 ms, grid 1/4, threshold 100 ms, zoom 1/1. These are **one laptop's test settings**, not universal defaults. Native tests used the in-place compatibility filename with the exact RC3.3 patch; the canonical filename container was verified offline. No private recordings or Live Sets are distributed.
+
+140 automated static/simulation checks passed. They exercise generated structure, a C++ arithmetic harness and message/host stubs; they do not execute Max. [Actual host evidence](docs/HOST_VALIDATION.json) is separate from [automated results](docs/TEST_RESULTS.json).
+
+- Keyboard clicks, room noise and speaker bleed can trigger the amplitude detector. It does not isolate speech or cancel acoustic echo.
+- Vocal timing compensation remains approximate. RC2 reference impulses measured +92.2 ms before compensation and owner-reported 0.00 ms after it; this does not establish precise speech timing.
+- Compensation changes the reported number, not the audio recording or waveform position.
+- CALIBREAZA copies the last raw deviation on the 1/4 grid. Use an aligned reference impulse; later noise can overwrite it.
+- TEST IMPULS exercises display messages without producing audio or requesting Auto Stop.
+- Other systems and audio configurations remain unverified. Closing the monitor hides its UI; the device remains active on its track.
+
+## Development
+
+Python 3, NumPy and a C++17 compiler are development-only dependencies:
 
 ```sh
 python3 -m pip install -r requirements-dev.txt
@@ -70,14 +73,8 @@ python3 build.py
 python3 -m unittest discover -s tests -v
 ```
 
-`build.py` generates the Max patch and AMXD in `dist/`, embedding `src/vtm_engine.genexpr`. The AMXD container is generated programmatically, not via native Save/Freeze. The distributed AMXD is unchanged from the owner-tested device. `SHA256SUMS` lists package hashes.
-
-Preserve tag `v0.7-rc2` as the tested checkpoint when publishing. Develop persistence on a separate branch and validate it in Ableton before merging. Earlier engineering notes in [docs/history](docs/history/) describe historical stages.
+`build.py` embeds `src/vtm_engine.genexpr` and generates the Max patch and AMXD in dist. The container is generated programmatically, not via native Save/Freeze. The DSP source is byte-identical to RC2. Persistence changes initialization and state storage; RC3.3 also forwards the initial state zero to the status display. Audio and Live API paths retain regression coverage. `SHA256SUMS` verifies repository/source-package files; release `SHA256SUMS-ASSETS` verifies the downloadable release files. Historical engineering notes in docs/history are not current setup instructions.
 
 ## License
 
-The project source code and the distributed Vocal Timing Monitor AMXD device are licensed under the [MIT License](LICENSE). Copyright (c) 2026 alexandru348.
-
-Use, modification and redistribution, including commercial use, are permitted subject to preserving the copyright and license notices. The software is provided without warranty. Ableton Live, Max and other separately supplied third-party software retain their own licenses.
-
-The original v0.7-rc2 tag remains the tested checkpoint. The release also provides LICENSE and a source ZIP including this license; runtime files are unchanged.
+Source code and the distributed AMXD are under the [MIT License](LICENSE). Copyright (c) 2026 alexandru348. Use, modification and redistribution, including commercial use, are permitted with the copyright/license notices retained. Provided without warranty. Separately supplied Ableton, Max and other third-party software retain their own licenses.

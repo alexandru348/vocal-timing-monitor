@@ -113,10 +113,10 @@ class StaticTests(unittest.TestCase):
 
     def test_popup_defaults_and_action_buttons(self):
         u = boxmap(PATCH['patcher'])['popup']['patcher']; b = boxmap(u)
-        self.assertEqual(b['initial-0']['text'], '1')  # analysis
+        for i in [0,2,3,4,5]:self.assertEqual(b['initial-'+str(i)]['text'],'bang')
         self.assertEqual(b['initial-1']['text'], '0')  # Auto Stop
-        self.assertEqual(b['initial-2']['text'], '0')  # grid index 0=quarter
-        self.assertEqual(b['initial-3']['text'], '100')
+        for id,value in [('enabled',1),('grid-ui',0),('redms',100)]:
+            self.assertEqual(b[id]['saved_attribute_attributes']['valueof']['parameter_initial'],[value])
         for id in ['test', 'reset', 'calibrate']:
             self.assertEqual(b[id]['mode'], 1)
             self.assertEqual(b[id]['texton'], b[id]['text'])

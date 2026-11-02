@@ -7,7 +7,7 @@
 Capturile RC2 trimise de utilizator arată fereastra deschisă și consola fără
 erorile de compilare RC1. În timpul redării la 100 BPM, ceasul este sincronizat,
 dar starea este AUDIO ENGINE OFF, Intrare este -100 dB, iar numărătoarea rămâne zero.
-Ultima captură arată pista 6 activă, Monitor In, intrare Puls_calibrare / Post Mixer
+Ultima captură arată pista 6 activă, Monitor In, intrare Reference Pulse / Post Mixer
 și nivel înaintea dispozitivului. Activarea pistei nu a rezolvat simptomul.
 
 Capturile nu arată valorile interne ale tuturor parametrilor sau anvelopa dintre

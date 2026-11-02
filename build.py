@@ -10,7 +10,7 @@ import json
 import struct
 
 ROOT = Path(__file__).resolve().parent
-NAME = 'Vocal_Timing_Monitor_v0_7_RC2_Compact'
+NAME = 'Vocal_Timing_Monitor_v0_7_RC3_3_Persistent'
 BG = [0.055, 0.071, 0.098, 1.]
 CARD = [0.094, 0.118, 0.157, 1.]
 TEXT = [0.91, 0.94, 0.98, 1.]
@@ -241,7 +241,157 @@ def popup():
         u.msg('initial-' + str(i), value); u.wire('initialize', 'initial-' + str(i), i); u.wire('initial-' + str(i), dest)
     add_waveform_popup(u, tags)
     compact_popup(u)
+    add_persistent_controls(u, tags)
     return u.p
+
+
+PERSISTENT_CONTROLS = [
+    ('enabled', 'VTM Analysis', 1, 0, 1, 1),
+    ('grid-ui', 'VTM Grid', 0, 0, 2, 1),
+    ('redms', 'VTM Threshold ms', 100, 10, 300, 0),
+    ('offsetms', 'VTM Compensation ms', 0., -500, 500, 0),
+    ('gatedb', 'VTM Detection dB', -32., -60, -6, 0),
+    ('voice-gain', 'VTM Voice zoom', 1., 1, 8, 0),
+    ('beat-gain', 'VTM Beat zoom', 1., 1, 8, 0),
+]
+
+
+def parameter_attributes(name, initial, ptype=0, low=None, high=None, order=0):
+    attrs = dict(parameter_longname=name, parameter_shortname=name,
+                 parameter_type=ptype, parameter_invisible=1,
+                 parameter_initial_enable=1, parameter_initial=[initial],
+                 parameter_order=order)
+    if low is not None: attrs['parameter_mmin'] = float(low)
+    if high is not None: attrs['parameter_mmax'] = float(high)
+    return {'valueof': attrs}
+
+
+def add_persistent_controls(u, tags):
+    """Live-owned per-instance parameters; no external preset files.
+
+    Replay restored values only after live.thisdevice. Never replay Auto Stop
+    intent or action buttons. Routing labels are matched exactly against the
+    host's current lists; indices and volatile Live ids are never persisted.
+    """
+    b = {w['box']['id']: w['box'] for w in u.p['boxes']}
+    for order, (id, name, initial, low, high, ptype) in enumerate(PERSISTENT_CONTROLS):
+        b[id].update(parameter_enable=1, parameter_mappable=0,
+                     varname='vtm_'+id.replace('-', '_'),
+                     saved_attribute_attributes=parameter_attributes(
+                         name, initial, ptype, low, high, order))
+    # Threshold exceeds the 0..255 integer parameter range: store as Float,
+    # while the original number box continues to display an integer.
+    b['redms']['saved_attribute_attributes']['valueof']['parameter_unitstyle'] = 0
+    # Old init messages overwrote the Live-restored values. Bang numeric UIs;
+    # textbutton bang would toggle it: query the bound UI value via pattr.
+    for i in (0, 2, 3, 4, 5): b['initial-'+str(i)]['text'] = 'bang'
+    u.p['lines'] = [w for w in u.p['lines'] if not (
+        w['patchline']['source'] == ['initial-0', 0] and
+        w['patchline']['destination'] == ['enabled', 0])]
+    u.obj('enabled-replay', 'pattr @bindto vtm_enabled @thru 0 @autorestore 0',
+          3, 3, saved_object_attributes=dict(parameter_enable=0))
+    u.wire('initial-0', 'enabled-replay')
+    u.wire('enabled-replay', 'enabled-tag')
+    for name in ('voice', 'beat'):
+        u.p['lines'] = [w for w in u.p['lines'] if w['patchline']['source'] != [name+'-initial-gain', 0]
+                        and w['patchline']['destination'] != [name+'-initial-gain', 0]]
+        b[name+'-initial-gain']['text'] = 'bang'
+        u.wire('initialize', name+'-initial-gain', 6)
+        u.wire(name+'-initial-gain', name+'-gain')
+    u.obj('persist-reset', 't b b', 1, 2)
+    u.msg('persist-restore-on', '1'); u.msg('persist-capture-off', '0')
+    u.wire('initialize', 'persist-reset', 6)
+    u.wire('persist-reset', 'persist-restore-on', 1)
+    u.wire('persist-reset', 'persist-capture-off')
+    u.msg('persist-retry', 'set -1')
+    u.wire('persist-reset', 'persist-retry', 1)
+    u.obj('persist-manual', 't b b', 1, 2)
+    u.msg('persist-restore-off', '0'); u.msg('persist-capture-on', '1')
+    u.wire('persist-manual', 'persist-restore-off', 1)
+    u.wire('persist-manual', 'persist-capture-on')
+    for kind, selected, choices in [('type','wave_type','wave_types'),
+                                    ('channel','wave_channel','wave_channels')]:
+        prefix = 'persist-'+kind
+        name = 'VTM Instrumental '+kind
+        attrs = parameter_attributes(name, '__vtm_unset__', 3,
+                                     order=10 if kind=='type' else 11)
+        # newobj's parameters belong to the wrapped object's attributes.
+        # Enabling only through @parameter_enable in its text created default
+        # Float parameters in the RC3 host test; symbolic values were lost.
+        # Use native pattr serialization so Blob/Stored Only metadata is loaded.
+        attrs['valueof'].pop('parameter_initial_enable')
+        attrs['valueof'].pop('parameter_initial')
+        attrs['valueof']['parameter_linknames'] = 0
+        u.obj(prefix, 'pattr vtm_beat_'+kind+' @thru 0 @autorestore 0',
+              3, 3,
+              saved_object_attributes=dict(parameter_enable=1, parameter_mappable=0),
+              restore=['__vtm_unset__'],
+              varname='vtm_saved_beat_'+kind,
+              saved_attribute_attributes=attrs)
+        # Native feedback is a selected INDEX, not a label (confirmed in the
+        # owner's RC3.1 ALS: both former symbolic captures contained "vtm 2").
+        # Resolve that index through the current list before storing its label.
+        # Startup feedback cannot replace the restored desired labels.
+        u.obj(prefix+'-capture', 'gate 1 0', 2, 1)
+        u.wire('beat-'+kind+'-selected-index', prefix+'-capture', 0, 1)
+        u.wire('persist-capture-off', prefix+'-capture')
+        u.wire('persist-capture-on', prefix+'-capture')
+        u.obj(prefix+'-index-map', 'coll @embed 0', 1, 4)
+        u.wire(prefix+'-capture', prefix+'-index-map')
+        u.wire(prefix+'-index-map', prefix)
+        menu = 'beat-'+kind
+        u.p['lines'] = [w for w in u.p['lines'] if not (
+            w['patchline']['source'] == [menu,0] and
+            w['patchline']['destination'] == [menu+'-command',0])]
+        u.obj(prefix+'-manual', 't i b', 1, 2)
+        u.wire(menu, prefix+'-manual'); u.wire(prefix+'-manual', 'persist-manual', 1)
+        u.wire(prefix+'-manual', menu+'-command')
+        # Exact label -> current index table. No prefix match or global coll name.
+        u.obj(prefix+'-list', 't b l b', 1, 3)
+        u.wire('route', prefix+'-list', tags.index(choices))
+        u.obj(prefix+'-map', 'coll @embed 0', 1, 4)
+        u.msg(prefix+'-clear', 'clear'); u.msg(prefix+'-zero', 'set 0')
+        u.wire(prefix+'-list', prefix+'-clear', 2); u.wire(prefix+'-clear', prefix+'-map')
+        u.wire(prefix+'-clear', prefix+'-index-map')
+        u.wire(prefix+'-list', prefix+'-zero', 2)
+        u.obj(prefix+'-iter', 'iter'); u.obj(prefix+'-list-key', 'prepend vtm')
+        u.obj(prefix+'-list-symbol', 'tosymbol'); u.obj(prefix+'-entry', 't s b', 1, 2)
+        u.obj(prefix+'-index', 'counter 0 1000000000', 5, 4)
+        u.wire(prefix+'-zero', prefix+'-index')
+        u.obj(prefix+'-pair', 'pack s 0', 2, 1); u.obj(prefix+'-store', 'prepend store')
+        u.obj(prefix+'-reverse', 'zl rev', 2, 2)
+        u.wire(prefix+'-list', prefix+'-iter', 1)
+        u.wire(prefix+'-iter', prefix+'-list-key'); u.wire(prefix+'-list-key', prefix+'-list-symbol')
+        u.wire(prefix+'-list-symbol', prefix+'-entry')
+        u.wire(prefix+'-entry', prefix+'-index', 1)
+        u.wire(prefix+'-index', prefix+'-pair', 0, 1)
+        u.wire(prefix+'-entry', prefix+'-pair')
+        u.wire(prefix+'-pair', prefix+'-store'); u.wire(prefix+'-store', prefix+'-map')
+        u.wire(prefix+'-pair', prefix+'-reverse')
+        # A numeric-leading list is coll's documented numeric-address store.
+        u.wire(prefix+'-reverse', prefix+'-index-map')
+        # If confirmed feedback preceded the list, resolve it after rebuilding
+        # the map too. Capture is still closed throughout startup restoration.
+        u.wire(prefix+'-list', 'beat-'+kind+'-selected-index')
+        u.obj(prefix+'-defer', 'deferlow'); u.obj(prefix+'-restore', 'gate 1 1', 2, 1)
+        u.wire(prefix+'-list', prefix+'-defer')
+        u.wire(prefix+'-defer', prefix+'-restore', 0, 1)
+        u.wire('persist-restore-on', prefix+'-restore'); u.wire('persist-restore-off', prefix+'-restore')
+        u.wire(prefix+'-restore', prefix); u.wire(prefix, prefix+'-map')
+        u.obj(prefix+'-change', 'change -1', 3, 3)
+        u.wire('persist-retry', prefix+'-change')
+        u.wire(prefix+'-map', prefix+'-change')
+        if kind == 'type':
+            u.obj(prefix+'-apply', 't i b', 1, 2)
+            u.msg('persist-channel-retry', 'set -1')
+            u.wire(prefix+'-change', prefix+'-apply')
+            u.wire(prefix+'-apply', 'persist-channel-retry', 1)
+            u.wire('persist-channel-retry', 'persist-channel-change')
+            u.wire(prefix+'-apply', menu+'-command')
+        else: u.wire(prefix+'-change', menu+'-command')
+    u.p['title'] = 'Vocal Timing Monitor | 0.7 RC3.3 Persistent'
+    b['version']['text'] = '0.7 RC3.3 / SALVARE'
+    b['footer2']['text'] = 'Setari in proiect (Ctrl+S). Auto Stop se activeaza manual. Iesire microfon muta.'
 
 
 def compact_popup(u):
@@ -402,13 +552,21 @@ def add_waveform_popup(u, tags):
         ('beat-channel',488,195,'wave_channel','wave_channels')]:
         u.box(name,'umenu',ins=1,outs=3,pres=[x,630,w,26],
               items=['(alege sursa)'], parameter_enable=0, bgcolor=CARD,textcolor=TEXT)
-        # This is Cycling '74's menu protocol: outlet 0/1 selected symbols,
-        # outlet 2/3 symbol lists; setsymbol/clear/append do not emit a selection.
-        u.obj(name+'-select','prepend setsymbol');u.wire('route',name+'-select',tags.index(selected));u.wire(name+'-select',name)
+        # Native outlet 0/1 sends selected indices, outlet 2/3 symbol lists.
+        # Silent set renders an index without producing another routing command.
+        u.obj(name+'-selected-index','i 0',2,1)
+        u.wire('route',name+'-selected-index',tags.index(selected))
+        u.obj(name+'-select','prepend set')
+        u.wire(name+'-selected-index',name+'-select');u.wire(name+'-select',name)
         u.obj(name+'-list','t l clear',1,2);u.wire('route',name+'-list',tags.index(choices))
         u.obj(name+'-iter','iter');u.obj(name+'-append','prepend append')
         u.wire(name+'-list',name,1);u.wire(name+'-list',name+'-iter')
         u.wire(name+'-iter',name+'-append');u.wire(name+'-append',name)
+        # Repaint after clear/append even when selected-index feedback arrived
+        # before the available-options list.
+        u.obj(name+'-reselect','t b')
+        u.wire(name+'-list',name+'-reselect')
+        u.wire(name+'-reselect',name+'-selected-index')
         u.obj(name+'-command','prepend '+name.replace('-','_'));u.wire(name,name+'-command');u.wire(name+'-command','out')
     u.button('beat-refresh','ACTUALIZEAZA SURSE',[699,630,175,27])
     u.obj('beat-refresh-bang','t b');u.msg('beat-refresh-command','beat_refresh')
@@ -492,14 +650,14 @@ def engine():
 def make_patch():
     p = Patch(360, 169)
     p.p.update(devicewidth=360., description='Audio onset grid proximity monitor',
-        digest='Vocal Timing Monitor 0.7 RC2 Compact - native embedded engine',
+        digest='Vocal Timing Monitor 0.7 RC3.3 Persistent - native embedded engine',
         tags='audio timing monitor', latency=0, is_mpe=0,
         minimum_live_version='12.0.0', minimum_max_version='8.6.0',
         dependency_cache=[], parameters={'inherited_shortname': 1})
     p.label('title', 'VOCAL TIMING MONITOR', [16, 11, 330, 26], 17, CYAN, fontface=1)
-    p.label('version', '0.7 RC2 Compact | fereastra separata', [16, 40, 330, 18], 11, MUTED)
+    p.label('version', '0.7 RC3.3 Persistent | fereastra separata', [16, 40, 330, 18], 11, MUTED)
     p.button('open', 'OPEN MONITOR', [16, 69, 328, 34], accent=True)
-    p.label('note1', 'ANALIZA ON / AUTO STOP OFF la incarcare', [16, 113, 330, 18], 11, MUTED)
+    p.label('note1', 'Setari salvate in proiect / AUTO STOP OFF', [16, 113, 330, 18], 11, MUTED)
     p.label('note2', 'Iesire muta cat timp dispozitivul este activ.', [16, 135, 330, 18], 11, MUTED)
     p.obj('open-bang', 't b'); p.msg('open-message', 'open'); p.obj('pcontrol', 'pcontrol')
     p.obj('popup', 'p VTM_Monitor', 1, 1, patcher=popup())
@@ -657,7 +815,7 @@ def make_patch():
             if tag in ['count', 'state', 'tests', 'sync', 'hasdelta']:
                 p.obj(tag + '-int', 'i', 2, 1); p.wire(prev, tag + '-int'); prev = tag + '-int'
             if tag not in ['level', 'delta']:
-                p.obj(tag + '-change', 'change 0.' if tag in ['raw', 'maxdev'] else 'change', 3, 3); p.wire(prev, tag + '-change'); prev = tag + '-change'
+                p.obj(tag + '-change', 'change 0.' if tag in ['raw', 'maxdev'] else 'change -1' if tag == 'state' else 'change', 3, 3); p.wire(prev, tag + '-change'); prev = tag + '-change'
             p.obj(tag + '-ui-tag', 'prepend ' + tag); p.wire(tag + '-ui-tag', 'popup')
             if tag == 'state':
                 p.wire(prev, 'state-pak')
@@ -701,6 +859,11 @@ def make_patch():
         contents={'patchers': {}, 'code': {}}, searchpath={}, detailsvisible=0,
         autoorganize=1, hideprojectwindow=1, showdependencies=1, autolocalize=0)
     add_waveform_parent(p)
+    for id, name, initial, *_ in PERSISTENT_CONTROLS:
+        p.p['parameters']['popup::'+id] = [name, name, 0]
+    for kind in ('type', 'channel'):
+        name = 'VTM Instrumental '+kind
+        p.p['parameters']['popup::persist-'+kind] = [name, name, 0]
     def explicit_fanout(patcher):
         groups = {}
         for wrapped in patcher['lines']:

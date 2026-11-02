@@ -1,9 +1,11 @@
-# Checkpoint — 2026-11-01
+# RC3.3 checkpoint — 2026-11-02
 
-Current version: 0.7 RC2 Compact, functional in the owner-tested setup.
-Confirmed: compact/expanded UI, both waveforms, microphone detection, separate recording, actual Auto Stop and clip retention.
-Runtime build.py, src/ and dist/ are unchanged. Packaging updates documentation only.
-Next version: persist controls across project reloads. Do not implement in this checkpoint.
-Keep Auto Stop explicitly armed by the user after loading.
-Suggested branch: feature/save-settings. Preserve v0.7-rc2 tag and test save/reopen plus actual Stop in Ableton before merging.
-MIT license added to source and distributed device on 2026-11-01. Original v0.7-rc2 tag and tested runtime preserved; licensed source ZIP is attached separately to the release.
+Completed: nine per-instance Live Set controls, exact source/channel label capture/restore, initial analysis-OFF display correction. 140 automated checks passed. No Gen DSP source changes from tested RC2.
+
+Owner native tests passed: complete Ableton restarts retain controls including non-default OFF/1/8/80/zoom2-3 and routing; corrected OFF header; both waves and speech/silence behavior; separate track3 recording; actual Auto Stop with clip retained and host confirmation; saving Auto Stop ON then reopening OFF with other settings retained. Details and chronological failures/fixes in docs/HOST_VALIDATION.json. Native tests used same-patch compatibility filename RC3_2, canonical RC3_3 equivalence verified offline.
+
+Final test settings: mic70%, speakers15%, detection-26 dB, offset92.2ms, grid1/4, threshold100ms, zoom1/1. These are setup-specific, not defaults.
+
+Release: v0.7-rc3.3, MIT, canonical RC3_3 AMXD plus sources and optional in-place RC3_2 update. Preserve original v0.7-rc2 tag/commit/release. New instances have factory defaults; no automatic RC2 migration. Current owner project may retain compat filename safely; changing local filename is not required for GitHub release. Private .als/audio/screenshots are excluded.
+
+Limits: speech timing is approximate; noise/speaker bleed can trigger. Other host/audio setups remain unverified. Saving controls requires saving Live Set; no periodic disk autosave. Future work should branch from the new checkpoint, with native validation for host-dependent changes.

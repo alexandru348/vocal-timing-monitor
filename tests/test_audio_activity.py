@@ -74,5 +74,19 @@ class AudioActivityTests(unittest.TestCase):
         self.assertIn('FARA PROCESARE',self.label(g,'state-text'))
         self.assertFalse(g.calls)
 
+    def test_restored_analysis_off_initial_zero_is_rendered_after_reopen(self):
+        # Regression reproduced from owner RC3.2 before/after screenshots:
+        # UI/engine OFF survived, but `change` suppressed the initial state 0
+        # and left state-pak's fallback 1 (waiting for clock) on the display.
+        g=Graph();g.initialize({'VTM Analysis':0,'VTM Grid':1,'VTM Threshold ms':80})
+        e=Engine();e.set(enabled=g.params['enabled']);e.play=0
+        out=e.run(seconds=.02)
+        self.assertEqual(int(out[-1,3]),0)
+        g.emit('root/snapshot-3',(int(out[-1,3]),))
+        self.assertEqual(self.label(g,'state-text'),'ANALIZA OPRITA')
+        self.assertEqual(g.state['root/popup/enabled']['value'],0)
+        self.assertFalse(out[:,1].any())
+        self.assertFalse(g.calls)
+
 
 if __name__=='__main__':unittest.main()

@@ -10,6 +10,13 @@ from test_static import PATCH
 BANG = ('bang',)
 
 
+def parameter_enabled(box):
+    # Wrapped newobj attributes have a different serialized location from UI
+    # box attributes. The RC3 model previously ignored that distinction.
+    return (box.get('saved_object_attributes',{}) if box['maxclass']=='newobj'
+            else box).get('parameter_enable',0)
+
+
 def atoms(text):
     result = []
     for t in text.split():
@@ -89,6 +96,9 @@ class Graph:
                 if head=='setsymbol':s['selected_symbol']=msg[1];return
             if head in ['set', 'active']:
                 s['value' if head == 'set' else 'active'] = msg[1]; return
+            if head == 'bang':
+                # textbutton toggles on bang; number/umenu repeat current value.
+                head = 1-int(s.get('value',0)) if cls=='textbutton' else s.get('value',0)
             if not isinstance(head, (float, int)): return
             if cls == 'textbutton': head = int(head != 0)
             else: head = max(b.get('minimum', -1e12), min(b.get('maximum', 1e12), head))
@@ -101,6 +111,34 @@ class Graph:
         if op == 'inlet': self.emit(id, msg); return
         if op == 'outlet': self.emit(id.rsplit('/', 1)[0], msg); return
         if op == 'prepend': self.emit(id, (words[1],)+msg); return
+        if op == 'tosymbol': self.emit(id,(' '.join(map(str,msg)),)); return
+        if op == 'zl' and words[1:] == ['rev']:
+            self.emit(id,tuple(reversed(msg)));return
+        if op == 'pattr':
+            if '@bindto' in words:
+                target=words[words.index('@bindto')+1]
+                scope=id.rsplit('/',1)[0]+'/'
+                bound=next(k for k,v in self.boxes.items()
+                           if k.startswith(scope) and v.get('varname')==target)
+                if head=='bang':self.emit(id,(self.state[bound].get('value',0),))
+                return
+            if head=='bang':self.emit(id,s.get('value',('__vtm_unset__',)))
+            else:s['value']=msg
+            # The generated routing pattrs have @thru 0: only bang emits.
+            return
+        if op == 'coll':
+            data=s.setdefault('data',{})
+            if head=='clear':data.clear()
+            elif head=='store':data[msg[1]]=msg[2:]
+            elif isinstance(head,(int,float)) and len(msg)>1:data[int(head)]=msg[1:]
+            else:
+                key=msg[1] if head=='symbol' and len(msg)==2 else head
+                if key in data:
+                    value=data[key]
+                    # Documented coll output preserves a lone symbol with the
+                    # explicit symbol selector. Actual owner RC3.2 ALS stores it.
+                    self.emit(id,('symbol',)+value if len(value)==1 and isinstance(value[0],str) else value)
+            return
         if op == 'route':
             selectors = atoms(' '.join(words[1:]))
             if head in selectors: self.emit(id, msg[1:] or BANG, selectors.index(head))
@@ -136,10 +174,12 @@ class Graph:
             return
         if op in ['f','i']:
             if head != 'bang': s['value']=int(head) if op=='i' else float(head)
-            if inlet==0: self.emit(id,(s.get('value',0),))
+            initial=float(words[1]) if len(words)>1 else 0
+            if inlet==0: self.emit(id,(s.get('value',initial),))
             return
         if op == 'counter':
             lo, hi = map(int, words[1:])
+            if head=='set':s['value']=int(msg[1])-1;return
             s['value']=s.get('value',lo-1)+1
             if s['value']>hi: s['value']=lo
             self.emit(id,(s['value'],)); return
@@ -211,7 +251,10 @@ class Graph:
             return
         raise AssertionError(('unmodelled object',id,text,cls,msg))
 
-    def initialize(self):
+    def initialize(self, saved=None):
+        # Explicit HOST STUB: emulate delivery of default/saved Live parameters
+        # before live.thisdevice. This does not execute Ableton's serializer.
+        self.restore_parameters(saved or {})
         self.emit('root/thisdevice', BANG, 0); self.drain()
         self.emit('root/live-path', ('id',42),1)
         self.emit('root/thisdevice',(1,),1)
@@ -219,3 +262,20 @@ class Graph:
         self.drain()
         self.emit('root/snapshot-7',(1,))
         self.emit('root/heartbeat-snapshot',(4410.,))
+
+    def restore_parameters(self, saved):
+        for id,b in self.boxes.items():
+            attrs=b.get('saved_attribute_attributes',{}).get('valueof',{})
+            if not parameter_enabled(b) or attrs.get('parameter_invisible')!=1:continue
+            name=attrs['parameter_longname']
+            default=attrs.get('parameter_initial',b.get('restore',[0]))
+            value=saved.get(name,default[0])
+            self.send(id,tuple(value) if isinstance(value,(tuple,list)) else (value,))
+
+    def saved_parameters(self):
+        saved={}
+        for id,b in self.boxes.items():
+            attrs=b.get('saved_attribute_attributes',{}).get('valueof',{})
+            if parameter_enabled(b) and attrs.get('parameter_invisible')==1:
+                saved[attrs['parameter_longname']]=self.state[id].get('value')
+        return saved

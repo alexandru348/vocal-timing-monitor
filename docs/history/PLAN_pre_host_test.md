@@ -4,7 +4,7 @@ Etapa curentă: interfață compactă înainte de conectarea microfonului.
 
 Confirmat în istoricul furnizat:
 - RC6 a oprit efectiv Live la primul impuls cu abatere mare, contor 1, Auto Stop OFF.
-- RC1 afișează două unde: Puls_calibrare sus și primul_beat jos.
+- RC1 afișează două unde: Reference Pulse sus și Reference Drums jos.
 - Testul No Input confirmă separarea intrărilor.
 
 Implementat în RC2 Compact:

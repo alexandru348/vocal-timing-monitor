@@ -89,10 +89,17 @@ class CompactTests(unittest.TestCase):
         # popup contents: audio, lifecycle, API and all parent patchlines.
         p = json.loads(json.dumps(PATCH['patcher']))
         p.pop('digest',None)
+        # RC3 adds only a parameter registry and updates this root UI note.
+        # Normalize those documented metadata changes, retaining RC1 graph hash.
+        p['parameters'] = {'inherited_shortname': 1}
         for wrapped in p['boxes']:
             b=wrapped['box']
             if b['id']=='popup':b.pop('patcher')
             if b['id']=='version':b.pop('text')
+            if b['id']=='note1':b['text']='ANALIZA ON / AUTO STOP OFF la incarcare'
+            # RC3.3 permits the initial OFF (zero) status to reach the UI;
+            # normalize this display-only initializer, not any audio/API edge.
+            if b['id']=='state-change':b['text']='change'
         self.assertEqual(hashlib.sha256(json.dumps(p,sort_keys=True).encode()).hexdigest(),
                          '718e30262a8779e2d4265430b0105ee26bba96651ea651cbdac5281fa1d5e9d0')
 

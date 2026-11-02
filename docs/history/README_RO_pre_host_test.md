@@ -22,9 +22,9 @@ identic din 0.7 RC1. Nu trebuie editat cod sau realizate conexiuni în Max.
 
 1. Oprește Live și salvează proiectul. Dezactivează 0.7 RC1, păstrându-l ca rezervă.
 2. Încarcă `Vocal_Timing_Monitor_v0_7_RC2_Compact.amxd` pe aceeași pistă 6 și
-   deschide OPEN MONITOR. Păstrează intrarea pistei pe Puls_calibrare, Monitor In,
+   deschide OPEN MONITOR. Păstrează intrarea pistei pe Reference Pulse, Monitor In,
    Sends Only și trimiterile A/B la minimum.
-3. În SETARI verifică sursa instrumentalului: pista `4-primul_beat_v1_24bit`,
+3. În SETARI verifică sursa instrumentalului: pista `Reference Drums`,
    Post Mixer. Compensare 0 ms, grilă 1/4, prag 100 ms, Auto Stop OFF.
    Apasă ASCUNDE și mută fereastra unde îți lasă clipurile vizibile.
 4. Redă zona în care sunt ambele clipuri: impulsurile sus, instrumentalul jos,

@@ -106,7 +106,8 @@ class WaveformTests(unittest.TestCase):
         u=boxmap(boxmap(self.root())['popup']['patcher'])
         for n in ['voice','beat']:
             self.assertEqual(u[n+'-magnify']['text'],'*~ 1.')
-            self.assertEqual(u[n+'-initial-gain']['text'],'1.')
+            self.assertEqual(u[n+'-initial-gain']['text'],'bang')
+            self.assertEqual(u[n+'-gain']['saved_attribute_attributes']['valueof']['parameter_initial'],[1.])
             self.assertEqual((u[n+'-gain']['minimum'],u[n+'-gain']['maximum']),(1.,8.))
 
     def test_stereo_antiphase_and_right_only_still_visible(self):
@@ -150,12 +151,12 @@ class WaveformTests(unittest.TestCase):
 
     def test_source_menus_accept_spaces_and_update_without_recursive_commands(self):
         g=Graph();g.initialize();before=dict(g.params)
-        for i,menu,names,selected in [(2,'beat-type',('No Input','4 primul beat','Puls_calibrare'),'4 primul beat'),
+        for i,menu,names,selected in [(2,'beat-type',('No Input','Reference Drums','Reference Pulse'),'Reference Drums'),
                                        (3,'beat-channel',('Pre FX','Post FX','Post Mixer'),'Post Mixer')]:
             g.emit('root/beat-router',names,i)
-            g.emit('root/beat-router',(selected,),i-2)
+            g.emit('root/beat-router',(names.index(selected),),i-2)
             state=g.state['root/popup/'+menu]
-            self.assertEqual(state['items'],list(names));self.assertEqual(state['selected_symbol'],selected)
+            self.assertEqual(state['items'],list(names));self.assertEqual(state['value'],names.index(selected))
         self.assertEqual(g.state['root/beat-router']['commands'],[('port','audio_inputs'),('index',1)])
         self.assertEqual(g.params,before)
 
