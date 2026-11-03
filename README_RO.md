@@ -1,73 +1,68 @@
-# Vocal Timing Monitor — 0.7 RC3.3 Persistent
+# Vocal Timing Monitor — 0.8 RC1.3 Studio
 
-Dispozitiv audio Max for Live pentru afișarea abaterilor atacurilor față de grila Ableton și oprirea opțională a redării/înregistrării. **Setările se păstrează în proiectul Live și revin la redeschidere.** [English documentation](README.md).
+Monitor ritmic Max for Live cu interfață în română. **0.8 RC1.3 Studio — candidat de lansare acceptat în configurația testată, 03.11.2026.** Proprietarul a confirmat funcționarea în Windows / Ableton Live 12: teme luminoase sincronizate, setări păstrate după repornire completă, înregistrare și oprire automată cu clip păstrat, apoi redeschidere cu oprirea OFF după salvare cu ON. [Rezultate și limite](docs/HOST_VALIDATION.json). [Versiunea 0.7 RC3.3](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc3.3) rămâne disponibilă pentru revenire. [English](README.md).
 
-## Descărcare și instalare
+[Descarcă dispozitivul AMXD](https://github.com/alexandru348/vocal-timing-monitor/raw/refs/heads/main/dist/Vocal_Timing_Monitor_v0_8_RC1_3_Studio.amxd). Fișierul publicat este exact cel testat; după acceptare s-a actualizat doar documentația.
 
-Descarcă `Vocal_Timing_Monitor_v0_7_RC3_3_Persistent.amxd` din [release v0.7-rc3.3](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc3.3) sau din [dist](dist/). Necesită Ableton cu Max for Live disponibil. Nu este VST/AU și nu necesită Python pentru utilizare. Etichetele interfeței sunt în română.
+## Ce s-a schimbat
 
-1. Încarcă AMXD pe o pistă dedicată analizei și apasă OPEN MONITOR.
-2. Selectează microfonul: Ext. In, intrarea potrivită, Monitor In. Ieșirea pistei: Sends Only, trimiterile la minimum. Dispozitivul activ are ieșire mută.
-3. În SETARI → SURSA INSTRUMENTALULUI alege manual pista cu beat-ul și Post Mixer.
-4. Înregistrează pe o pistă separată, cu intrarea microfonului și armare activă când înregistrezi. Configurația testată cu difuzoare folosește Monitor Off pe pista de înregistrare.
-5. Pornește redarea cu ANALIZA ON și AUTO STOP OFF. Verifică undele, sincronizarea și contorul. Apoi activează explicit Auto Stop pentru încercarea dorită.
-6. **Apasă Ctrl+S în Ableton pentru a salva proiectul.** Setările se refac la redeschiderea aceleiași instanțe. Dispozitivul nu salvează periodic proiectul pe disc; o instanță nouă pornește cu valorile implicite.
+- Teme luminoasă/întunecată, selectabile permanent și salvate în proiect.
+- Rezultat ritmic mai vizibil, explicația „mai devreme” / „mai târziu”, text și simbol alături de culoare.
+- Cele două unde rămân simultan vizibile: microfon și instrumental.
+- Setări uzuale: grilă, toleranță, detecție și sursa instrumentalului.
+- Indicator de nivel brut, marcaj pentru prag și mesaj de supraîncărcare. Depășirea pragului vizual nu garantează un atac: detectorul folosește și filtrare, anvelopă, zgomot și rearmare.
+- Compensarea, calibrarea, mărirea vizuală și diagnosticul sunt în „Avansat”.
+- Fereastră compactă de 640 × 370; cu setări deschise, 640 × 760. Paginile de setări folosesc aceeași zonă.
 
-## Ce se păstrează
+Motorul DSP și protocolul de rutare/oprire automată sunt păstrate. „Resetează măsurătorile” șterge contorul/rezultatul și dezarmează oprirea automată; valorile controalelor rămân.
 
-Analiză, grilă, prag, compensare, detecție, cele două măriri și sursa/canalul instrumentalului. Sursa și canalul sunt căutate după numele exact din lista curentă; dacă numele dispare sau se schimbă, reselectează și salvează.
+## Instalare și prima utilizare
 
-**Auto Stop pornește întotdeauna OFF**, chiar dacă proiectul a fost salvat cu ON. Contorul, istoricul undelor, acțiunile și diagnosticul temporar nu se păstrează. Volumul microfonului/difuzoarelor din Windows și tempo-ul Live sunt setări externe.
+Folosește `dist/Vocal_Timing_Monitor_v0_8_RC1_3_Studio.amxd`. Necesită Ableton Live 12 cu Max for Live și Max 8.6 sau mai nou. Nu este VST/AU; utilizarea nu necesită Python.
 
-Pentru actualizarea de la RC2, introdu o singură dată valorile în noua instanță: RC2 nu le salva. Păstrează o copie a proiectului înainte să înlocuiești dispozitivul.
+1. Fă o copie separată a proiectului. Păstrează fișierul și instanța RC3.3 funcționale.
+2. În copie, dezactivează RC3.3 și adaugă noul AMXD pe pista de analiză. Apasă **Deschide monitorul**. Păstrează o singură instanță VTM activă pe acea pistă.
+3. Pista de analiză: intrarea microfonului, Monitor In, Sends Only, trimiterile la minimum. Dispozitivul activ are ieșire mută. Pista separată de înregistrare își păstrează rutarea potrivită configurației existente.
+4. În **Setări**, selectează pista instrumentalului și **Post Mixer**, apoi introdu valorile preferate în noua instanță. O instanță nouă nu preia automat valorile celei vechi.
+5. Lasă **Oprire auto: OFF**, pornește redarea cu **Analiză activă** și verifică undele/contorul. Vorbește normal, apoi păstrează câteva secunde de liniște.
+6. **Ctrl+S salvează setările și tema în proiect.** Nu există salvare periodică a proiectului pe disc.
 
-Numai pentru proiectul de test care referă deja fișierul RC3_2, folderul [compat](compat/) conține patch-ul RC3.3 sub numele vechi. Astfel instanța și valorile ei rămân pe loc. Nu redenumi/șterge acel fișier din Explorer fără actualizarea referinței proiectului. Pentru instalări noi folosește RC3_3 din dist. Conținutul patch-ului este identic, dar numele intern al containerului și hash-ul diferă.
+[Protocolul 0.8](docs/TESTARE_0_8.md) descrie verificările reproductibile: teme/pagini, repornire completă, restaurarea valorilor, voce/instrumental și oprire reală în timpul înregistrării, cu păstrarea clipului.
 
-## Interpretare
+Nu există un procent universal potrivit pentru microfon. Evită supraîncărcarea vorbind normal și adaptează pragul la nivelul ales. Un număr mai negativ în **Prag de detecție (dB)** crește sensibilitatea. Nu forța vocea pentru a trece un prag nepotrivit. Volumul Windows și tempo-ul Live sunt setări externe.
 
-Unda albastră este intrarea/vocea, iar cea verde instrumentalul; istoricul comun este de șase secunde. MARIRE schimbă numai desenul.
+## Interpretare și salvare
 
-Minus = devreme; plus = târziu, după compensare. Se măsoară față de reperul cel mai apropiat al grilei Live. Detectorul nu identifică silabe și nu evaluează muzical flow-ul.
+Minus = mai devreme; plus = mai târziu, după compensare, față de cel mai apropiat reper al grilei Live. Nu se identifică silabe și nu se evaluează flow-ul muzical. Compensarea schimbă rezultatul numeric, fără să mute înregistrarea sau undele.
 
-La prag 100 ms: verde sub 45 ms, galben de la 45 până sub 100 ms, roșu de la 100 ms în valoare absolută. Limita verde generală este min(45 ms, prag/2). La 100 BPM limita abaterii este ±300 ms pe 1/4, ±150 ms pe 1/8 și ±75 ms pe 1/16; pragul 100 ms nu poate fi atins pe 1/16.
+La toleranță 100 ms: verde sub 45 ms, galben de la 45 până sub 100 ms, roșu de la 100 ms în valoare absolută. Limita verde este min(45 ms, toleranță/2). La 100 BPM: ±300 ms pe 1/4, ±150 ms pe 1/8, ±75 ms pe 1/16. Interfața explică dacă toleranța depășește limita grilei.
 
-Auto Stop solicită oprirea întregului transport Live, inclusiv înregistrarea, la primul eveniment roșu confirmat. Clipul rămâne. Revine OFF și trebuie reactivat pentru fiecare încercare. Resetarea, anumite modificări de parametri sau pierderea sincronizării îl pot dezarma. Diagnosticul este în SETARI.
+**Oprire auto: ON** se activează explicit după sincronizare, pentru încercarea dorită. Primul eveniment roșu confirmat solicită oprirea întregului transport Live, inclusiv înregistrarea; clipul rămâne. Revine OFF după cerere și întotdeauna la încărcare, inclusiv după salvare cu ON. Resetarea, anumite modificări de parametri sau pierderea sincronizării îl pot dezarma. Tema și navigarea nu schimbă această intenție.
 
-## Testare — 02.11.2026
+Se salvează zece controale: analiză, grilă, toleranță, detecție, compensare, două măriri, sursa/canalul instrumentalului și temă. Pentru sursă/canal se folosește numele exact confirmat; dacă dispare/se schimbă, reselectează și salvează. Contorul, istoricul, diagnosticul și pagina deschisă sunt temporare. [Detalii](docs/PERSISTENCE.md).
 
-Autorul a verificat în Ableton Live 12 Suite, Windows 11, 44,1 kHz și 100 BPM: restaurarea controalelor după închiderea completă a Ableton, sursa/Post Mixer, valorile neimplicite OFF / 1/8 / 80 ms / măriri 2 și 3, mesajul inițial corect, ambele unde, detecția vocii și contor stabil în liniște pe pasajul testat, înregistrarea separată și Auto Stop cu păstrarea clipului. Salvarea cu Auto Stop ON a fost urmată de OFF la redeschidere.
+**Preia întârzierea** copiază ultima abatere brută pe grila 1/4; folosește un impuls cunoscut și aliniat. **Test afișare** verifică mesajele vizuale, fără sunet sau cerere de oprire.
 
-Configurația finală de test, specifică laptopului:
+## Ce este verificat
 
-| Parametru | Valoare |
-| --- | --- |
-| Microfon Windows / difuzoare | 70% / 15% |
-| Detecție | −26 dB |
-| Compensare | +92,2 ms |
-| Tempo / grilă / prag | 100 BPM / 1/4 / ±100 ms |
-| Măriri voce / beat | 1× / 1× |
-| Instrumental | Pista 4 / Post Mixer |
-| Analiză | Pista 6: Ext. In 1/2, Monitor In, Sends Only |
-| Înregistrare | Pista 3: Ext. In mono 1, Monitor Off, Main |
+155 de verificări statice/simulate au trecut, inclusiv pentru motorul existent. Nu rulează Max/Ableton. [Rezultatele automate](docs/TEST_RESULTS.json) sunt separate de [testele native](docs/HOST_VALIDATION.json), care consemnează acceptarea RC1.3 în configurația testată și limitele observațiilor.
 
-Nivelul microfonului a fost redus pentru evitarea supraîncărcării; apoi sensibilitatea detecției a fost adaptată. Nu vorbi mai tare pentru a compensa un prag nepotrivit. Aceste valori nu sunt o calibrare universală.
+Previzualizările PNG sunt ilustrații aproximative din geometria generată, cu unde sintetice și font substituit; nu sunt capturi din Max. Nu au indicat depășiri estimate de text pe cele trei pagini, în ambele teme. Aspectul nativ Windows folosit în test a fost acceptat de proprietar; PNG-urile nu demonstrează randarea pe alte sisteme. Testele RC3.3 arhivate nu validează automat noua interfață.
 
-Testele native au folosit fișierul compatibil cu numele RC3_2 și patch RC3.3 identic cu varianta canonică; containerul cu numele RC3_3 a fost verificat offline. Proiectele și înregistrările private nu sunt incluse.
-
-140 de verificări statice/simulate au trecut; ele nu execută Max. Vezi [rezultatele automate](docs/TEST_RESULTS.json), [observațiile în Ableton](docs/HOST_VALIDATION.json) și [protocolul](docs/TESTARE_RC3.md). [Versiunea RC2](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc2) rămâne punctul de revenire original.
-
-## Limite
-
-- Tastele, zgomotul și instrumentalul captat de microfon pot declanșa detectorul. Nu există separare automată a vocii sau anulare de ecou.
-- Compensarea vocală rămâne aproximativă și schimbă numai rezultatul numeric. Referința RC2 cu opt impulsuri nu demonstrează aceeași precizie pentru voce.
-- CALIBREAZA copiază ultima abatere brută pe grila 1/4; folosește un impuls aliniat, fără zgomote ulterioare.
-- TEST IMPULS testează afișarea, fără sunet sau cerere Auto Stop.
-- Închiderea monitorului ascunde interfața, dar dispozitivul rămâne activ. Alte configurații decât cea raportată nu sunt validate.
+Zgomotul, tastele și sunetul difuzoarelor captat de microfon pot produce atacuri. Compensarea vocală rămâne aproximativă. Închiderea ferestrei ascunde interfața; dispozitivul rămâne activ. Alte configurații nu sunt validate. Nu sunt distribuite proiecte Live private, diagnosticele lor, înregistrări sau capturi ale proprietarului.
 
 ## Dezvoltare și licență
 
-Python 3, NumPy și compilator C++17 sunt necesare numai dezvoltării: `python3 -m pip install -r requirements-dev.txt`, `python3 build.py`, apoi `python3 -m unittest discover -s tests -v`.
+Sursele includ `build.py`, `studio_ui.py`, motorul Gen, testele, semnalul sintetic și documentația. Comenzile sunt în [README.md](README.md). SHA256SUMS verifică fișierele pachetului; SHA256SUMS-ASSETS verifică descărcările separate.
 
-Motorul DSP este identic cu RC2. RC3 adaugă stocarea/inițializarea controalelor, iar RC3.3 corectează mesajul inițial pentru analiza oprită. Hash-urile fișierelor sunt în SHA256SUMS; hash-urile descărcărilor release-ului sunt în SHA256SUMS-ASSETS.
+Codul și AMXD sunt sub [licența MIT](LICENSE), Copyright (c) 2026 alexandru348: utilizare, modificare și redistribuire, inclusiv comercială, cu mențiunile păstrate; fără garanție. Programele terțe își păstrează licențele.
 
-Codul și dispozitivul AMXD sunt sub [licența MIT](LICENSE), Copyright (c) 2026 alexandru348. Sunt permise utilizarea, modificarea și redistribuirea, inclusiv comercială, cu păstrarea licenței și a copyright-ului. Fără garanție. Programele terțe își păstrează propriile licențe.
+## RC1.2: text și mărire vizuală
+
+Câmpurile măririi afișează direct 1×, 2×, 2.5× etc., până la 8×, păstrând valori numerice și identificatorii salvați. Se folosesc controale native live.numbox; editarea fracționară și restaurarea valorilor au fost confirmate de proprietar în Ableton. Fontul este Segoe UI, disponibil în Windows, cu texte mici mărite și spațiu vertical adaptat. Alte sisteme pot înlocui fontul; nu este inclus un fișier de font. Previzualizarea folosește DejaVu Sans. Claritatea efectivă depinde și de randarea High DPI din Max, nu doar de font: vezi docs/TEXT_RENDERING.md. Pluginul nu schimbă setările globale Max/Windows.
+
+## RC1.3: aceeași temă în monitor și în dispozitiv
+
+Fundalul panoului din Ableton, titlul, explicațiile și butonul de deschidere urmează tema aleasă în monitor. Alegerea salvată se aplică și înainte să deschizi fereastra separată. Nu există un al doilea comutator sau parametru de temă. Bara de titlu și cadrul exterior sunt desenate de Ableton și își păstrează tema aplicației.
+
+Observațiile RC1.2 despre aspectul monitorului și pauza fără interacțiune sunt arhivate separat. În RC1.3, proprietarul a confirmat aceeași temă luminoasă în panou și monitor, panoul deja luminos înainte de deschiderea monitorului după repornire, valorile/sursa păstrate, cele două unde în redare/înregistrare și oprirea automată cu clip păstrat și confirmare Live. În ultimul test s-a salvat explicit cu oprirea ON; după închiderea completă și redeschidere aceasta a revenit OFF, iar celelalte setări s-au păstrat. Raportul delimitează observațiile; nu declară testate toate configurațiile, repornirea nativă cu panou întunecat sau latența exactă a opririi.

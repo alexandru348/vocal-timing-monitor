@@ -1,46 +1,60 @@
 {
-  "version": "0.7 RC3.3 Persistent",
-  "date": "2026-11-02",
-  "kind": "Public summary of owner-reported functional tests; no private project extraction",
-  "host": "Ableton Live 12 Suite / Windows 11 / 44.1 kHz / 100 BPM",
+  "version": "0.8 RC1.3 Studio",
+  "date": "2026-11-03",
+  "status": "OWNER ACCEPTED — TESTED WINDOWS / LIVE 12 WORKFLOW",
+  "baseline_commit": "8cd555d6ac907816d375efe2f2410132c7dded70",
+  "method": "Owner reports and native-host screenshots reviewed during guided testing; automated checks are reported separately.",
+  "environment": {
+    "os": "Windows 11 Pro",
+    "host": "Ableton Live 12 Suite"
+  },
   "checks": [
     {
-      "test": "Per-instance controls across full application restart",
-      "result": "passed in owner setup",
-      "scope": "Changed analysis state, grid, threshold, compensation, detection and waveform zoom values retained"
+      "test": "RC1.3 embedded device body matches the light monitor theme",
+      "result": "passed",
+      "evidence": "Owner accepted the correction; both surfaces were visibly light."
     },
     {
-      "test": "Instrumental selection restoration",
-      "result": "passed in owner setup",
-      "scope": "Owner confirmed selection retained; private source names and input/routing metadata omitted"
+      "test": "Full application restart restores light device body before monitor opens",
+      "result": "passed",
+      "evidence": "Device body already light with monitor closed, then monitor opened in the same theme."
     },
     {
-      "test": "Initial analysis-OFF display",
-      "result": "passed in owner setup",
-      "scope": "OFF button agrees with initial status after restart"
+      "test": "Saved controls, fractional visual zoom, compensation and instrumental selection survive restart",
+      "result": "passed_in_tested_configuration",
+      "evidence": "Owner confirmed retained settings; basic and advanced views reviewed after restart."
     },
     {
-      "test": "Playback, separate waveforms and ordinary speech detection",
-      "result": "passed in owner setup",
-      "scope": "Synchronized clock, both waves and attack counter; short speech/silence test count remained stable during silence"
+      "test": "Microphone and instrumental waveforms and attack feedback during playback / recording",
+      "result": "passed_in_tested_workflow",
+      "evidence": "Both waves and detected events visible; owner reported intended operation in RC1.3."
     },
     {
-      "test": "Separate vocal recording and actual Auto Stop",
-      "result": "passed in owner setup",
-      "scope": "Transport and recording stopped, clip retained; host-confirmed stop message and Auto Stop OFF"
+      "test": "Actual recording and automatic transport stop retain the recorded clip",
+      "result": "passed_in_tested_workflow",
+      "evidence": "Owner confirmed successful operation; stopped view showed the retained clip and Live stop confirmation."
     },
     {
-      "test": "Save with Auto Stop explicitly ON, reopen application",
-      "result": "passed in owner setup",
-      "scope": "Owner clarified saved while ON; reopened OFF with other controls retained"
+      "test": "Save automatic stop ON, fully close/reopen, initialize OFF with other settings retained",
+      "result": "passed",
+      "evidence": "ON and stopped transport confirmed before save/exit; OFF confirmed after full restart with themes and controls retained."
+    },
+    {
+      "test": "Playback synchronization after the stopped-state audio diagnostic",
+      "result": "passed_in_tested_workflow",
+      "evidence": "Subsequent playback showed synchronized status and both audio waveforms."
     }
   ],
-  "native_runtime": "Owner tested compatibility RC3_2 container filename with RC3.3 patch; canonical RC3_3 patch JSON equivalence verified offline",
+  "predecessor_observations": "RC1.2 monitor layout, both monitor themes, unit display and untouched-silence stability are archived in history/RC1_2_HOST_OBSERVATIONS.json. They remain version-scoped observations.",
   "limits": [
-    "Single owner setup only",
-    "Short silence test does not establish general speaker-bleed rejection",
-    "Approximate vocal timing; no musical-flow evaluation",
-    "Other host versions, operating systems and audio setups unverified"
+    "Acceptance applies to the owner-tested Windows / Live 12 workflow, not every host, operating system, parameter combination or audio setup.",
+    "Both directions of the RC1.3 embedded palette and per-instance isolation have automated message-model coverage; a separate native dark-body restart and native multi-instance test were not independently documented.",
+    "Screenshots confirm stop behavior and owner acceptance, not sample-accurate stop latency or the exact first-event timing.",
+    "This amplitude-onset detector can count keyboard/room sounds and speaker bleed; it does not recognize speech. Earlier untouched-silence stability is a bounded RC1.2 observation.",
+    "Global Max High DPI / Windows scaling settings were not inspected or changed; no claim of universal text sharpness is made."
   ],
-  "privacy": "Private .als files, their extracted diagnostics, saved routing/input payloads, private audio and screenshots are excluded."
+  "protocol": "TESTARE_0_8.md",
+  "previous_host_report": "history/RC3_3_HOST_VALIDATION.json",
+  "previous_ui_report": "history/RC1_2_HOST_OBSERVATIONS.json",
+  "privacy": "Sanitized functional outcomes only. No private Live Sets, extracted diagnostic dumps, saved routing/input payloads, recordings or owner screenshots are published."
 }

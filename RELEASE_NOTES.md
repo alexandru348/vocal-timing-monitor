@@ -1,26 +1,30 @@
-# Vocal Timing Monitor 0.7 RC3.3 Persistent
+# Vocal Timing Monitor 0.8 RC1.3 Studio — owner-tested release candidate
 
-## Download
+**Owner acceptance completed on 3 November 2026 in the tested Windows / Ableton Live 12 workflow.** Based on tested RC3.3 at `8cd555d6ac907816d375efe2f2410132c7dded70`; that earlier tag/release remains available. The RC1.3 AMXD is byte-identical to the owner-tested artifact (SHA-256 `9d26049639cfad68ee18c6c7800e99b57013b4b1fd567b383405d5106dbd9e00`). Publication changes documentation only after acceptance.
 
-Download **Vocal_Timing_Monitor_v0_7_RC3_3_Persistent.amxd** from Assets and load it on a dedicated audio analysis track in Ableton Live. **VTM_v0_7_RC3_3_Persistent_Sources.zip** includes source, tests, documentation, MIT license and runtime. SHA256SUMS-ASSETS verifies release downloads; SHA256SUMS verifies the source snapshot.
+- Native floating UI redesigned at 640 × 370, expanding to 640 × 760 with basic/advanced pages.
+- Light/dark theme, saved per instance as an additional Stored Only parameter.
+- Clear Romanian names and result/direction labels; states distinguished by text/symbol and color.
+- Raw microphone peak meter with gate marker/overload feedback; independent of the filtered detector.
+- Compensation/calibration and visual zoom moved to advanced settings. Impossible-tolerance warning beside its control.
+- Existing nine stored-control IDs, Gen source, audio graph, routing and automatic-stop lifecycle retained. Theme/page changes preserve audio controls and stop intent.
 
-## Changes since RC2
+155 automated static/simulation tests passed. Eight approximate layout illustrations used synthetic waves; no estimated text overflow. The owner confirmed the light device/monitor palette, restoration before opening the monitor, controls/source after full restart, playback/recording waves, actual automatic stop with retained clip and Live confirmation, and saved-ON/reopened-OFF behavior. See docs/HOST_VALIDATION.json for evidence and limits. Earlier RC3.3 host validation is archived separately.
 
-- Restores nine settings with the saved Live Set: analysis, grid, threshold, compensation, detection, both waveform zooms and instrumental source/channel.
-- Resolves confirmed routing indices to exact labels for storage, then labels to current indices after reopen. Missing or renamed sources require reselection.
-- Keeps Auto Stop OFF at load, even when the Set was saved with ON. New instances use factory defaults.
-- Fixes the initial analysis-OFF status header. DSP source is unchanged from RC2.
+Test the new AMXD in a copied Live Set with RC3.3 deactivated; retain the old file. Enter preferences once for a fresh instance. Save with Ctrl+S. Auto Stop always loads OFF. See docs/TESTARE_0_8.md.
 
-Save your Live Set with Ctrl+S; this feature does not periodically save the project to disk. From RC2, enter your preferred settings once in the new instance. Existing RC3.2 test projects can retain their current filename using the optional **VTM_RC3_3_Update_Existing_RC3_2.zip** asset; its patch is identical to RC3.3, but keeps the old container filename. New users should use the canonical RC3_3 AMXD.
+MIT licensed, including commercial reuse, with notices retained. No private Live Sets, extracted private diagnostics, recordings or owner screenshots are packaged.
 
-## Validation
+## RC1.1 spacing correction
 
-Owner-tested on 2 November 2026 in Ableton Live 12 Suite / Windows 11, 44.1 kHz, 100 BPM: full restart restored changed controls and instrumental routing; initial OFF status corrected; both waves and speech attacks worked; the count stayed stable during silence in the short test. Actual Auto Stop stopped recording with the clip retained and host confirmation. Saving Auto Stop ON then reopening yielded OFF with other settings retained.
+Owner screenshots of RC1 showed the compact time labels too close to the lower window border. Compact height is now 370 instead of 360 native units, giving 12 units below the label boxes instead of 2. Waveforms, label coordinates and expanded height remain unchanged. Initial size and both expand/collapse calculations use the same constants. The compact layout was subsequently accepted by the owner.
 
-Native tests used the compatibility RC3_2 filename containing the exact RC3.3 patch; canonical container payload equivalence and deterministic output were verified offline. 140 automated static/simulation checks passed; these do not execute Max. Final speech/recording test used microphone 70%, speakers 15%, detection −26 dB and compensation +92.2 ms, specific to one laptop.
+## RC1.2 text and units
 
-## Requirements and limits
+Native LCD zoom fields display 1×, 2× and fractional multipliers while preserving Float parameter identities/ranges and the visual-only signal path. Displayed text now uses Segoe UI with enlarged small captions, integer point sizes and room for descenders. The compact lower padding is retained. The owner accepted the revised text and confirmed fractional unit display/editing and saved values after restart; objective sharpness measurements are not claimed; the global Max High DPI preference is neither inspected nor changed by the AMXD.
 
-Requires Ableton with Max for Live available; AMXD, not VST/AU. Current interface labels are Romanian. Timing follows the nearest Live grid point; it does not evaluate musical flow or separate speech. Keyboard noise and speaker bleed may trigger attacks. Vocal compensation is approximate and other setups are unverified. Auto Stop stops the entire transport, including recording, and must be enabled explicitly for each attempt after synchronization.
+## RC1.3 embedded device body
 
-Source and AMXD are licensed under **MIT**, including commercial reuse, with notices retained; provided without warranty. See LICENSE and README.md / README_RO.md. No private Live Sets or recordings are included. Original tag and release **v0.7-rc2** are preserved as the earlier checkpoint.
+Synchronize the embedded device body and floating monitor using the same instance-scoped stored theme. Root background uses a native solid-fill panel; title, notes and open-button normal/on/hover colors follow the palette. A dedicated second popup outlet carries theme values to root-local thispatcher messages only. Saved-theme replay applies before opening the monitor. No new parameters, audio routes, runtime dependencies or global settings. Live's own device header/frame is unchanged.
+
+Three additional regression checks cover both toggle directions with armed stop intent preserved, full-restart/repeated-ready replay while the monitor is closed, local outlet/target isolation and independent instance models. All 155 tests pass. Native RC1.2 partial acceptance is recorded in history/RC1_2_HOST_OBSERVATIONS.json; current RC1.3 owner acceptance, actual recording/stop and saved-ON/reopened-OFF results are in docs/HOST_VALIDATION.json. Dark-body restart and native multi-instance isolation were not independently documented; both palette directions and instance isolation have automated model coverage.

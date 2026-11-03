@@ -8,9 +8,10 @@ There is one JSON entry, no external scripts, images, abstractions or samples.
 from pathlib import Path
 import json
 import struct
+from studio_ui import apply_studio_ui, apply_readable_type, apply_device_theme
 
 ROOT = Path(__file__).resolve().parent
-NAME = 'Vocal_Timing_Monitor_v0_7_RC3_3_Persistent'
+NAME = 'Vocal_Timing_Monitor_v0_8_RC1_3_Studio'
 BG = [0.055, 0.071, 0.098, 1.]
 CARD = [0.094, 0.118, 0.157, 1.]
 TEXT = [0.91, 0.94, 0.98, 1.]
@@ -242,6 +243,7 @@ def popup():
     add_waveform_popup(u, tags)
     compact_popup(u)
     add_persistent_controls(u, tags)
+    apply_studio_ui(u, parameter_attributes)
     return u.p
 
 
@@ -650,15 +652,15 @@ def engine():
 def make_patch():
     p = Patch(360, 169)
     p.p.update(devicewidth=360., description='Audio onset grid proximity monitor',
-        digest='Vocal Timing Monitor 0.7 RC3.3 Persistent - native embedded engine',
+        digest='Vocal Timing Monitor 0.8 RC1.3 Studio - native embedded engine',
         tags='audio timing monitor', latency=0, is_mpe=0,
         minimum_live_version='12.0.0', minimum_max_version='8.6.0',
         dependency_cache=[], parameters={'inherited_shortname': 1})
     p.label('title', 'VOCAL TIMING MONITOR', [16, 11, 330, 26], 17, CYAN, fontface=1)
     p.label('version', '0.7 RC3.3 Persistent | fereastra separata', [16, 40, 330, 18], 11, MUTED)
-    p.button('open', 'OPEN MONITOR', [16, 69, 328, 34], accent=True)
-    p.label('note1', 'Setari salvate in proiect / AUTO STOP OFF', [16, 113, 330, 18], 11, MUTED)
-    p.label('note2', 'Iesire muta cat timp dispozitivul este activ.', [16, 135, 330, 18], 11, MUTED)
+    p.button('open', 'Deschide monitorul', [16, 69, 328, 34], accent=True)
+    p.label('note1', 'Setări în proiect · oprire automată OFF la încărcare', [16, 113, 330, 18], 10, MUTED)
+    p.label('note2', 'Pistă pentru analiză · ieșire audio mută', [16, 135, 330, 18], 11, MUTED)
     p.obj('open-bang', 't b'); p.msg('open-message', 'open'); p.obj('pcontrol', 'pcontrol')
     p.obj('popup', 'p VTM_Monitor', 1, 1, patcher=popup())
     p.wire('open', 'open-bang'); p.wire('open-bang', 'open-message'); p.wire('open-message', 'pcontrol'); p.wire('pcontrol', 'popup')
@@ -864,6 +866,9 @@ def make_patch():
     for kind in ('type', 'channel'):
         name = 'VTM Instrumental '+kind
         p.p['parameters']['popup::persist-'+kind] = [name, name, 0]
+    p.p['parameters']['popup::theme'] = ['VTM Theme', 'VTM Theme', 0]
+    for item in p.p['boxes']:
+        if item['box']['id']=='version':item['box']['text']='0.8 RC1.3 Studio | teme și setări salvate'
     def explicit_fanout(patcher):
         groups = {}
         for wrapped in patcher['lines']:
@@ -877,6 +882,8 @@ def make_patch():
         for wrapped in patcher['boxes']:
             if 'patcher' in wrapped['box']:
                 explicit_fanout(wrapped['box']['patcher'])
+    apply_readable_type(p.p)
+    apply_device_theme(p)
     explicit_fanout(p.p)
     return {'patcher': p.p}
 

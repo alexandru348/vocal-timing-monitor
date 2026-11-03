@@ -1,0 +1,23 @@
+{
+  "version": "0.8 RC1.2 Studio",
+  "date": "2026-11-03",
+  "status": "PARTIAL OWNER NATIVE ACCEPTANCE; DEVICE THEME MISMATCH REPORTED",
+  "evidence": "Owner report and screenshots; private screenshots and Live Sets excluded",
+  "confirmed": [
+    "Monitor layout in compact/basic/advanced views and both themes accepted",
+    "Native zoom fields display and edit 1×/2×/2.5×",
+    "Separate microphone and instrumental waveforms during playback",
+    "Speech attacks counted; short silence with no keyboard interaction kept count stable",
+    "Full application close/reopen retained light theme, fractional zooms and compensation; automatic stop OFF"
+  ],
+  "reported_not_fully_visible": [
+    "Owner reported other settings unchanged after reopen"
+  ],
+  "limitation": "Keyboard sounds can count as attacks; this is an amplitude onset detector, not speech recognition",
+  "issue": "Floating monitor was light while the embedded device body remained dark",
+  "pending": [
+    "Actual recording/automatic stop with clip retained in 0.8",
+    "Saved automatic stop ON reopens OFF in 0.8",
+    "Max global High DPI Rendering preference was not inspected"
+  ]
+}

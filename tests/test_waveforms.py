@@ -89,7 +89,7 @@ class WaveformTests(unittest.TestCase):
         self.assertTrue(all(h['maxclass']=='live.scope~' and h['mode']==0 for h in histories))
         for field in ['samples','interval']:
             self.assertEqual(len({h[field] for h in histories}),1)
-        self.assertEqual({(h['presentation_rect'][0],h['presentation_rect'][2]) for h in histories},{(16.,568.)})
+        self.assertEqual({(h['presentation_rect'][0],h['presentation_rect'][2]) for h in histories},{(28.,584.)})
         self.assertEqual({h['samples'] for h in histories},{264600.})
         self.assertFalse(any(d[0].endswith('-scope') and d[1]==1 for s,d in edges(u)))
         self.assertFalse(any(h['grid'] for h in histories),'fixed lines are not beat markers')
@@ -108,7 +108,8 @@ class WaveformTests(unittest.TestCase):
             self.assertEqual(u[n+'-magnify']['text'],'*~ 1.')
             self.assertEqual(u[n+'-initial-gain']['text'],'bang')
             self.assertEqual(u[n+'-gain']['saved_attribute_attributes']['valueof']['parameter_initial'],[1.])
-            self.assertEqual((u[n+'-gain']['minimum'],u[n+'-gain']['maximum']),(1.,8.))
+            a=u[n+'-gain']['saved_attribute_attributes']['valueof']
+            self.assertEqual((a['parameter_mmin'],a['parameter_mmax']),(1.,8.))
 
     def test_stereo_antiphase_and_right_only_still_visible(self):
         for left,right,expected in [([.2,-.3],[0,0],[.2,-.3]),([0,0],[.4,-.5],[.4,-.5]),

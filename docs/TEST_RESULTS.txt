@@ -125,6 +125,21 @@ test_running_host_readback_is_not_falsely_confirmed (test_stop_readback.StopRead
 test_stopped_host_readback_confirms_one_request (test_stop_readback.StopReadbackTests.test_stopped_host_readback_confirms_one_request) ... ok
 test_user_off_is_reported_as_cancelled (test_stop_readback.StopReadbackTests.test_user_off_is_reported_as_cancelled) ... ok
 test_zero_and_mismatched_readbacks_do_not_claim_readiness (test_stop_readback.StopReadbackTests.test_zero_and_mismatched_readbacks_do_not_claim_readiness) ... ok
+test_basic_and_advanced_pages_visible_bounds_and_no_hit_target_overlap (test_studio_ui.StudioTests.test_basic_and_advanced_pages_visible_bounds_and_no_hit_target_overlap) ... ok
+test_device_body_restores_saved_theme_before_monitor_is_opened (test_studio_ui.StudioTests.test_device_body_restores_saved_theme_before_monitor_is_opened) ... ok
+test_device_body_theme_follows_live_toggle_in_both_directions (test_studio_ui.StudioTests.test_device_body_theme_follows_live_toggle_in_both_directions) ... ok
+test_device_palette_outlet_is_local_and_cannot_reach_audio_or_actions (test_studio_ui.StudioTests.test_device_palette_outlet_is_local_and_cannot_reach_audio_or_actions) ... ok
+test_display_modules_have_no_path_to_core (test_studio_ui.StudioTests.test_display_modules_have_no_path_to_core) ... ok
+test_dsp_source_matches_published_rc33 (test_studio_ui.StudioTests.test_dsp_source_matches_published_rc33) ... ok
+test_impossible_tolerance_warning_updates_in_both_directions (test_studio_ui.StudioTests.test_impossible_tolerance_warning_updates_in_both_directions) ... ok
+test_level_raw_peak_threshold_and_overload_are_visual_only (test_studio_ui.StudioTests.test_level_raw_peak_threshold_and_overload_are_visual_only) ... ok
+test_repeated_ready_returns_basic_compact_without_rearming (test_studio_ui.StudioTests.test_repeated_ready_returns_basic_compact_without_rearming) ... ok
+test_sign_labels_clear_with_measurement_validity (test_studio_ui.StudioTests.test_sign_labels_clear_with_measurement_validity) ... ok
+test_text_and_semantic_colors_have_readable_contrast_in_both_themes (test_studio_ui.StudioTests.test_text_and_semantic_colors_have_readable_contrast_in_both_themes) ... ok
+test_theme_advanced_and_settings_never_change_audio_params_or_armed_stop (test_studio_ui.StudioTests.test_theme_advanced_and_settings_never_change_audio_params_or_armed_stop) ... ok
+test_theme_is_stored_only_and_silent_restore_preserves_all_values (test_studio_ui.StudioTests.test_theme_is_stored_only_and_silent_restore_preserves_all_values) ... ok
+test_theme_switch_recolors_current_status_without_new_engine_packet (test_studio_ui.StudioTests.test_theme_switch_recolors_current_status_without_new_engine_packet) ... ok
+test_zoom_unit_fields_keep_numeric_gain_range_restore_and_theme (test_studio_ui.StudioTests.test_zoom_unit_fields_keep_numeric_gain_range_restore_and_theme) ... ok
 test_display_gain_defaults_and_limits (test_waveforms.WaveformTests.test_display_gain_defaults_and_limits) ... ok
 test_embedded_engine_is_identical_to_confirmed_rc6 (test_waveforms.WaveformTests.test_embedded_engine_is_identical_to_confirmed_rc6) ... ok
 test_grid_pulses_follow_host_phase_for_each_grid_and_tempo (test_waveforms.WaveformTests.test_grid_pulses_follow_host_phase_for_each_grid_and_tempo) ... ok
@@ -140,6 +155,6 @@ test_stereo_antiphase_and_right_only_still_visible (test_waveforms.WaveformTests
 test_two_host_buses_and_five_outlet_routing_contract (test_waveforms.WaveformTests.test_two_host_buses_and_five_outlet_routing_contract) ... ok
 
 ----------------------------------------------------------------------
-Ran 140 tests in 1.212s
+Ran 155 tests in 3.565s
 
 OK

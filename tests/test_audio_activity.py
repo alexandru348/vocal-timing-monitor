@@ -36,17 +36,17 @@ class AudioActivityTests(unittest.TestCase):
         g.advance(200);g.emit('root/heartbeat-snapshot',(4410.,)) # same frozen sample
         g.advance(51)
         self.assertEqual(g.params['autostop'],0)
-        self.assertIn('FARA PROCESARE AUDIO',self.label(g,'state-text'))
-        self.assertIn('indisponibil',self.label(g,'clock-text'))
+        self.assertIn('Verifică motorul audio',self.label(g,'state-text'))
+        self.assertIn('Pornește redarea',self.label(g,'clock-text'))
         self.assertFalse(g.calls)
 
     def test_recovery_restores_state_even_if_engine_status_unchanged(self):
         g=self.ready();g.emit('root/snapshot-3',(3,))
-        self.assertIn('SYNC OK',self.label(g,'state-text'))
+        self.assertIn('Pregătit să te asculte',self.label(g,'state-text'))
         g.advance(251)
-        self.assertIn('FARA PROCESARE',self.label(g,'state-text'))
+        self.assertIn('Verifică motorul audio',self.label(g,'state-text'))
         g.emit('root/heartbeat-snapshot',(5000.,))
-        self.assertIn('SYNC OK',self.label(g,'state-text'))
+        self.assertIn('Pregătit să te asculte',self.label(g,'state-text'))
         self.assertIn('sincronizat',self.label(g,'clock-text'))
 
     def test_audio_loss_cancels_queued_stop(self):
@@ -65,13 +65,13 @@ class AudioActivityTests(unittest.TestCase):
 
     def test_actual_input_peak_messages_reach_ui(self):
         g=self.ready();g.emit('root/input-peak',(.1,))
-        self.assertEqual(self.label(g,'level-text'),'Intrare: -20.0 dB')
+        self.assertEqual(self.label(g,'level-text'),'Nivel: -20.0 dB')
         g.emit('root/input-peak',(.001,))
-        self.assertEqual(self.label(g,'level-text'),'Intrare: -60.0 dB')
+        self.assertEqual(self.label(g,'level-text'),'Nivel: -60.0 dB')
 
     def test_startup_without_audio_is_inactive(self):
         g=Graph();g.emit('root/load')
-        self.assertIn('FARA PROCESARE',self.label(g,'state-text'))
+        self.assertIn('Verifică motorul audio',self.label(g,'state-text'))
         self.assertFalse(g.calls)
 
     def test_restored_analysis_off_initial_zero_is_rendered_after_reopen(self):
@@ -83,7 +83,7 @@ class AudioActivityTests(unittest.TestCase):
         out=e.run(seconds=.02)
         self.assertEqual(int(out[-1,3]),0)
         g.emit('root/snapshot-3',(int(out[-1,3]),))
-        self.assertEqual(self.label(g,'state-text'),'ANALIZA OPRITA')
+        self.assertEqual(self.label(g,'state-text'),'Analiză oprită')
         self.assertEqual(g.state['root/popup/enabled']['value'],0)
         self.assertFalse(out[:,1].any())
         self.assertFalse(g.calls)

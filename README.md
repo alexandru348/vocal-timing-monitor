@@ -1,80 +1,83 @@
-# Vocal Timing Monitor — 0.7 RC3.3 Persistent
+# Vocal Timing Monitor — 0.8 RC1.3 Studio
 
-Max for Live audio device for visual attack timing feedback and optional automatic transport stop in Ableton Live. **RC3.3 saves controls with your Live Set and restores them when it reopens.** [Documentație în română](README_RO.md).
+Max for Live device with separate microphone/instrumental waveforms, grid timing feedback and optional automatic transport stop. [Documentație în română](README_RO.md).
 
-## Download
+**0.8 RC1.3 Studio — owner-tested release candidate, 3 November 2026.** The owner accepted the tested Windows / Ableton Live 12 workflow, including matching light themes, saved controls after full restart, actual recording/automatic stop with the clip retained, and saved-ON/reopened-OFF behavior. [Host results and limits](docs/HOST_VALIDATION.json). The earlier [0.7 RC3.3 release](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc3.3) remains available as a rollback point.
 
-Get `Vocal_Timing_Monitor_v0_7_RC3_3_Persistent.amxd` from [release v0.7-rc3.3](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc3.3), or from [dist](dist/). Requires Ableton Live with Max for Live available; this is an AMXD device, not a VST/AU. Runtime components are embedded. No Python or compiler is needed to use it. UI labels currently use Romanian.
+[Download the AMXD](https://github.com/alexandru348/vocal-timing-monitor/raw/refs/heads/main/dist/Vocal_Timing_Monitor_v0_8_RC1_3_Studio.amxd). No plugin rebuild or code change was made after owner acceptance; publication updates documentation only.
 
-The previous [v0.7-rc2 release](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.7-rc2) and its tag remain available as the original tested checkpoint.
+## Installation
 
-## Features
+Use `dist/Vocal_Timing_Monitor_v0_8_RC1_3_Studio.amxd`. Requires Ableton Live 12 with Max for Live and Max 8.6 or later. This is an AMXD, not VST/AU. Runtime components are embedded; Python and the build dependencies are development-only. UI text is Romanian.
 
-- Compact floating monitor with expandable settings, separate input/voice and instrumental waveforms, six seconds of history and grid markers.
-- Attack counter, signed deviation in milliseconds and color feedback against the selected Live grid (1/4, 1/8 or 1/16).
-- Adjustable detection, timing threshold and compensation; independent visual zoom for the two waves.
-- Optional Auto Stop stops the entire Live transport, including recording, while retaining the recorded clip.
-- Nine per-instance settings restored with the saved Live Set: analysis, grid, threshold, compensation, detection, both waveform zooms, instrumental source and channel.
+1. Make a separate copy of your Live Set. Retain the working RC3.3 device and its referenced file as a rollback point.
+2. In the copy, deactivate RC3.3 and load the new AMXD on the dedicated analysis track. Click **Deschide monitorul**. Keep one VTM analyzer active on that track.
+3. Analysis track: microphone input, Monitor In, Sends Only, all sends fully down. The active device outputs silence. Record on a separate track, retaining the routing/monitoring appropriate to your setup.
+4. Under **Setări → Instrumental**, select the instrumental track and **Post Mixer**. Enter preferred controls once for this fresh instance; a new instance does not copy another instance's values.
+5. Start playback with **Analiză activă** and **Oprire auto: OFF**. Check both waves and ordinary speech/silence detection before enabling automatic stop.
+6. **Ctrl+S saves controls and theme with the Live Set.** This does not periodically save the project to disk.
 
-## Setup
+## New interface
 
-1. Load the AMXD on a dedicated audio analysis track and click OPEN MONITOR.
-2. On that track select the microphone under Ext. In, the appropriate input and Monitor In. Set its output to Sends Only and all sends fully down. The active device outputs silence.
-3. In SETARI → SURSA INSTRUMENTALULUI, manually choose the instrumental track and Post Mixer. This feeds a separate input bus.
-4. Record on a separate audio track using the microphone input; arm it when recording. The tested laptop speaker setup uses Monitor Off on the recording track.
-5. Start playback with ANALIZA ON and AUTO STOP OFF. Check both waves, clock synchronization and speech detection. Then explicitly enable Auto Stop if wanted.
-6. **Save the Live Set with Ctrl+S.** Reopen that saved instance to restore its settings. This does not periodically save the project to disk. New instances start with factory defaults.
+- Compact 640 × 370 floating monitor, expanding to 640 × 760. Basic/advanced pages share the same space.
+- Always-visible light/dark theme button; theme stored per instance in the Set.
+- Prominent timing result with early/late explanation, readable state text and an additional symbol.
+- Basic settings: grid, timing tolerance, microphone detection and instrumental source.
+- Raw microphone peak meter and selected-threshold marker, including overload feedback. **A visual aid, not the detector's internal envelope.** Filtering, noise estimation and rearming also affect whether an attack is counted.
+- Advanced: compensation/calibration, waveform zoom and temporary diagnostics.
+- Existing Gen source, audio graph, routing and automatic-stop protocol retained. Theme/navigation send no audio-control or transport commands.
 
-Input numbers, detection sensitivity and compensation depend on your setup. Keep the microphone input below overload while speaking normally, then adjust DETECTIE to register speech without continuous unwanted triggers during silence. MARIRE only changes the drawing. Windows volume, microphone level and Live tempo are outside this device's saved controls.
+Images in `previews/` are approximate layout illustrations from generated geometry with synthetic waves and a substitute font. They are **not Max screenshots**. The owner accepted the tested native Windows layout; these illustrations themselves do not establish native rendering quality on other systems.
 
-## Timing and Auto Stop
+## Controls and interpretation
 
-Minus means early and plus means late, after compensation. Timing is measured against the nearest selected Live grid point. It does not identify syllables, match each sound to a drum hit or judge musical flow.
+Speak normally, keep the raw microphone input below overload and adjust **Prag de detecție (dB)** until speech counts while a short silence test stays stable. More negative values increase sensitivity. Microphone percentages depend on the setup. Waveform **Mărire vizuală** changes drawing only. Windows levels and Live tempo are outside the device's stored controls.
 
-At a 100 ms threshold: green below 45 ms absolute deviation, amber from 45 to below 100 ms, red at or above 100 ms. The general green boundary is `min(45 ms, threshold / 2)`. At 100 BPM the nearest-grid range is ±300 ms on 1/4, ±150 ms on 1/8 and ±75 ms on 1/16, so a 100 ms threshold cannot be reached on 1/16.
+Signed deviation is measured against the nearest selected Live grid point, after compensation. Negative means early; positive means late. It does not identify syllables, separate speech or judge musical flow. Compensation changes the reported number, not recorded audio or waveform placement.
 
-After synchronization, explicitly set AUTO STOP ON for an attempt. The first confirmed red event requests a stop of the **entire transport and recording**. Auto Stop disarms after its request. Reset, relevant parameter changes or sync loss may also disarm it. Diagnostics appear in SETARI. **Auto Stop always loads OFF, including when the project was saved with it ON.**
+At 100 ms tolerance: green below 45 ms absolute deviation, amber from 45 to below 100 ms, red at or above 100 ms. The general green boundary is `min(45 ms, tolerance / 2)`. At 100 BPM, nearest-grid range is ±300 ms on 1/4, ±150 ms on 1/8 and ±75 ms on 1/16. The UI warns when tolerance exceeds the possible deviation.
 
-## Persistence and updating
+After synchronization, explicitly enable **Oprire auto: ON** for each attempt. A confirmed red event requests a stop of the **entire Live transport, including recording**, retaining the clip. It disarms after the request; reset, relevant parameter changes or synchronization loss may also disarm it. It always loads **OFF**, even if saved ON. Theme/page changes preserve current stop intent.
 
-Source/channel selections are stored as exact labels and resolved against current routing lists; they are captured after a manual menu selection. If a source is missing, renamed or renumbered in its displayed label, reselect it and save. Counts, waveform history, action buttons, transport state and temporary diagnostics are not restored. See [persistence design](docs/PERSISTENCE.md).
+**Preia întârzierea** copies the last raw deviation on the 1/4 grid; use a known aligned reference impulse. **Test afișare** tests display messages without audio or an automatic-stop request.
 
-From RC2, enter your preferred settings once in the new instance; RC2 did not save them. Keep a copy of your project before replacing a device.
+Ten settings are stored: analysis, grid, tolerance, detection, compensation, two zooms, instrumental source/channel and theme. Exact confirmed routing labels are used; missing/renamed/renumbered labels require reselection. Counters, waves, diagnostics, action buttons and page selection are transient. [Persistence design](docs/PERSISTENCE.md).
 
-For the existing RC3.2 test project only, [compat](compat/) contains the same RC3.3 patch under the RC3_2 filename already referenced by the saved project. This preserves the existing instance. Do not rename or remove that referenced file in Explorer without updating the project's reference. New installations should use the canonical RC3_3 file in dist. The patch JSON is identical; container filename bytes and SHA-256 differ.
+## Validation
 
-## Validation and limitations
+**155 automated checks passed**: static/container checks, C++ arithmetic harness and generated-message/host stubs. They do not execute native Max. Approximate device/compact/basic/advanced illustrations in both themes showed no estimated text overflow; they are not native layout proof.
 
-On 2 November 2026, the owner tested RC3.3 in Ableton Live 12 Suite / Windows 11, 44.1 kHz, 100 BPM:
+New checks cover saved-theme replay, status repaint, raw-level/threshold feedback, contrast, layout bounds, view toggles without parameter/routing/stop side effects and impossible-tolerance warnings. DSP source is byte-identical to RC3.3. Parent audio/API graph retains its historical digest after explicitly normalizing the parameter registry, root UI copy, dedicated device-theme module and existing display initializer.
 
-- Full restart restored controls, including non-default analysis OFF, grid 1/8, threshold 80 ms, zoom 2/3 and instrumental source/Post Mixer. Initial OFF header was corrected.
-- Both waves, synchronized clock and ordinary speech attacks worked; the count stayed stable during silence in the short tested passage.
-- A separate vocal recording was retained after actual Auto Stop; Live reported `Ultimul Stop: oprire confirmata de Live`, then Auto Stop was OFF.
-- Saving with Auto Stop ON and reopening resulted in OFF, with other settings retained.
+[Automated results](docs/TEST_RESULTS.json) and [current host status](docs/HOST_VALIDATION.json) are separate. The archived [RC3.3 host report](docs/history/RC3_3_HOST_VALIDATION.json) applies to RC3.3 only.
 
-Final speech/recording tests used microphone level 70%, Windows speaker volume 15%, detection −26 dB, compensation +92.2 ms, grid 1/4, threshold 100 ms, zoom 1/1. These are **one laptop's test settings**, not universal defaults. Native tests used the in-place compatibility filename with the exact RC3.3 patch; the canonical filename container was verified offline. No private recordings or Live Sets are distributed.
-
-140 automated static/simulation checks passed. They exercise generated structure, a C++ arithmetic harness and message/host stubs; they do not execute Max. [Actual host evidence](docs/HOST_VALIDATION.json) is separate from [automated results](docs/TEST_RESULTS.json).
-
-- Keyboard clicks, room noise and speaker bleed can trigger the amplitude detector. It does not isolate speech or cancel acoustic echo.
-- Vocal timing compensation remains approximate. RC2 reference impulses measured +92.2 ms before compensation and owner-reported 0.00 ms after it; this does not establish precise speech timing.
-- Compensation changes the reported number, not the audio recording or waveform position.
-- CALIBREAZA copies the last raw deviation on the 1/4 grid. Use an aligned reference impulse; later noise can overwrite it.
-- TEST IMPULS exercises display messages without producing audio or requesting Auto Stop.
-- Other systems and audio configurations remain unverified. Closing the monitor hides its UI; the device remains active on its track.
+Other systems remain unverified. Room/keyboard noise and speaker bleed may trigger this amplitude detector. Vocal compensation remains approximate. Closing the monitor hides the UI; the device stays active. No private Live Sets, extracted diagnostic dumps, recordings or owner screenshots are included.
 
 ## Development
-
-Python 3, NumPy and a C++17 compiler are development-only dependencies:
 
 ```sh
 python3 -m pip install -r requirements-dev.txt
 python3 build.py
 python3 -m unittest discover -s tests -v
+python3 tools/render_studio_preview.py
 ```
 
-`build.py` embeds `src/vtm_engine.genexpr` and generates the Max patch and AMXD in dist. The container is generated programmatically, not via native Save/Freeze. The DSP source is byte-identical to RC2. Persistence changes initialization and state storage; RC3.3 also forwards the initial state zero to the status display. Audio and Live API paths retain regression coverage. `SHA256SUMS` verifies repository/source-package files; release `SHA256SUMS-ASSETS` verifies the downloadable release files. Historical engineering notes in docs/history are not current setup instructions.
+`build.py` and `studio_ui.py` generate native Max objects and the AMXD, embedding `src/vtm_engine.genexpr`. The container is generated programmatically, not through native Save/Freeze. The optional Pillow renderer uses a DejaVu Sans substitute font on Linux; preview images, Python and fonts are not runtime dependencies. Tests create temporary files under `tests/_generated/`.
+
+`SHA256SUMS` verifies package files; standalone downloads have separate `SHA256SUMS-ASSETS`. Notes in `docs/history/` describe earlier versions and are not current instructions.
 
 ## License
 
-Source code and the distributed AMXD are under the [MIT License](LICENSE). Copyright (c) 2026 alexandru348. Use, modification and redistribution, including commercial use, are permitted with the copyright/license notices retained. Provided without warranty. Separately supplied Ableton, Max and other third-party software retain their own licenses.
+Source and AMXD are under the [MIT License](LICENSE), Copyright (c) 2026 alexandru348. Commercial use, modification and redistribution are allowed with notices retained; provided without warranty. Third-party software retains its own license.
+
+## RC1.2 text and zoom fields
+
+The two waveform zoom controls use native live.numbox LCD fields with custom `%g×` units: 1×, 2×, 2.5×, up to 8×. The same Stored Only Float parameter names/IDs/ranges are retained. Their left outlets still send numeric multipliers only to waveform drawing, never to the detector or transport. The owner confirmed fractional editing and save/full application restart in RC1.2; RC1.3 subsequently confirmed the synchronized light device body, including restoration before the monitor opens.
+
+All displayed text uses the Windows Segoe UI system font with integer point sizes; small captions are enlarged and comment boxes have more vertical room. Other operating systems may substitute a font. No font is bundled. The preview uses DejaVu Sans as an approximation. This improves readability but cannot establish native text sharpness from an offline renderer. Max's global High DPI Rendering preference and Windows/application scaling can affect the result; see docs/TEXT_RENDERING.md. The device does not modify those preferences.
+
+## RC1.3 synchronized device theme
+
+The embedded device body now follows the monitor theme: background, title, descriptive text and open button, including its selected/hover text colors. A second local popup outlet carries only the existing theme value to native root-patcher palette messages. Startup replays that value even when the floating monitor has not been opened. There is no additional stored parameter, global send/receive or Live theme change. The title bar and outer frame remain owned by Ableton.
+
+RC1.2 monitor/layout and short untouched-silence observations remain archived with their original scope. In RC1.3, the owner accepted the corrected light device body and monitor, restored light body before opening the monitor, retained controls/source after full application restart, both waves during playback/recording, and actual automatic stop with the clip retained and confirmation from Live. The final restart test explicitly saved Auto Stop ON and reopened OFF while the other settings remained saved. See the current host report for limits; native dark-body restart, exhaustive combinations and sample-accurate stop timing are not claimed.

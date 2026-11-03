@@ -79,7 +79,7 @@ class StaticTests(unittest.TestCase):
         # Only display gain may process a signal in this UI. The analysis
         # engine and host Stop executor remain in the always-running parent.
         self.assertEqual([x['text'] for x in boxmap(popup).values()
-                          if '~' in x.get('text', '')], ['*~ 1.', '*~ 1.'])
+                          if x['maxclass']=='newobj' and '~' in x.get('text', '')], ['*~ 1.', '*~ 1.'])
         self.assertFalse(any(x.get('text') in ['gen~','live.object','plugout~'] for x in boxmap(popup).values()))
         self.assertIn((('pcontrol', 0), ('popup', 0)), edges(p))
         self.assertFalse(any(x.get('text', '').startswith(('mute', 'enable')) for x in boxmap(popup).values() if x['maxclass'] == 'message'))
@@ -173,7 +173,7 @@ class StaticTests(unittest.TestCase):
             width, height = p['rect'][2:]
             if name == 'root/popup':
                 # The collapsed viewport is 340px; settings expand to 620px.
-                height = 620
+                height = 760
             for b in boxmap(p).values():
                 if b.get('presentation'):
                     x, y, w, h = b['presentation_rect']

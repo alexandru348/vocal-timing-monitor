@@ -63,7 +63,7 @@ class SyntaxRegressionTests(unittest.TestCase):
         for level,expected in [(0,-100.),(.000001,-100.),(.1,-20.),(1.,0.)]:
             g.send('root/popup',('level',level))
             label=g.state['root/popup/level-text']['label'][0]
-            self.assertEqual(label,'Intrare: %.1f dB'%expected)
+            self.assertEqual(label,'Nivel: %.1f dB'%expected)
 
 
 if __name__=='__main__':unittest.main()

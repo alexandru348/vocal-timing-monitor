@@ -1,0 +1,32 @@
+{
+  "version": "0.7 RC3.3 Persistent",
+  "date": "2026-11-02",
+  "tests_run": 140,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "passed": true,
+  "python": "3.12.14",
+  "runtime": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "scope": [
+    "108 regression checks from RC2, with obsolete default/reset assertions updated for persistence",
+    "17 persistence checks: stored-only registration, simulated save/reopen, silent analysis restore, repeated initialization, calibration, per-instance isolation and Auto Stop off after reopen",
+    "Exact routing label capture and lookup, reordered/missing/delayed lists, manual override and bounded repeated feedback",
+    "Gen arithmetic via C++17 harness; generated message graph and host/API stubs",
+    "Engine source unchanged; parent audio/API graph matches historical digest after normalizing only new parameter registry and UI text",
+    "AMXD container parse, deterministic build, layout bounds and waveform isolation",
+    "Native-style saved_object_attributes for pattr Blob parameters; regression checks for actual RC3 numeric fallback schema; read-only ALS BlobSlot inspection with minimal synthetic XML fixtures",
+    "Native selected-index feedback is resolved through current index-to-label maps before storage; reverse label-to-index lookup on restore",
+    "Numeric selected-index rendering is silent; feedback-before-list order, reordered-option roundtrip and unknown-index rejection",
+    "Saved-state inspector compares label payload to actual saved bus labels; does not treat prefixed numeric strings alone as success",
+    "Actual RC3.2 typed-symbol saved payload is accepted by read-only inspector and replayed by message model; native reload subsequently confirmed in HOST_VALIDATION.json",
+    "Regression from actual OFF reload screenshots: initial Gen state 0 must reach display; DSP disabled state/count verified with harness"
+  ],
+  "not_executed": [
+    "The Linux automated runner does not load or compile native Max/Ableton; owner native tests are documented separately in HOST_VALIDATION.json",
+    "Other operating systems, host versions and audio setups have not been validated",
+    "The canonical RC3_3 container filename was not installed in the owner project: native tests used the compatibility RC3_2 filename containing the exact same RC3.3 patch JSON."
+  ],
+  "native_test_status": "PASSED IN OWNER SETUP — control persistence, initial display, playback/detection, recording, Auto Stop and armed-save/reopen-OFF",
+  "baseline_commit": "b2dedcc6d9a9fd18ad9ca8d004d650c2703272d7"
+}

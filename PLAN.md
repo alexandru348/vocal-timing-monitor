@@ -1,11 +1,11 @@
-# RC3.3 checkpoint — 2026-11-02
+# 0.8 RC1.3 Studio — owner acceptance, 2026-11-03
 
-Completed: nine per-instance Live Set controls, exact source/channel label capture/restore, initial analysis-OFF display correction. 140 automated checks passed. No Gen DSP source changes from tested RC2.
+Completed: compact/basic/advanced native monitor, readable system-font text, visual zoom fields with × units, saved theme, synchronized embedded device body, existing DSP/routing/automatic-stop protocol retained.
 
-Owner native tests passed: complete Ableton restarts retain controls including non-default OFF/1/8/80/zoom2-3 and routing; corrected OFF header; both waves and speech/silence behavior; separate track3 recording; actual Auto Stop with clip retained and host confirmation; saving Auto Stop ON then reopening OFF with other settings retained. Details and chronological failures/fixes in docs/HOST_VALIDATION.json. Native tests used same-patch compatibility filename RC3_2, canonical RC3_3 equivalence verified offline.
+Development validation: 155 automated checks passed. Gen source and the historical audio/API graph remain pinned; AMXD container is deterministic. Eight approximate illustrations have no estimated text overflow. These checks do not execute native Max.
 
-Final test settings: mic70%, speakers15%, detection-26 dB, offset92.2ms, grid1/4, threshold100ms, zoom1/1. These are setup-specific, not defaults.
+Owner acceptance: the RC1.3 light device body and monitor match; the saved light body restores before opening the monitor; controls/fractional zoom/compensation/instrumental selection survive full application restart; playback/recording show both waves; automatic stop retains the clip with Live confirmation. Final test saved Auto Stop ON and reopened OFF with themes and other controls retained. Current bounded results are in docs/HOST_VALIDATION.json. RC1.2 speech/silence and layout observations remain separately archived.
 
-Release: v0.7-rc3.3, MIT, canonical RC3_3 AMXD plus sources and optional in-place RC3_2 update. Preserve original v0.7-rc2 tag/commit/release. New instances have factory defaults; no automatic RC2 migration. Current owner project may retain compat filename safely; changing local filename is not required for GitHub release. Private .als/audio/screenshots are excluded.
+Publication: update main with RC1.3 source, documentation and the byte-identical tested AMXD. Preserve the 0.7 RC3.3 tag, checkpoint, release and old AMXD as rollback points. No private Live Sets, raw diagnostics, saved input/routing payloads, owner screenshots or recordings are included.
 
-Limits: speech timing is approximate; noise/speaker bleed can trigger. Other host/audio setups remain unverified. Saving controls requires saving Live Set; no periodic disk autosave. Future work should branch from the new checkpoint, with native validation for host-dependent changes.
+Future work is driven by new reports or requested features. No repeated owner test cycle is required for this documentation-only publication. Other hosts/OSes, native dark-body restart, exhaustive parameter combinations and sample-accurate stop timing are outside the completed acceptance scope.

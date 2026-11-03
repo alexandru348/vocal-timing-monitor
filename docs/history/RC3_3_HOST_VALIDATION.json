@@ -1,0 +1,46 @@
+{
+  "version": "0.7 RC3.3 Persistent",
+  "date": "2026-11-02",
+  "kind": "Public summary of owner-reported functional tests; no private project extraction",
+  "host": "Ableton Live 12 Suite / Windows 11 / 44.1 kHz / 100 BPM",
+  "checks": [
+    {
+      "test": "Per-instance controls across full application restart",
+      "result": "passed in owner setup",
+      "scope": "Changed analysis state, grid, threshold, compensation, detection and waveform zoom values retained"
+    },
+    {
+      "test": "Instrumental selection restoration",
+      "result": "passed in owner setup",
+      "scope": "Owner confirmed selection retained; private source names and input/routing metadata omitted"
+    },
+    {
+      "test": "Initial analysis-OFF display",
+      "result": "passed in owner setup",
+      "scope": "OFF button agrees with initial status after restart"
+    },
+    {
+      "test": "Playback, separate waveforms and ordinary speech detection",
+      "result": "passed in owner setup",
+      "scope": "Synchronized clock, both waves and attack counter; short speech/silence test count remained stable during silence"
+    },
+    {
+      "test": "Separate vocal recording and actual Auto Stop",
+      "result": "passed in owner setup",
+      "scope": "Transport and recording stopped, clip retained; host-confirmed stop message and Auto Stop OFF"
+    },
+    {
+      "test": "Save with Auto Stop explicitly ON, reopen application",
+      "result": "passed in owner setup",
+      "scope": "Owner clarified saved while ON; reopened OFF with other controls retained"
+    }
+  ],
+  "native_runtime": "Owner tested compatibility RC3_2 container filename with RC3.3 patch; canonical RC3_3 patch JSON equivalence verified offline",
+  "limits": [
+    "Single owner setup only",
+    "Short silence test does not establish general speaker-bleed rejection",
+    "Approximate vocal timing; no musical-flow evaluation",
+    "Other host versions, operating systems and audio setups unverified"
+  ],
+  "privacy": "Private .als files, their extracted diagnostics, saved routing/input payloads, private audio and screenshots are excluded."
+}

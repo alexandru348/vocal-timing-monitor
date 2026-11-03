@@ -1,0 +1,20 @@
+{
+  "version": "0.8 RC1.1 Studio",
+  "date": "2026-11-03",
+  "evidence": "Owner-supplied screenshots and feedback, summarized without private files",
+  "confirmed": [
+    "Compact lower spacing accepted in both themes",
+    "Basic settings shown in both themes",
+    "Advanced page shown in dark theme; controls readable and no overlap reported"
+  ],
+  "requested_next": [
+    "Multiplier units inside the editable zoom fields",
+    "Improve text readability and investigate native pixelation"
+  ],
+  "not_yet_tested": [
+    "Audio acceptance for 0.8",
+    "Theme/control native save/reopen",
+    "Real recording and Auto Stop for 0.8"
+  ],
+  "privacy": "No private screenshots, Live Sets, routing payloads or recordings included."
+}

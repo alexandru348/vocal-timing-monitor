@@ -68,7 +68,7 @@ class SingleClockTests(unittest.TestCase):
     def test_test_click_after_valid_audio_clock_has_measurement(self):
         p = Pipeline(); p.run(np.zeros(8820))
         p.g.click('test'); p.run(np.zeros(4410))
-        self.assertEqual(p.label('state-text'), 'TEST OK')
+        self.assertEqual(p.label('state-text'), 'Test de afișare')
         self.assertEqual(p.label('tests-text'), 'Teste: 1')
         self.assertEqual(p.label('count-text'), '0')
         self.assertNotEqual(p.label('delta-text'), '--')
@@ -90,10 +90,10 @@ class SingleClockTests(unittest.TestCase):
                 p = Pipeline(); p.run(audio, arm_at=.5 if arm else None)
                 self.assertEqual(p.label('count-text'), '8')
                 self.assertEqual(p.label('delta-text'), '+120.0 ms')
-                self.assertEqual(p.label('clock-text'), 'Ceas audio: sincronizat')
+                self.assertEqual(p.label('clock-text'), 'Redarea este sincronizată')
                 self.assertEqual(len(p.g.calls), int(arm))
                 self.assertEqual(p.g.params['autostop'],0)
-                self.assertEqual(p.label('state-text'),'OPRIRE...' if arm else 'OFF BEAT')
+                self.assertEqual(p.label('state-text'),'Se oprește redarea' if arm else 'Peste toleranță')
 
     def test_lifecycle_flags_do_not_block_read_only_analysis(self):
         # In this model DSP is deliberately still running. Real bypass normally
@@ -103,7 +103,7 @@ class SingleClockTests(unittest.TestCase):
             a = pulse_train(44100,1.5,[.6,1.2])
             p.run(a,arm_at=.1,flag_at=(.2,value,outlet))
             self.assertEqual(p.label('count-text'),'2')
-            self.assertEqual(p.label('state-text'),'ON BEAT')
+            self.assertEqual(p.label('state-text'),'Aproape de grilă')
             self.assertEqual(p.g.params['autostop'],1 if outlet==2 else 0)
             self.assertFalse(p.g.calls)
 
@@ -140,8 +140,8 @@ class SingleClockTests(unittest.TestCase):
         p.e.play=0
         p.run(pulse_train(44100,1.,[.2,.8]))
         self.assertEqual(p.label('count-text'),'0')
-        self.assertEqual(p.label('state-text'),'ASTEPT CEAS AUDIO')
-        self.assertIn('indisponibil',p.label('clock-text'))
+        self.assertEqual(p.label('state-text'),'Pornește redarea')
+        self.assertIn('Pornește redarea',p.label('clock-text'))
         self.assertEqual(p.g.params['autostop'],0)
         self.assertFalse(p.g.calls)
 

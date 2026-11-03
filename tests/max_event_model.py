@@ -71,6 +71,11 @@ class Graph:
         assert self.steps < 100000, 'message recursion'
         b = self.boxes[id]; s = self.state[id]; cls = b['maxclass']; text = b.get('text', '')
         msg = tuple(msg); head = msg[0] if msg else 'bang'
+        if cls in ['comment','panel','textbutton','number','flonum','umenu','multislider','live.scope~','live.numbox'] and head in ['bgcolor','bgfillcolor','activebgcolor','textcolor','textoncolor','bgoncolor','textovercolor','linecolor','activelinecolor','slidercolor','lcdbgcolor','lcdcolor','inactivelcdcolor','bordercolor','focusbordercolor']:
+            s.setdefault('attrs',{})[head]=msg[1:];return
+        if cls=='multislider':
+            if head=='setlist':s['value']=msg[1:]
+            return
         if cls in ['comment', 'panel']:
             if head == 'set': s['label'] = msg[1:]
             return
@@ -89,7 +94,7 @@ class Graph:
                                else a for a in atoms(part.strip()))
                 self.emit(id, output)
             return
-        if cls in ['textbutton', 'number', 'flonum', 'umenu']:
+        if cls in ['textbutton', 'number', 'flonum', 'umenu','live.numbox']:
             if cls == 'umenu':
                 if head=='clear':s['items']=[];return
                 if head=='append':s.setdefault('items',[]).append(msg[1]);return
@@ -101,7 +106,12 @@ class Graph:
                 head = 1-int(s.get('value',0)) if cls=='textbutton' else s.get('value',0)
             if not isinstance(head, (float, int)): return
             if cls == 'textbutton': head = int(head != 0)
-            else: head = max(b.get('minimum', -1e12), min(b.get('maximum', 1e12), head))
+            else:
+                a=b.get('saved_attribute_attributes',{}).get('valueof',{})
+                low=a.get('parameter_mmin',-1e12) if cls=='live.numbox' else b.get('minimum',-1e12)
+                high=a.get('parameter_mmax',1e12) if cls=='live.numbox' else b.get('maximum',1e12)
+                head=max(low,min(high,head))
+                if cls=='live.numbox':self.emit(id,((head-low)/(high-low),),1)
             s['value'] = head; self.emit(id, (head,)); return
         words = text.split(); op = words[0] if words else ''
         if id == 'root/engine':
@@ -109,7 +119,13 @@ class Graph:
         if op == 'p':
             self.send(id+'/in', msg); return
         if op == 'inlet': self.emit(id, msg); return
-        if op == 'outlet': self.emit(id.rsplit('/', 1)[0], msg); return
+        if op == 'outlet':
+            parent = id.rsplit('/',1)[0]
+            outlets = sorted((k for k,v in self.boxes.items()
+                              if k.rsplit('/',1)[0] == parent
+                              and v.get('text') == 'outlet'),
+                             key=lambda k:self.boxes[k]['patching_rect'][0])
+            self.emit(parent, msg, outlets.index(id)); return
         if op == 'prepend': self.emit(id, (words[1],)+msg); return
         if op == 'tosymbol': self.emit(id,(' '.join(map(str,msg)),)); return
         if op == 'zl' and words[1:] == ['rev']:
@@ -191,6 +207,8 @@ class Graph:
         if op == 'unpack':
             for i in reversed(range(min(len(msg),len(words)-1))): self.emit(id,(msg[i],),i)
             return
+        if op=='clip':
+            self.emit(id,(max(float(words[1]),min(float(words[2]),head)),));return
         if op == 'maximum':
             if inlet==1: s['floor']=head; return
             self.emit(id,(max(head,s.get('floor',float(words[1]))),)); return
@@ -242,8 +260,16 @@ class Graph:
         if op == 'thispatcher':
             # Models the documented window protocol only, not a native GUI.
             s.setdefault('commands',[]).append(msg)
-            if msg==('window','getsize'):
-                self.emit(id,('window','size')+s.get('rect',(60,50,660,390)))
+            if msg[:2]==('script','send'):
+                scope=id.rsplit('/',1)[0]+'/'
+                target=next(k for k,v in self.boxes.items() if k.startswith(scope) and v.get('varname')==msg[2])
+                self.send(target,msg[3:])
+            elif msg[:2] in [('script','show'),('script','hide')]:
+                scope=id.rsplit('/',1)[0]+'/'
+                target=next(k for k,v in self.boxes.items() if k.startswith(scope) and v.get('varname')==msg[2])
+                self.state[target]['hidden']=(msg[1]=='hide')
+            elif msg==('window','getsize'):
+                self.emit(id,('window','size')+s.get('rect',(60,50,700,410)))
             elif msg[:2]==('window','size'):
                 s['rect']=tuple(msg[2:])
             return

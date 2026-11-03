@@ -107,7 +107,7 @@ cu zero impulsuri în noul monitor. Nu dovedește valorile numerice ale ieșiril
 
 **Nu au fost accesibile transcrierile integrale ale celor trei conversații.**
 Instrumentul de recuperare a istoricului a furnizat fragmente și rezumate, nu
-mesajele integrale. Nu este disponibil Set-ul real `prima_piesa_calibrare_TEST.als`,
+mesajele integrale. Nu este disponibil Set-ul real `example_calibration_TEST.als`,
 dispozitivul v0.4.1 modificat manual pe calculator, proiectul Max salvat local după
 acele modificări sau un jurnal complet cu valorile plugsync~ la momentul blocajului.
 Conținutul acestor materiale nu a fost presupus.

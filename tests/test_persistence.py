@@ -24,14 +24,14 @@ class PersistenceTests(unittest.TestCase):
     def test_all_nine_saved_parameters_are_registered_stored_only(self):
         root=PATCH['patcher']; ui=boxmap(boxmap(root)['popup']['patcher'])
         registry={k:v for k,v in root['parameters'].items() if k!='inherited_shortname'}
-        self.assertEqual(len(registry),9)
+        self.assertEqual(len(registry),10)
         for path,value in registry.items():
             b=ui[path.split('::')[1]]; a=b['saved_attribute_attributes']['valueof']
             self.assertEqual(parameter_enabled(b),1)
             self.assertEqual(a['parameter_invisible'],1)  # Stored Only
             self.assertEqual(value[:2],[a['parameter_longname']]*2)
             self.assertTrue(b['varname'].startswith('vtm_'))
-        self.assertEqual(len({b['varname'] for b in ui.values() if parameter_enabled(b)}),9)
+        self.assertEqual(len({b['varname'] for b in ui.values() if parameter_enabled(b)}),10)
 
     def test_pattr_blob_attributes_use_native_wrapped_object_serialization(self):
         # Regression from the actual RC3 .als: the top-level flag + text
@@ -223,7 +223,7 @@ class PersistenceTests(unittest.TestCase):
             attrs=ui['persist-'+kind]['saved_attribute_attributes']['valueof']
             self.assertEqual(attrs['parameter_type'],3)
         self.assertNotIn('pattrstorage',str(ui))
-        self.assertEqual(len(Graph().saved_parameters()),9)
+        self.assertEqual(len(Graph().saved_parameters()),10)
 
 
 if __name__=='__main__':unittest.main()

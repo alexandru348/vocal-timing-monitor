@@ -16,22 +16,28 @@ class CompactTests(unittest.TestCase):
 
     def test_primary_workflow_fits_collapsed_window(self):
         p = self.ui(); b = boxmap(p)
-        self.assertEqual(p['rect'][2:], [600., 340.])
-        self.assertEqual(p['openrect'][2:], [600., 340.])
-        self.assertLess(600*340/(900*720), .32)
+        self.assertEqual(p['rect'][2:], [640., 370.])
+        self.assertEqual(p['openrect'][2:], [640., 370.])
+        self.assertLess(640*370/(900*720), .37)
         for id in ['voice-scope','beat-scope','grid-scope','state-text','delta-text',
                    'autostop','enabled','reset','count-text','settings']:
             x,y,w,h = b[id]['presentation_rect']
-            self.assertTrue(0 <= x and x+w <= 600 and 0 <= y and y+h <= 340, id)
+            self.assertTrue(0 <= x and x+w <= 640 and 0 <= y and y+h <= 370, id)
+        # Native regression: time labels need room above the lower border.
+        for id in ('time-old','time-mid','time-now'):
+            x,y,w,h = b[id]['presentation_rect']
+            self.assertGreaterEqual(370 - (y+h), 12, id)
+        for id in ('settings-heading','advanced'):
+            self.assertGreaterEqual(b[id]['presentation_rect'][1], 370, id)
         for id in ['beat-type','beat-channel','grid-ui','redms','offsetms','gatedb',
                    'voice-gain','beat-gain','calibrate','test','api-text']:
             x,y,w,h = b[id]['presentation_rect']
-            self.assertTrue(y >= 350 and x+w <= 600 and y+h <= 620, id)
+            self.assertTrue(y >= 410 and x+w <= 640 and y+h <= 760, id)
 
     def test_interactive_controls_do_not_overlap_in_either_view(self):
         controls = [(id,b['presentation_rect']) for id,b in boxmap(self.ui()).items()
-                    if b.get('presentation') and b['maxclass'] in
-                    ['textbutton','number','flonum','umenu']]
+                    if b.get('presentation') and not b.get('hidden') and b['maxclass'] in
+                    ['textbutton','number','flonum','umenu','live.numbox']]
         for i,(aid,(ax,ay,aw,ah)) in enumerate(controls):
             for bid,(bx,by,bw,bh) in controls[i+1:]:
                 self.assertFalse(ax < bx+bw and bx < ax+aw and ay < by+bh and by < ay+ah,
@@ -41,11 +47,11 @@ class CompactTests(unittest.TestCase):
         for left,top in [(60,50),(700,120),(-590,240)]:
             g = Graph(); g.initialize()
             window = g.state['root/popup/window']
-            window['rect']=(left,top,left+600,top+340)
+            window['rect']=(left,top,left+640,top+370)
             g.click('settings')
-            self.assertEqual(window['rect'],(left,top,left+600,top+620))
+            self.assertEqual(window['rect'],(left,top,left+640,top+760))
             g.click('settings')
-            self.assertEqual(window['rect'],(left,top,left+600,top+340))
+            self.assertEqual(window['rect'],(left,top,left+640,top+370))
             self.assertEqual(g.openings,0)
 
     def test_settings_keep_source_gains_analysis_and_stop_intent(self):
@@ -79,7 +85,7 @@ class CompactTests(unittest.TestCase):
 
     def test_renamed_timing_bands_do_not_hide_moderate_deviation(self):
         g=Graph(); g.initialize()
-        for state,label in [(4,'ON BEAT'),(5,'USOR DECALAT'),(6,'OFF BEAT'),(9,'OPRIRE...')]:
+        for state,label in [(4,'Aproape de grilă'),(5,'Decalaj moderat'),(6,'Peste toleranță'),(9,'Se oprește redarea')]:
             g.send('root/popup',('state',state))
             self.assertEqual(g.state['root/popup/state-text']['label'],tuple(label.split()))
         self.assertFalse(g.calls)
@@ -89,14 +95,36 @@ class CompactTests(unittest.TestCase):
         # popup contents: audio, lifecycle, API and all parent patchlines.
         p = json.loads(json.dumps(PATCH['patcher']))
         p.pop('digest',None)
-        # RC3 adds only a parameter registry and updates this root UI note.
-        # Normalize those documented metadata changes, retaining RC1 graph hash.
+        # Normalize the parameter registry and explicitly listed root UI copy
+        # changes only. All audio/API objects and every parent edge stay pinned.
         p['parameters'] = {'inherited_shortname': 1}
+        # Remove only the explicitly named display-only module. Keep every
+        # original audio/control/Live API object and edge in the pinned digest.
+        device_ui={w['box']['id'] for w in p['boxes'] if w['box']['id'].startswith('ui-device-')}
+        p['boxes']=[w for w in p['boxes'] if w['box']['id'] not in device_ui]
+        p['lines']=[w for w in p['lines'] if w['patchline']['source'][0] not in device_ui
+                    and w['patchline']['destination'][0] not in device_ui]
         for wrapped in p['boxes']:
             b=wrapped['box']
-            if b['id']=='popup':b.pop('patcher')
+            # RC1.2 changes only font metadata on the five root UI objects.
+            if b['id'] in ('title','version','open','note1','note2'):
+                b.pop('fontname',None)
+                b.pop('varname',None)
+                b['textcolor']=[0.29,0.79,0.91,1.] if b['id'] in ('title','open') else [0.59,0.67,0.77,1.]
+            if b['id']=='open':
+                b.update(bgcolor=[.12,.17,.22,1.],bgoncolor=[.12,.17,.22,1.],textoncolor=[.91,.94,.98,1.])
+                b.pop('textovercolor',None);b.pop('usetextovercolor',None)
+            if b['id']=='title':
+                b['fontsize']=17.
+                b['presentation_rect'][3]=26.
+            if b['id']=='popup':
+                b.pop('patcher');b['numoutlets']=1
             if b['id']=='version':b.pop('text')
-            if b['id']=='note1':b['text']='ANALIZA ON / AUTO STOP OFF la incarcare'
+            if b['id']=='note1':
+                b['text']='ANALIZA ON / AUTO STOP OFF la incarcare'
+                b['fontsize']=11.
+            if b['id']=='note2':b['text']='Iesire muta cat timp dispozitivul este activ.'
+            if b['id']=='open':b['text']=b['texton']='OPEN MONITOR'
             # RC3.3 permits the initial OFF (zero) status to reach the UI;
             # normalize this display-only initializer, not any audio/API edge.
             if b['id']=='state-change':b['text']='change'
