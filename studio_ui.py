@@ -74,7 +74,7 @@ def apply_studio_ui(u, parameter_attributes):
     for obj in b.values():
         obj.pop('presentation', None)
         obj.pop('presentation_rect', None)
-    u.p.update(title='Vocal Timing Monitor | 0.8 RC1.3 Studio',
+    u.p.update(title='Vocal Timing Monitor | 0.9 RC1.6 Studio',
                rect=[60., 50., WIDTH, COMPACT_HEIGHT],
                openrect=[60., 50., WIDTH, COMPACT_HEIGHT], bgcolor=PALETTES[0]['bg'])
     b['window-config']['text'] = ('window flags float nogrow nozoom, '
@@ -115,7 +115,7 @@ def apply_studio_ui(u, parameter_attributes):
     u.p['boxes'].remove(next(w for w in u.p['boxes'] if w['box']['id']=='studio-canvas'))
     u.p['boxes'].insert(0, {'box': canvas})
     place('title', [16, 10, 350, 27], 18, 'Vocal Timing Monitor')
-    place('version', [17, 37, 320, 14], 10, '0.8 RC1.3  ·  reper ritmic în timp real')
+    place('version', [17, 37, 320, 14], 10, '0.9 RC1.6  ·  reper ritmic în timp real')
     button('theme', 'Temă: întunecată', [386, 12, 144, 30], 'Temă: luminoasă')
     b['theme'].update(parameter_enable=1, parameter_mappable=0, varname='vtm_theme',
                       saved_attribute_attributes=parameter_attributes('VTM Theme', 0, 1, 0, 1, 12),

@@ -1,0 +1,13 @@
+{
+  "version": "0.9 RC1.2 Studio",
+  "date": "2026-11-04",
+  "status": "NATIVE DIAGNOSTICS CONFIRMED \u2014 CALIBRATION REJECTED",
+  "observations": [
+    "Intro and full-beat trials rendered detailed insufficient-correlation messages.",
+    "Intro window lags nearly agreed; full-beat independent window lags diverged beyond the acceptance threshold.",
+    "Correlation checks failed; previous compensation remained unchanged.",
+    "Repeated calibration clicks were reported; each begins a new capture without requiring reset.",
+    "Physical cause and acoustic accuracy are not established by screenshots."
+  ],
+  "privacy": "Sanitized functional observations only; no owner audio, Set, raw diagnostic dump, routing payload or screenshots."
+}

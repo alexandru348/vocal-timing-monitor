@@ -1,0 +1,12 @@
+{
+  "version": "0.9 RC1.1 Studio",
+  "date": "2026-11-04",
+  "status": "NATIVE MEASUREMENT REACHED REJECTION \u2014 NO ACCEPTED ESTIMATE",
+  "observations": [
+    "Playback synchronized and both signal histories visible.",
+    "Calibration ended with full inconclusive-reference message; compensation retained at 0 ms.",
+    "Same outcome reported for intro and full-beat passage after quiet playback.",
+    "No rejection metrics available in RC1.1; reason and acoustic accuracy cannot be inferred."
+  ],
+  "privacy": "Sanitized functional observations only; no private audio, Set, screenshot or raw routing payload."
+}

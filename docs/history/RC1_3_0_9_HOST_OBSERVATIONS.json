@@ -1,0 +1,12 @@
+{
+  "version": "0.9 RC1.3 Studio",
+  "date": "2026-11-04",
+  "status": "NATIVE SINGLE-PATH MATCH CONFIRMED \u2014 NO APPLIED CALIBRATION",
+  "observations": [
+    "Both intro and full-beat trials reported strong single-path correlations and a similar candidate delay.",
+    "Only one path qualified in each trial; cross-band minimum blocked compensation.",
+    "Independent windows within that qualified path closely agreed; compensation stayed unchanged.",
+    "No successful automatic compensation or acoustic accuracy validation has been demonstrated."
+  ],
+  "privacy": "Sanitized functional observations only; no private audio, Set, diagnostic dump, raw routing or owner screenshots."
+}

@@ -35,6 +35,7 @@ class Graph:
         self.id = 0; self.steps = 0
         self.now = 0; self.timers = {}
         self.auto_api_readback=True; self.simulate_stop_effect=True; self.playing=True
+        self.recording=0; self.session_record=0; self.session_record_status=0
         self._flatten(PATCH['patcher'], 'root')
 
     def _flatten(self, patch, prefix):
@@ -89,7 +90,8 @@ class Graph:
                 s['text'] = msg[1:]; return
             if 'text' in s:
                 self.emit(id, s['text']); return
-            for part in text.split(','):
+            for part in re.split(r'(?<!\\),',text):
+                part=part.replace('\\,',',').replace('\\;',';').replace('\\\\','\\')
                 output = tuple(msg[int(a[1:])-1] if isinstance(a,str) and re.fullmatch(r'\$[1-9]',a)
                                else a for a in atoms(part.strip()))
                 self.emit(id, output)
@@ -116,6 +118,18 @@ class Graph:
         words = text.split(); op = words[0] if words else ''
         if id == 'root/engine':
             self.params[head] = msg[1] if len(msg)>1 else None; return
+        if op == 'live.observer':
+            # Model the documented positional argument/property message only.
+            # RC1 incorrectly accepted an undocumented @property constructor.
+            if len(words)>1 and not words[1].startswith('@'):s.setdefault('property',words[1])
+            if inlet==1:
+                assert head=='id'
+                s['id']=msg[1]
+            elif head=='property':s['property']=msg[1]
+            if s.get('id',0)>0 and s.get('property') and self.auto_api_readback:
+                prop=s['property']
+                self.deferred.append((id,(self.recording if prop=='record_mode' else int(self.playing) if prop=='is_playing' else getattr(self,prop),)))
+            return
         if op == 'p':
             self.send(id+'/in', msg); return
         if op == 'inlet': self.emit(id, msg); return
@@ -128,6 +142,16 @@ class Graph:
             self.emit(parent, msg, outlets.index(id)); return
         if op == 'prepend': self.emit(id, (words[1],)+msg); return
         if op == 'tosymbol': self.emit(id,(' '.join(map(str,msg)),)); return
+        if op == 'zl' and words[1:] == ['change']:
+            if inlet==1:s['list']=msg;return
+            changed=msg!=s.get('list')
+            self.emit(id,(int(changed),),1)
+            if changed:s['list']=msg;self.emit(id,msg)
+            return
+        if op == 'zl' and words[1:] == ['reg']:
+            if head!='bang':s['list']=msg
+            if inlet==0:self.emit(id,s.get('list',()))
+            return
         if op == 'zl' and words[1:] == ['rev']:
             self.emit(id,tuple(reversed(msg)));return
         if op == 'pattr':
@@ -236,11 +260,19 @@ class Graph:
             assert '?' not in expression, 'Max expr does not accept C ternary syntax'
             expression=re.sub(r'\$[if](\d)',lambda m:str(vals[int(m[1])-1]),expression)
             expression=expression.replace('&&',' and ').replace('||',' or ')
+            expression=re.sub(r'!(?!=)',' not ',expression)
             value=eval(expression,{'__builtins__':{},'exp':math.exp,'log10':math.log10})
             self.emit(id,(int(value) if isinstance(value,bool) else value,)); return
         if op == 'sprintf':
             # Formatting only; no Max font or locale claim.
-            fmt=text[8:].replace('%ld','%d'); self.emit(id,(fmt % head,)); return
+            fmt=text[8:].replace('%ld','%d')
+            if fmt.startswith('symout '):fmt=fmt[7:]
+            count=len(re.findall(r'%(?!%)[^a-zA-Z]*[a-zA-Z]',fmt))
+            vals=s.setdefault('values',[0]*count)
+            for i,value in enumerate(msg):
+                if inlet+i<count:vals[inlet+i]=value
+            if inlet==0:self.emit(id,(fmt % tuple(vals),))
+            return
         if op == 'live.object':
             # Explicit simulation: numeric binding + deferred readback, no host.
             if inlet==1:

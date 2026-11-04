@@ -111,7 +111,10 @@ class PersistenceTests(unittest.TestCase):
 
     def test_calibration_updates_the_persistent_compensation(self):
         g=Graph();g.initialize()
-        g.send('root/popup',('count',8));g.send('root/popup',('raw',92.2));g.click('calibrate')
+        g.click('calibrate')
+        token=g.state['root/lat-request-counter']['value']
+        g.emit('root/lat-snapshot-1',(92.2,));g.emit('root/lat-snapshot-2',(.97,))
+        g.emit('root/lat-snapshot-4',(token,));g.emit('root/lat-snapshot-0',(3,));g.drain()
         self.assertEqual(g.saved_parameters()['VTM Compensation ms'],92.2)
 
     def test_routing_capture_uses_confirmed_labels_not_menu_indices(self):

@@ -1,0 +1,12 @@
+{
+  "version": "0.9 RC1 Studio",
+  "date": "2026-11-04",
+  "status": "NATIVE CALIBRATION STARTUP BLOCK REPORTED",
+  "method": "Owner screenshots and report; private files excluded",
+  "confirmed": [
+    "Candidate loaded and monitor/device UI visible",
+    "Playback synchronized with microphone and instrumental waves present"
+  ],
+  "reported_failure": "Calibration did not update the compensation; a generic playback instruction remained despite active playback. Exact failed recording/lifecycle guard was not exposed in RC1.",
+  "privacy": "Sanitized functional outcomes only; no private Sets, routing/input payloads, audio or screenshots."
+}

@@ -1,0 +1,518 @@
+// Acoustic reference calibration. It never learns latency from vocal grid errors.
+// in1/2: microphone; in3/4: selected digital instrumental; in5: host phase.
+// Data is instance-local and overwritten fully before it is read.
+Param requestseq(0);
+Param permit(0);
+Param cancelseq(0);
+Param cancelreason(0);
+Param guardreason(0);
+Data micdata(14336);
+Data refdata(14336);
+Data scores(801);
+Data bandinfo(40);
+History lastrequest(0);
+History lastcancel(0);
+History lastsr(0);
+History prevphase(0);
+History validrun(0);
+History clocklocked(0);
+History clockbad(0);
+History clockinc(0);
+History stage(0);
+History state(0);
+History clock(0);
+History ticks(0);
+History count(0);
+History msum(0);
+History rsum(0);
+History menv(0);
+History renv(0);
+History mlprev(0);
+History mrprev(0);
+History rlprev(0);
+History rrprev(0);
+History mlhp(0);
+History mrhp(0);
+History rlhp(0);
+History rrhp(0);
+History lagindex(0);
+History pos(0);
+History sx(0);
+History sy(0);
+History sxx(0);
+History syy(0);
+History sxy(0);
+History tx(0);
+History ty(0);
+History txx(0);
+History tyy(0);
+History txy(0);
+History best(-1);
+History bestlag(0);
+History besta(-1);
+History bestb(-1);
+History laga(0);
+History lagb(0);
+History runner(-1);
+History scan(0);
+History resultms(0);
+History quality(0);
+History rejection(0);
+History refviable(0);
+History micviable(0);
+History bandindex(0);
+History confirmationround(0);
+History anchorlag(0);
+History anchorband(0);
+History anchorquality(0);
+History diagnosticlag(0);
+History diagnostica(0);
+History diagnosticb(0);
+History diagnosticmargin(0);
+History diagnosticdiff(0);
+History confirmedbands(0);
+History bandspread(0);
+History b1mlprev(0);
+History b1mlhp1(0);
+History b1mlhp2(0);
+History b1mllp1(0);
+History b1mllp2(0);
+History b1mrprev(0);
+History b1mrhp1(0);
+History b1mrhp2(0);
+History b1mrlp1(0);
+History b1mrlp2(0);
+History b1rlprev(0);
+History b1rlhp1(0);
+History b1rlhp2(0);
+History b1rllp1(0);
+History b1rllp2(0);
+History b1rrprev(0);
+History b1rrhp1(0);
+History b1rrhp2(0);
+History b1rrlp1(0);
+History b1rrlp2(0);
+History b1menv(0);
+History b1renv(0);
+History b1msum(0);
+History b1rsum(0);
+History b2mlprev(0);
+History b2mlhp1(0);
+History b2mlhp2(0);
+History b2mllp1(0);
+History b2mllp2(0);
+History b2mrprev(0);
+History b2mrhp1(0);
+History b2mrhp2(0);
+History b2mrlp1(0);
+History b2mrlp2(0);
+History b2rlprev(0);
+History b2rlhp1(0);
+History b2rlhp2(0);
+History b2rllp1(0);
+History b2rllp2(0);
+History b2rrprev(0);
+History b2rrhp1(0);
+History b2rrhp2(0);
+History b2rrlp1(0);
+History b2rrlp2(0);
+History b2menv(0);
+History b2renv(0);
+History b2msum(0);
+History b2rsum(0);
+History b3mlprev(0);
+History b3mlhp1(0);
+History b3mlhp2(0);
+History b3mllp1(0);
+History b3mllp2(0);
+History b3mrprev(0);
+History b3mrhp1(0);
+History b3mrhp2(0);
+History b3mrlp1(0);
+History b3mrlp2(0);
+History b3rlprev(0);
+History b3rlhp1(0);
+History b3rlhp2(0);
+History b3rllp1(0);
+History b3rllp2(0);
+History b3rrprev(0);
+History b3rrhp1(0);
+History b3rrhp2(0);
+History b3rrlp1(0);
+History b3rrlp2(0);
+History b3menv(0);
+History b3renv(0);
+History b3msum(0);
+History b3rsum(0);
+
+
+phase = clamp(in5, 0, 1);
+pd = phase - prevphase;
+inc = pd < -0.5 ? pd + 1 : pd;
+incok = (inc >= 19.8 / (60 * samplerate)) && (inc <= 404 / (60 * samplerate));
+nv = incok ? min(validrun + 1, samplerate) : 0;
+// Calibration timestamps use audio sample counts, not beat phase. Require
+// initial lock, but tolerate <2 ms of invalid phase increments after lock.
+// A large phase discontinuity still cancels immediately.
+nclockbad = incok ? 0 : min(clockbad + 1, samplerate);
+nclockinc = incok ? (clockinc > 0 ? clockinc + (inc - clockinc) / (samplerate * 0.1) : inc) : clockinc;
+jumpthreshold = max(clockinc, 19.8 / (60 * samplerate)) * samplerate * 0.002;
+hardjump = (clocklocked > 0) && (abs(inc) > jumpthreshold);
+nclocklocked = (clocklocked > 0) || (nv >= samplerate * 0.010);
+if (hardjump || (nclockbad >= samplerate * 0.002)) { nclocklocked = 0; }
+synced = nclocklocked > 0;
+ns = stage;
+nst = state;
+nc = clock;
+nt = ticks;
+nn = count;
+nm = msum;
+nr = rsum;
+li = lagindex;
+pp = pos;
+ax = sx; ay = sy; axx = sxx; ayy = syy; axy = sxy;
+bx = tx; by = ty; bxx = txx; byy = tyy; bxy = txy;
+nbest = best; nlag = bestlag;
+na = besta; nb = bestb; nla = laga; nlb = lagb;
+nrunner = runner; nscan = scan;
+nresult = resultms;
+nquality = quality;
+nreject = rejection;
+nrefviable = refviable;
+nmicviable = micviable;
+nbi = bandindex;
+nround = confirmationround; nanchorlag = anchorlag; nanchorband = anchorband; nanchorquality = anchorquality;
+ndlag = diagnosticlag; nda = diagnostica; ndb = diagnosticb;
+ndmargin = diagnosticmargin; nddiff = diagnosticdiff;
+nconfirmed = confirmedbands; nspread = bandspread;
+
+// Matched 65 Hz high-pass and 4 ms energy envelopes on both reference paths.
+hp = exp(-6.28318530718 * 65 / samplerate);
+am = in1 - mlprev + hp * mlhp;
+bm = in2 - mrprev + hp * mrhp;
+ar = in3 - rlprev + hp * rlhp;
+br = in4 - rrprev + hp * rrhp;
+coef = exp(-1 / (samplerate * 0.004));
+me = max(abs(am), abs(bm)) + coef * (menv - max(abs(am), abs(bm)));
+re = max(abs(ar), abs(br)) + coef * (renv - max(abs(ar), abs(br)));
+
+// Three matched, overlapping bands reduce dependence on broad spectral balance.
+// Each has cascaded first-order high-pass and low-pass stages on both paths.
+b1hp = exp(-6.28318530718 * 250 / samplerate);
+b1lp = exp(-6.28318530718 * 700 / samplerate);
+b1mlh1 = in1 - b1mlprev + b1hp * b1mlhp1;
+b1mlh2 = b1mlh1 - b1mlhp1 + b1hp * b1mlhp2;
+b1mll1 = (1 - b1lp) * b1mlh2 + b1lp * b1mllp1;
+b1mll2 = (1 - b1lp) * b1mll1 + b1lp * b1mllp2;
+b1mrh1 = in2 - b1mrprev + b1hp * b1mrhp1;
+b1mrh2 = b1mrh1 - b1mrhp1 + b1hp * b1mrhp2;
+b1mrl1 = (1 - b1lp) * b1mrh2 + b1lp * b1mrlp1;
+b1mrl2 = (1 - b1lp) * b1mrl1 + b1lp * b1mrlp2;
+b1rlh1 = in3 - b1rlprev + b1hp * b1rlhp1;
+b1rlh2 = b1rlh1 - b1rlhp1 + b1hp * b1rlhp2;
+b1rll1 = (1 - b1lp) * b1rlh2 + b1lp * b1rllp1;
+b1rll2 = (1 - b1lp) * b1rll1 + b1lp * b1rllp2;
+b1rrh1 = in4 - b1rrprev + b1hp * b1rrhp1;
+b1rrh2 = b1rrh1 - b1rrhp1 + b1hp * b1rrhp2;
+b1rrl1 = (1 - b1lp) * b1rrh2 + b1lp * b1rrlp1;
+b1rrl2 = (1 - b1lp) * b1rrl1 + b1lp * b1rrlp2;
+b1me = max(abs(b1mll2), abs(b1mrl2)) + coef * (b1menv - max(abs(b1mll2), abs(b1mrl2)));
+b1re = max(abs(b1rll2), abs(b1rrl2)) + coef * (b1renv - max(abs(b1rll2), abs(b1rrl2)));
+b1nm = b1msum; b1nr = b1rsum;
+b2hp = exp(-6.28318530718 * 700 / samplerate);
+b2lp = exp(-6.28318530718 * 2000 / samplerate);
+b2mlh1 = in1 - b2mlprev + b2hp * b2mlhp1;
+b2mlh2 = b2mlh1 - b2mlhp1 + b2hp * b2mlhp2;
+b2mll1 = (1 - b2lp) * b2mlh2 + b2lp * b2mllp1;
+b2mll2 = (1 - b2lp) * b2mll1 + b2lp * b2mllp2;
+b2mrh1 = in2 - b2mrprev + b2hp * b2mrhp1;
+b2mrh2 = b2mrh1 - b2mrhp1 + b2hp * b2mrhp2;
+b2mrl1 = (1 - b2lp) * b2mrh2 + b2lp * b2mrlp1;
+b2mrl2 = (1 - b2lp) * b2mrl1 + b2lp * b2mrlp2;
+b2rlh1 = in3 - b2rlprev + b2hp * b2rlhp1;
+b2rlh2 = b2rlh1 - b2rlhp1 + b2hp * b2rlhp2;
+b2rll1 = (1 - b2lp) * b2rlh2 + b2lp * b2rllp1;
+b2rll2 = (1 - b2lp) * b2rll1 + b2lp * b2rllp2;
+b2rrh1 = in4 - b2rrprev + b2hp * b2rrhp1;
+b2rrh2 = b2rrh1 - b2rrhp1 + b2hp * b2rrhp2;
+b2rrl1 = (1 - b2lp) * b2rrh2 + b2lp * b2rrlp1;
+b2rrl2 = (1 - b2lp) * b2rrl1 + b2lp * b2rrlp2;
+b2me = max(abs(b2mll2), abs(b2mrl2)) + coef * (b2menv - max(abs(b2mll2), abs(b2mrl2)));
+b2re = max(abs(b2rll2), abs(b2rrl2)) + coef * (b2renv - max(abs(b2rll2), abs(b2rrl2)));
+b2nm = b2msum; b2nr = b2rsum;
+b3hp = exp(-6.28318530718 * 2000 / samplerate);
+b3lp = exp(-6.28318530718 * 6000 / samplerate);
+b3mlh1 = in1 - b3mlprev + b3hp * b3mlhp1;
+b3mlh2 = b3mlh1 - b3mlhp1 + b3hp * b3mlhp2;
+b3mll1 = (1 - b3lp) * b3mlh2 + b3lp * b3mllp1;
+b3mll2 = (1 - b3lp) * b3mll1 + b3lp * b3mllp2;
+b3mrh1 = in2 - b3mrprev + b3hp * b3mrhp1;
+b3mrh2 = b3mrh1 - b3mrhp1 + b3hp * b3mrhp2;
+b3mrl1 = (1 - b3lp) * b3mrh2 + b3lp * b3mrlp1;
+b3mrl2 = (1 - b3lp) * b3mrl1 + b3lp * b3mrlp2;
+b3rlh1 = in3 - b3rlprev + b3hp * b3rlhp1;
+b3rlh2 = b3rlh1 - b3rlhp1 + b3hp * b3rlhp2;
+b3rll1 = (1 - b3lp) * b3rlh2 + b3lp * b3rllp1;
+b3rll2 = (1 - b3lp) * b3rll1 + b3lp * b3rllp2;
+b3rrh1 = in4 - b3rrprev + b3hp * b3rrhp1;
+b3rrh2 = b3rrh1 - b3rrhp1 + b3hp * b3rrhp2;
+b3rrl1 = (1 - b3lp) * b3rrh2 + b3lp * b3rrlp1;
+b3rrl2 = (1 - b3lp) * b3rrl1 + b3lp * b3rrlp2;
+b3me = max(abs(b3mll2), abs(b3mrl2)) + coef * (b3menv - max(abs(b3mll2), abs(b3mrl2)));
+b3re = max(abs(b3rll2), abs(b3rrl2)) + coef * (b3renv - max(abs(b3rll2), abs(b3rrl2)));
+b3nm = b3msum; b3nr = b3rsum;
+
+request = requestseq != lastrequest;
+cancel = (cancelseq != lastcancel) || ((lastsr > 0) && (samplerate != lastsr));
+if (request) {
+    ns = 0; nbi = 0; nconfirmed = 0; nspread = 0; nround = 0; nanchorlag = 0; nanchorband = 0; nanchorquality = 0;
+    nquality = 0; nreject = 0; nrefviable = 0; nmicviable = 0;
+    if ((permit > 0) && synced && !cancel) {
+        ns = 1; nst = 1;
+        nc = 0; nt = 0; nn = 0; nm = 0; nr = 0;
+        li = 0; pp = 0;
+        b1nm = 0; b1nr = 0;
+        b2nm = 0; b2nr = 0;
+        b3nm = 0; b3nr = 0;
+
+        ax = 0; ay = 0; axx = 0; ayy = 0; axy = 0;
+        bx = 0; by = 0; bxx = 0; byy = 0; bxy = 0;
+        nbest = -1; nlag = 0; na = -1; nb = -1; nla = 0; nlb = 0;
+        nrunner = -1; nscan = 0;
+    } else {
+        nst = 6;
+    }
+}
+if ((ns > 0) && ((permit <= 0) || !synced || cancel)) {
+    ns = 0; nst = 5; nquality = 0;
+    // Latch the failure cause in the terminal packet; later guard recovery or
+    // repeated polling must not erase the explanation.
+    nreject = 100 + cancelreason;
+    if ((permit <= 0) && ((cancelseq == lastcancel) || (cancelreason == 14))) { nreject = 200 + guardreason; }
+    if (!synced) { nreject = hardjump ? 303 : 302; }
+    if ((lastsr > 0) && (samplerate != lastsr)) { nreject = 301; }
+}
+
+if (ns == 1) {
+    // Average at a rational 1 kHz clock: valid at 44.1, 48 and 96 kHz.
+    nc = nc + 1000;
+    nt = nt + 1;
+    nm = nm + me;
+    nr = nr + re;
+    b1nm = b1nm + b1me; b1nr = b1nr + b1re;
+    b2nm = b2nm + b2me; b2nr = b2nr + b2re;
+    b3nm = b3nm + b3me; b3nr = b3nr + b3re;
+
+    if (nc >= samplerate) {
+        nc = nc - samplerate;
+        poke(micdata, nm / nt, nn);
+        poke(refdata, nr / nt, nn);
+        poke(micdata, b1nm / nt, 1 * 3584 + nn);
+        poke(refdata, b1nr / nt, 1 * 3584 + nn);
+        b1nm = 0; b1nr = 0;
+        poke(micdata, b2nm / nt, 2 * 3584 + nn);
+        poke(refdata, b2nr / nt, 2 * 3584 + nn);
+        b2nm = 0; b2nr = 0;
+        poke(micdata, b3nm / nt, 3 * 3584 + nn);
+        poke(refdata, b3nr / nt, 3 * 3584 + nn);
+        b3nm = 0; b3nr = 0;
+
+        nn = nn + 1; nt = 0; nm = 0; nr = 0;
+        if (nn >= 3584) {
+            ns = 2; nst = 2;
+        }
+    }
+} else if (ns == 2) {
+    // Bounded work: 64 multiply/accumulate iterations per audio sample.
+    // Independent 1024 ms windows must agree on the same delay.
+    for (q = 0; q < 64; q += 1) {
+        if (pp < 2048) {
+            idx = pp < 1024 ? 512 + pp : 2048 + pp - 1024;
+            x = peek(refdata, nbi * 3584 + idx);
+            y = peek(micdata, nbi * 3584 + idx + li - 400);
+            if (pp < 1024) {
+                ax = ax + x; ay = ay + y;
+                axx = axx + x*x; ayy = ayy + y*y; axy = axy + x*y;
+            } else {
+                bx = bx + x; by = by + y;
+                bxx = bxx + x*x; byy = byy + y*y; bxy = bxy + x*y;
+            }
+            pp = pp + 1;
+        }
+    }
+    if (pp >= 2048) {
+        vx = max(0, axx - ax*ax/1024);
+        vy = max(0, ayy - ay*ay/1024);
+        wx = max(0, bxx - bx*bx/1024);
+        wy = max(0, byy - by*by/1024);
+        nrefviable = max(nrefviable, (vx > 0.00000001) && (wx > 0.00000001));
+        nmicviable = max(nmicviable, (vy > 0.00000001) && (wy > 0.00000001));
+        ca = (vx > 0.00000001) && (vy > 0.00000001) ? (axy - ax*ay/1024) / sqrt(max(0.0000000000000001, vx*vy)) : -1;
+        cb = (wx > 0.00000001) && (wy > 0.00000001) ? (bxy - bx*by/1024) / sqrt(max(0.0000000000000001, wx*wy)) : -1;
+        score = min(ca, cb);
+        poke(scores, score, li);
+        if (score > nbest) { nbest = score; nlag = li; }
+        if (ca > na) { na = ca; nla = li; }
+        if (cb > nb) { nb = cb; nlb = li; }
+        li = li + 1;
+        pp = 0;
+        ax = 0; ay = 0; axx = 0; ayy = 0; axy = 0;
+        bx = 0; by = 0; bxx = 0; byy = 0; bxy = 0;
+        if (li >= 801) { ns = 3; }
+    }
+} else if (ns == 3) {
+    // A rhythmic / repeated pattern can have several plausible delays.
+    // Reject competing peaks rather than choosing a convenient grid alignment.
+    for (q = 0; q < 64; q += 1) {
+        if (nscan < 801) {
+            value = peek(scores, nscan);
+            if ((abs(nscan - nlag) > 20) && (value > nrunner)) { nrunner = value; }
+            nscan = nscan + 1;
+        }
+    }
+    if (nscan >= 801) {
+        nquality = max(0, min(1, nbest));
+        accepted = (nbest >= 0.85) && ((nbest - nrunner) >= 0.12) && (abs(nla - nlb) <= 3) && (nlag > 2) && (nlag < 798);
+        // Each band keeps the previous strict single-band acceptance checks.
+        nreject = !nrefviable ? 1 : (!nmicviable ? 2 : (nbest < 0.85 ? 3 : ((nbest - nrunner) < 0.12 ? 4 : (abs(nla - nlb) > 3 ? 5 : ((nlag <= 2) || (nlag >= 798) ? 6 : 0)))));
+        estimate = nlag - 400;
+        if (accepted) {
+            left = peek(scores, nlag - 1);
+            right = peek(scores, nlag + 1);
+            bend = left - 2 * nbest + right;
+            fraction = abs(bend) > 0.00000001 ? clamp(0.5 * (left - right) / bend, -0.5, 0.5) : 0;
+            estimate = estimate + fraction;
+        }
+        // Store per-band evidence before reusing the bounded correlation workspace.
+        poke(bandinfo, accepted, nbi * 10);
+        poke(bandinfo, estimate, nbi * 10 + 1);
+        poke(bandinfo, nbest, nbi * 10 + 2);
+        poke(bandinfo, nlag - 400, nbi * 10 + 3);
+        poke(bandinfo, na, nbi * 10 + 4);
+        poke(bandinfo, nb, nbi * 10 + 5);
+        poke(bandinfo, nbest - nrunner, nbi * 10 + 6);
+        poke(bandinfo, abs(nla - nlb), nbi * 10 + 7);
+        poke(bandinfo, nreject, nbi * 10 + 8);
+        nbi = nbi + 1;
+        if (nbi < 4) {
+            ns = 2; nst = 2;
+            li = 0; pp = 0;
+            nbest = -1; nlag = 0; na = -1; nb = -1; nla = 0; nlb = 0;
+            nrunner = -1; nscan = 0; nrefviable = 0; nmicviable = 0;
+        } else {
+            ns = 4;
+        }
+    }
+} else if (ns == 4) {
+    // Require at least two individually conclusive bands and agreement of ALL
+    // conclusive bands. Do not cherry-pick a cluster or accept a lone best lag.
+    nconfirmed = 0; minlag = 1000; maxlag = -1000;
+    bestquality = -2; bestvalidquality = -2; chosen = 0; chosenvalid = 0;
+    for (q = 0; q < 4; q += 1) {
+        pass = peek(bandinfo, q * 10);
+        candidatequality = peek(bandinfo, q * 10 + 2);
+        if (candidatequality > bestquality) { bestquality = candidatequality; chosen = q; }
+        if (pass > 0) {
+            nconfirmed = nconfirmed + 1;
+            candidate = peek(bandinfo, q * 10 + 1);
+            minlag = min(minlag, candidate); maxlag = max(maxlag, candidate);
+            if (candidatequality > bestvalidquality) { bestvalidquality = candidatequality; chosenvalid = q; }
+        }
+    }
+    if (nconfirmed > 0) { chosen = chosenvalid; }
+    nspread = nconfirmed > 1 ? maxlag - minlag : 0;
+    nquality = clamp(peek(bandinfo, chosen * 10 + 2), 0, 1);
+    ndlag = peek(bandinfo, chosen * 10 + 3);
+    nda = peek(bandinfo, chosen * 10 + 4); ndb = peek(bandinfo, chosen * 10 + 5);
+    ndmargin = peek(bandinfo, chosen * 10 + 6); nddiff = peek(bandinfo, chosen * 10 + 7);
+    nreject = peek(bandinfo, chosen * 10 + 8);
+    ns = 0;
+    if (nround > 0) {
+        // Independent new acquisition: the SAME band must qualify again.
+        // All conclusive second-capture paths and the first estimate must agree.
+        anchorpass = peek(bandinfo, nanchorband * 10);
+        anchorsecond = peek(bandinfo, nanchorband * 10 + 1);
+        totalspread = max(maxlag, nanchorlag) - min(minlag, nanchorlag);
+        if ((anchorpass > 0) && (nconfirmed > 0) && (totalspread <= 3)) {
+            nresult = 0.5 * (nanchorlag + anchorsecond);
+            nquality = min(nanchorquality, clamp(peek(bandinfo, nanchorband * 10 + 2), 0, 1));
+            nst = 3; nreject = 0; nspread = totalspread;
+        } else {
+            nst = 4;
+            nreject = 9;
+            if ((nconfirmed >= 2) && (nspread > 3)) { nreject = 8; }
+            if ((anchorpass > 0) && (abs(anchorsecond - nanchorlag) > 3)) { nreject = 10; nspread = totalspread; }
+        }
+    } else if ((nconfirmed >= 2) && (nspread <= 3)) {
+        nresult = peek(bandinfo, chosen * 10 + 1); nst = 3; nreject = 0;
+    } else if (nconfirmed == 1) {
+        // A lone band is provisional, never an immediate compensation.
+        // Reuse the fixed buffers only after a completely new 3.584 s capture.
+        nround = 1; nanchorband = chosen;
+        nanchorlag = peek(bandinfo, chosen * 10 + 1);
+        nanchorquality = peek(bandinfo, chosen * 10 + 2);
+        ns = 1; nst = 7; nquality = 0; nreject = 0; nbi = 0;
+        nc = 0; nt = 0; nn = 0; nm = 0; nr = 0;
+        b1nm = 0; b1nr = 0; b2nm = 0; b2nr = 0; b3nm = 0; b3nr = 0;
+        li = 0; pp = 0;
+        ax = 0; ay = 0; axx = 0; ayy = 0; axy = 0;
+        bx = 0; by = 0; bxx = 0; byy = 0; bxy = 0;
+        nbest = -1; nlag = 0; na = -1; nb = -1; nla = 0; nlb = 0;
+        nrunner = -1; nscan = 0; nrefviable = 0; nmicviable = 0;
+    } else {
+        nst = 4;
+        if (nconfirmed >= 2) { nreject = 8; }
+    }
+}
+
+out1 = nst;
+out2 = nresult;
+out3 = nquality;
+out4 = ns > 0;
+out5 = requestseq;
+// Read-only diagnostics; candidate is never an accepted compensation.
+out6 = nreject;
+out7 = ndlag;
+out8 = nda;
+out9 = ndb;
+out10 = ndmargin;
+out11 = nddiff;
+out12 = nconfirmed;
+out13 = nspread;
+
+lastrequest = requestseq; lastcancel = cancelseq; lastsr = samplerate;
+prevphase = phase; validrun = nv;
+clocklocked = nclocklocked; clockbad = nclockbad; clockinc = nclockinc;
+stage = ns; state = nst;
+clock = nc; ticks = nt; count = nn; msum = nm; rsum = nr;
+menv = me; renv = re;
+mlprev = in1; mrprev = in2; rlprev = in3; rrprev = in4;
+mlhp = am; mrhp = bm; rlhp = ar; rrhp = br;
+lagindex = li; pos = pp;
+sx = ax; sy = ay; sxx = axx; syy = ayy; sxy = axy;
+tx = bx; ty = by; txx = bxx; tyy = byy; txy = bxy;
+best = nbest; bestlag = nlag; besta = na; bestb = nb; laga = nla; lagb = nlb;
+runner = nrunner; scan = nscan; resultms = nresult; quality = nquality;
+
+rejection = nreject; refviable = nrefviable; micviable = nmicviable;
+
+bandindex = nbi;
+confirmationround = nround; anchorlag = nanchorlag; anchorband = nanchorband; anchorquality = nanchorquality;
+diagnosticlag = ndlag; diagnostica = nda; diagnosticb = ndb;
+diagnosticmargin = ndmargin; diagnosticdiff = nddiff;
+confirmedbands = nconfirmed; bandspread = nspread;
+b1mlprev = in1; b1mlhp1 = b1mlh1; b1mlhp2 = b1mlh2; b1mllp1 = b1mll1; b1mllp2 = b1mll2;
+b1mrprev = in2; b1mrhp1 = b1mrh1; b1mrhp2 = b1mrh2; b1mrlp1 = b1mrl1; b1mrlp2 = b1mrl2;
+b1rlprev = in3; b1rlhp1 = b1rlh1; b1rlhp2 = b1rlh2; b1rllp1 = b1rll1; b1rllp2 = b1rll2;
+b1rrprev = in4; b1rrhp1 = b1rrh1; b1rrhp2 = b1rrh2; b1rrlp1 = b1rrl1; b1rrlp2 = b1rrl2;
+b1menv = b1me; b1renv = b1re; b1msum = b1nm; b1rsum = b1nr;
+b2mlprev = in1; b2mlhp1 = b2mlh1; b2mlhp2 = b2mlh2; b2mllp1 = b2mll1; b2mllp2 = b2mll2;
+b2mrprev = in2; b2mrhp1 = b2mrh1; b2mrhp2 = b2mrh2; b2mrlp1 = b2mrl1; b2mrlp2 = b2mrl2;
+b2rlprev = in3; b2rlhp1 = b2rlh1; b2rlhp2 = b2rlh2; b2rllp1 = b2rll1; b2rllp2 = b2rll2;
+b2rrprev = in4; b2rrhp1 = b2rrh1; b2rrhp2 = b2rrh2; b2rrlp1 = b2rrl1; b2rrlp2 = b2rrl2;
+b2menv = b2me; b2renv = b2re; b2msum = b2nm; b2rsum = b2nr;
+b3mlprev = in1; b3mlhp1 = b3mlh1; b3mlhp2 = b3mlh2; b3mllp1 = b3mll1; b3mllp2 = b3mll2;
+b3mrprev = in2; b3mrhp1 = b3mrh1; b3mrhp2 = b3mrh2; b3mrlp1 = b3mrl1; b3mrlp2 = b3mrl2;
+b3rlprev = in3; b3rlhp1 = b3rlh1; b3rlhp2 = b3rlh2; b3rllp1 = b3rll1; b3rllp2 = b3rll2;
+b3rrprev = in4; b3rrhp1 = b3rrh1; b3rrhp2 = b3rrh2; b3rrlp1 = b3rrl1; b3rrlp2 = b3rrl2;
+b3menv = b3me; b3renv = b3re; b3msum = b3nm; b3rsum = b3nr;

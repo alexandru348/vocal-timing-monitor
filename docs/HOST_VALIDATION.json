@@ -1,60 +1,103 @@
 {
-  "version": "0.8 RC1.3 Studio",
-  "date": "2026-11-03",
-  "status": "OWNER ACCEPTED — TESTED WINDOWS / LIVE 12 WORKFLOW",
-  "baseline_commit": "8cd555d6ac907816d375efe2f2410132c7dded70",
-  "method": "Owner reports and native-host screenshots reviewed during guided testing; automated checks are reported separately.",
+  "version": "0.9 RC1.6 Studio",
+  "date": "2026-11-04",
+  "status": "OWNER-TESTED RELEASE CANDIDATE; LIMITED NATIVE SCOPE",
+  "baseline_commit": "ba89bffe136ef72381ae9e0d5c8b0280f60b9def",
+  "artifact_sha256": "c25358cb4f89a85e6bdcbc0e44a6323b463bf6c650427209cc12b8e51a6609e3",
+  "evidence": "Owner reports and original screenshots reviewed during the native test session. Public summary only; no private media included.",
   "environment": {
-    "os": "Windows 11 Pro",
-    "host": "Ableton Live 12 Suite"
+    "os": "Windows 11",
+    "host": "Ableton Live 12 Suite / Max for Live",
+    "sample_rate_hz": 44100,
+    "audio_path": "Laptop speakers and integrated microphone",
+    "driver_and_buffer": "Session setup reported ASIO4ALL v2 / 256 samples; not independently re-read during every trial"
   },
   "checks": [
     {
-      "test": "RC1.3 embedded device body matches the light monitor theme",
-      "result": "passed",
-      "evidence": "Owner accepted the correction; both surfaces were visibly light."
+      "test": "Native device load and functional DSP execution",
+      "result": "observed_pass",
+      "limit": "Functional runtime observed; no native compiler log or exhaustive Max-version matrix collected."
     },
     {
-      "test": "Full application restart restores light device body before monitor opens",
-      "result": "passed",
-      "evidence": "Device body already light with monitor closed, then monitor opened in the same theme."
+      "test": "Quiet reference calibration and same-version repeat",
+      "result": "observed_pass",
+      "applied_ms": [
+        93.056351,
+        92.885786
+      ],
+      "difference_ms": 0.170565
     },
     {
-      "test": "Saved controls, fractional visual zoom, compensation and instrumental selection survive restart",
-      "result": "passed_in_tested_configuration",
-      "evidence": "Owner confirmed retained settings; basic and advanced views reviewed after restart."
+      "test": "Known acoustic timing reference with compensation 92.885786 ms",
+      "result": "observed_samples_match",
+      "expected_ms": [
+        0,
+        150,
+        -150
+      ],
+      "displayed_ms": [
+        -0.2,
+        149.8,
+        -150.1
+      ],
+      "limit": "Individual sampled displays, not an error distribution or a general sub-millisecond accuracy guarantee."
     },
     {
-      "test": "Microphone and instrumental waveforms and attack feedback during playback / recording",
-      "result": "passed_in_tested_workflow",
-      "evidence": "Both waves and detected events visible; owner reported intended operation in RC1.3."
+      "test": "Automatic stop during Arrangement recording with compensated reference",
+      "result": "owner_confirmed_pass",
+      "displayed_ms": 149.9,
+      "stopped_position": "5.1.2 at 100 BPM",
+      "count": 17,
+      "clip_retained": true,
+      "host_confirmation": "Ultimul Stop: oprire confirmata de Live"
     },
     {
-      "test": "Actual recording and automatic transport stop retain the recorded clip",
-      "result": "passed_in_tested_workflow",
-      "evidence": "Owner confirmed successful operation; stopped view showed the retained clip and Live stop confirmation."
+      "test": "Full application close/reopen after saving Auto Stop ON",
+      "result": "owner_confirmed_pass",
+      "restored_compensation_ms": 92.885786,
+      "auto_stop_after_reopen": "OFF",
+      "light_monitor_and_device_themes": "retained",
+      "attack_count_after_reopen": 0
     },
     {
-      "test": "Save automatic stop ON, fully close/reopen, initialize OFF with other settings retained",
-      "result": "passed",
-      "evidence": "ON and stopped transport confirmed before save/exit; OFF confirmed after full restart with themes and controls retained."
+      "test": "Calibration request with Auto Stop ON",
+      "result": "observed_pass",
+      "message": "Lasa Oprire auto OFF in timpul calibrarii.",
+      "compensation_unchanged_ms": 92.885786,
+      "transport": "remained stopped"
     },
     {
-      "test": "Playback synchronization after the stopped-state audio diagnostic",
-      "result": "passed_in_tested_workflow",
-      "evidence": "Subsequent playback showed synchronized status and both audio waveforms."
+      "test": "Calibration request during Arrangement REC",
+      "result": "observed_pass",
+      "message": "Opreste REC pentru calibrare.",
+      "compensation_unchanged_ms": 92.885786,
+      "recording": "continued; owner subsequently switched REC off while playback continued"
+    },
+    {
+      "test": "Native CPU during all calibration stages",
+      "result": "not_profiled",
+      "limit": "No benchmark, peak capture or performance guarantee."
+    },
+    {
+      "test": "Current RC missing/ambiguous reference rejection, pending-result Stop/configuration races and Session Record transitions",
+      "result": "automated_only",
+      "limit": "Covered in arithmetic/message models; not exhaustively rechecked natively in RC1.6."
     }
   ],
-  "predecessor_observations": "RC1.2 monitor layout, both monitor themes, unit display and untouched-silence stability are archived in history/RC1_2_HOST_OBSERVATIONS.json. They remain version-scoped observations.",
-  "limits": [
-    "Acceptance applies to the owner-tested Windows / Live 12 workflow, not every host, operating system, parameter combination or audio setup.",
-    "Both directions of the RC1.3 embedded palette and per-instance isolation have automated message-model coverage; a separate native dark-body restart and native multi-instance test were not independently documented.",
-    "Screenshots confirm stop behavior and owner acceptance, not sample-accurate stop latency or the exact first-event timing.",
-    "This amplitude-onset detector can count keyboard/room sounds and speaker bleed; it does not recognize speech. Earlier untouched-silence stability is a bounded RC1.2 observation.",
-    "Global Max High DPI / Windows scaling settings were not inspected or changed; no claim of universal text sharpness is made."
+  "unresolved_observations": [
+    {
+      "displayed_ms": 231.9,
+      "expected_section_ms": 150,
+      "status": "Cause unconfirmed. A later capture in the same section showed 149.8 ms. Do not discard the earlier observation or attribute it to hardware/user error without evidence."
+    }
   ],
-  "protocol": "TESTARE_0_8.md",
-  "previous_host_report": "history/RC3_3_HOST_VALIDATION.json",
-  "previous_ui_report": "history/RC1_2_HOST_OBSERVATIONS.json",
-  "privacy": "Sanitized functional outcomes only. No private Live Sets, extracted diagnostic dumps, saved routing/input payloads, recordings or owner screenshots are published."
+  "limits": [
+    "Amplitude onset detection can count keyboard, room noise and speaker bleed; it does not identify vocal syllables.",
+    "Calibration measures effective relative reference-to-microphone delay, not every recording-latency component or recorded-clip placement.",
+    "A saved value requires revalidation after relevant audio-path/configuration changes.",
+    "Other sample rates, devices, operating systems and full recording transition combinations lack native validation."
+  ],
+  "protocol": "TESTARE_0_9.md",
+  "previous_candidate_report": "history/RC1_5_0_9_HOST_OBSERVATIONS.json",
+  "privacy": "No owner audio, Live Sets, original/annotated screenshots or raw routing/input diagnostics are published."
 }

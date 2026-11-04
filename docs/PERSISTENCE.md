@@ -1,6 +1,12 @@
+# Persistence in 0.9 RC1
+
+The ten existing control identities and types are preserved. Only the established compensation value is updated by successful reference calibration and saved with Ctrl+S. The request token, correlation confidence, acquisition buffers and status are transient. Auto Stop still initializes OFF. See AUTO_CALIBRATION.md for guards and limits; current owner-observed restart retention of compensation/light themes and saved-ON/reopened-OFF Auto Stop is recorded in HOST_VALIDATION.json; exhaustive parameter/host combinations are not claimed.
+
+The following RC1.3 design description is retained as historical context. Its manual last-attack calibration path was replaced in 0.9, and its native observations apply only to RC1.3.
+
 # 0.8 RC1.3 persistence design
 
-Release candidate based on RC3.3 commit `8cd555d6ac907816d375efe2f2410132c7dded70`. Nine existing parameter IDs/names/types/varnames are preserved. Earlier native results are archived in history/RC3_3_HOST_VALIDATION.json. RC1.3 owner-tested persistence and automatic-stop initialization results are recorded in HOST_VALIDATION.json, with scope limits.
+Release candidate based on RC3.3 commit `8cd555d6ac907816d375efe2f2410132c7dded70`. Nine existing parameter IDs/names/types/varnames are preserved. Earlier native results are archived in history/RC3_3_HOST_VALIDATION.json. RC1.3 owner-tested persistence and automatic-stop initialization results are recorded in history/RC1_3_HOST_VALIDATION.json, with scope limits.
 
 Seven numeric UI controls use Stored Only Live parameters: analysis, grid, tolerance, detection, compensation and two zooms. Two Blob pattr parameters store exact source/channel labels. Theme adds a tenth Stored Only integer, `VTM Theme`, varname `vtm_theme`, default 0 (dark), range 0–1. There is no global settings file.
 
@@ -31,7 +37,7 @@ RC1.2 replaces the two zoom flonums with native live.numbox LCD controls using t
 
 RC1.3 reuses the single VTM Theme parameter. ui-theme-trigger emits its integer on the new right-hand local popup outlet, while the existing left control outlet stays separate. The parent connects the theme outlet only to ui-device-theme-select and local palette/thispatcher objects. Regular outlet order is fixed by left-to-right patching coordinates. The initial bound pattr replay runs without opening the monitor and also updates the parent. Device palette targets are nonparameter color attributes; no value/action messages are sent. A solid bgfillcolor panel covers the 360×169 device body behind its existing foreground controls.
 
-RC1.2 owner observation: the light monitor theme, 2.5×/2× fields and compensation survived a full Ableton restart. Other controls were reported retained. See history/RC1_2_HOST_OBSERVATIONS.json. In RC1.3 the owner subsequently confirmed the restored light root palette before monitor opening and retained settings after full restart, plus saved-ON/reopened-OFF behavior. See the current HOST_VALIDATION.json; native dark-body restart and exhaustive combinations are not claimed.
+RC1.2 owner observation: the light monitor theme, 2.5×/2× fields and compensation survived a full Ableton restart. Other controls were reported retained. See history/RC1_2_HOST_OBSERVATIONS.json. In RC1.3 the owner subsequently confirmed the restored light root palette before monitor opening and retained settings after full restart, plus saved-ON/reopened-OFF behavior. See history/RC1_3_HOST_VALIDATION.json; native dark-body restart and exhaustive combinations are not claimed.
 
 Additional native references:
 - https://docs.cycling74.com/reference/panel/

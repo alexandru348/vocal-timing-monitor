@@ -64,7 +64,7 @@ class StudioTests(unittest.TestCase):
     def test_device_palette_outlet_is_local_and_cannot_reach_audio_or_actions(self):
         parent=PATCH['patcher'];b=boxmap(parent);ui=boxmap(b['popup']['patcher'])
         self.assertGreater(ui['ui-device-theme-out']['patching_rect'][0],ui['out']['patching_rect'][0])
-        self.assertEqual(b['popup']['numoutlets'],2)
+        self.assertEqual(b['popup']['numoutlets'],3)
         self.assertEqual([d for s,d in edges(parent) if s==('popup',1)],
                          [('ui-device-theme-select',0)])
         for theme in (0,1):

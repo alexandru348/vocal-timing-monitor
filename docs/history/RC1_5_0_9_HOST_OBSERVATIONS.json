@@ -1,0 +1,12 @@
+{
+  "version": "0.9 RC1.5 Studio",
+  "date": "2026-11-04",
+  "status": "C300 REPRODUCED DURING ACTIVE PLAYBACK",
+  "observations": [
+    "Owner repeated the measurement and supplied a screenshot during active synchronized playback.",
+    "Calibration reported latched clock-synchronization cancellation C300; compensation was not applied.",
+    "This excludes manual Stop as an explanation for that repeated trial.",
+    "A synthetic single held phase sample reproduces the old-code failure, but the exact native phase waveform is not available."
+  ],
+  "privacy": "Sanitized functional observations only; no private audio, Set, raw phase/routing dumps or owner screenshots."
+}

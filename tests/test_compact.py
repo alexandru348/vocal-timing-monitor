@@ -100,10 +100,19 @@ class CompactTests(unittest.TestCase):
         p['parameters'] = {'inherited_shortname': 1}
         # Remove only the explicitly named display-only module. Keep every
         # original audio/control/Live API object and edge in the pinned digest.
-        device_ui={w['box']['id'] for w in p['boxes'] if w['box']['id'].startswith('ui-device-')}
+        # Calibration has separate invariance, signal and transaction tests.
+        device_ui={w['box']['id'] for w in p['boxes'] if w['box']['id'].startswith(('ui-device-','lat-'))}
         p['boxes']=[w for w in p['boxes'] if w['box']['id'] not in device_ui]
         p['lines']=[w for w in p['lines'] if w['patchline']['source'][0] not in device_ui
                     and w['patchline']['destination'][0] not in device_ui]
+        # New calibration taps can turn an old single edge into a fanout.
+        # Recalculate order only after removing the explicit new taps.
+        groups={}
+        for w in p['lines']:groups.setdefault(tuple(w['patchline']['source']),[]).append(w['patchline'])
+        for lines in groups.values():
+            for i,line in enumerate(lines):
+                if len(lines)==1:line.pop('order',None)
+                else:line['order']=i
         for wrapped in p['boxes']:
             b=wrapped['box']
             # RC1.2 changes only font metadata on the five root UI objects.

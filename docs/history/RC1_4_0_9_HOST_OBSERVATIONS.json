@@ -1,0 +1,13 @@
+{
+  "version": "0.9 RC1.4 Studio",
+  "date": "2026-11-04",
+  "status": "PARTIAL NATIVE SUCCESS \u2014 REPEATABILITY UNCONFIRMED",
+  "observations": [
+    "One trial reached Calibrare aplicata and wrote a nonzero compensation near the previously observed candidate.",
+    "Later trials reported cancellation and preserved that existing compensation.",
+    "A subsequent screenshot showed playback active and synchronized while the cancellation message remained.",
+    "The cancellation trigger is not identified by screenshots; do not attribute the repeat failure to stopped playback.",
+    "No known native timing-reference accuracy test has been completed."
+  ],
+  "privacy": "Sanitized functional observations only; no private audio, Set, raw diagnostic dump, routing payload or owner screenshots."
+}

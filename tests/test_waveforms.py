@@ -148,7 +148,9 @@ class WaveformTests(unittest.TestCase):
             for name in ['voice','beat','grid']:
                 self.assertEqual(g.state['root/popup/'+name+'-scope']['samples'],(sr*6.,))
             self.assertEqual(g.params,before)
-        self.assertFalse(any(s==('wave-samplerate',0) for s,d in edges(self.root())))
+        # Audio lifecycle now cancels in-flight calibration; it still cannot
+        # change onset controls or stop transport.
+        self.assertTrue(all(d[0].startswith('lat-') for s,d in edges(self.root()) if s==('wave-samplerate',0)))
 
     def test_source_menus_accept_spaces_and_update_without_recursive_commands(self):
         g=Graph();g.initialize();before=dict(g.params)

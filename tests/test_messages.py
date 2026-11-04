@@ -61,11 +61,11 @@ class MessageTests(unittest.TestCase):
             g.send('root/popup/'+control,(value,))
             self.assertEqual(g.params['autostop'],0)
 
-    def test_calibration_routes_raw_value_and_guards_grid(self):
+    def test_calibration_never_adopts_a_vocal_raw_deviation(self):
         g=self.ready(); g.send('root/popup',('raw',35.4)); g.send('root/popup',('count',8))
-        g.click('calibrate'); self.assertAlmostEqual(g.params['offsetms'],35.4)
+        g.click('calibrate'); self.assertAlmostEqual(g.params['offsetms'],0.)
         g.send('root/popup/grid-ui',(1,)); g.send('root/popup',('raw',120))
-        g.click('calibrate'); self.assertAlmostEqual(g.params['offsetms'],35.4)
+        g.click('calibrate'); self.assertAlmostEqual(g.params['offsetms'],0.)
 
     def test_zero_deviation_is_visible_only_after_measurement(self):
         g=self.ready(); g.send('root/popup',('hasdelta',0)); g.send('root/popup',('delta',0.))

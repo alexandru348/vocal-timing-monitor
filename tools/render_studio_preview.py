@@ -19,7 +19,7 @@ FONT_ROOT = Path('/usr/share/fonts/truetype/dejavu')
 PREFIX = 'root/popup/'
 
 
-def render(theme, page, folder):
+def render(theme, page, folder, diagnostics=None):
     g = Graph()
     g.initialize({'VTM Theme': theme, 'VTM Detection dB': -26, 'VTM Beat zoom':2,
                   'VTM Compensation ms': 92.2})
@@ -28,6 +28,10 @@ def render(theme, page, folder):
     for msg in [('hasdelta', 1), ('delta', -17.5), ('state', 4), ('sync', 1),
                 ('level', .08), ('beatlevel', .5), ('count', 123), ('maxdev', 300.)]:
         g.send(PREFIX[:-1], msg)
+    if diagnostics is not None:
+        g.click('calibrate')
+        g.send(PREFIX[:-1], ('latencydiagnostics',)+tuple(diagnostics))
+        g.send(PREFIX[:-1], ('latencystatus',4))
     height = 169 if page == 'device' else COMPACT_HEIGHT if page == 'compact' else SETTINGS_HEIGHT
     width = 360 if page == 'device' else 640
     scope = 'root' if page == 'device' else PREFIX[:-1]

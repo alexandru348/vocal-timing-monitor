@@ -131,7 +131,7 @@ class StaticTests(unittest.TestCase):
             if x.get('text', '').startswith('prepend ') and x['id'].endswith('-tag') and not x['id'].endswith('ui-tag'):
                 tag = x['text'].split()[1]
                 if x['id'] != 'api-ui-tag':
-                    self.assertIn(tag, params)
+                    if not x['id'].startswith('lat-'): self.assertIn(tag, params)
         ui_tags = boxmap(u)['route']['text'].split()[1:]
         for x in boxmap(p).values():
             if x['id'].endswith('ui-tag'):

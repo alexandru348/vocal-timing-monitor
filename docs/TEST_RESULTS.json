@@ -1,33 +1,35 @@
 {
-  "version": "0.8 RC1.3 Studio",
-  "date": "2026-11-03",
-  "status": "155 AUTOMATED CHECKS PASSED — OWNER-ACCEPTED RC1.3 WORKFLOW",
-  "tests_run": 155,
+  "version": "0.9 RC1.6 Studio",
+  "date": "2026-11-04",
+  "tests_run": 229,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
   "passed": true,
-  "python": "3.12.14",
-  "runtime": "Linux-6.18.57-x86_64-with-glibc2.39",
-  "baseline_commit": "8cd555d6ac907816d375efe2f2410132c7dded70",
+  "status": "229 AUTOMATED CHECKS PASSED; SEPARATE LIMITED NATIVE RC VALIDATION RECORDED",
   "scope": [
-    "140 existing regression checks retained; obsolete presentation labels/bounds and parameter count updated",
-    "11 Studio UI checks: theme replay, state recoloring, level/threshold/overload diagnostics, UI-only reachability, pages, signs, tolerance warnings, contrasts and current-origin lifecycle",
-    "Generated native graph/message routing exercised with explicit UI/Live host stubs; arithmetic executed in a C++17 harness",
-    "Ten stored controls, including theme; simulated per-instance save/restore and Auto Stop OFF on reopen",
-    "Byte-identical Gen source and pinned parent audio/API digest after explicitly listed UI/registry normalization",
-    "AMXD container parse, deterministic build, silent audio output, routing label restoration and stop readback regressions",
-    "Eight approximate geometry illustrations with synthetic waves; estimated text wrapping and page bounds checked",
-    "RC1.1 compact time labels have 12 native units below their boxes; initial and toggle sizes agree, expanded view unchanged at 760; all 151 tests rerun",
-    "Native live.numbox zoom fields: Custom %g× display metadata; numeric 1–8 clipping, fractional multiplier routing, simulated persistence and LCD palette changes without detector/transport side effects",
-    "Three RC1.3 tests: live/replayed embedded device palette, separate local outlet/targets, armed-stop/control invariance and independent instance models"
+    "155 baseline automated tests retained, with obsolete calibration-copy assertions replaced by reference-only behavior",
+    "22 reference-calibration arithmetic and native-message transaction tests",
+    "Exact GenExpr arithmetic compiled into C++ harness with explicit Data/History semantics, not native Gen",
+    "Synthetic 0/23.6/92.2/173/-74 ms at 44.1/48/96 kHz within 0.6 ms",
+    "Stereo polarity, noise/echo, absent/unrelated/periodic reference, changing delay and boundaries",
+    "Measured compensation preserves real ±140 ms timing errors and automatic-stop decisions",
+    "Recording/API/lifecycle/source/buffer/manual cancellation, stale-generation and one-shot application",
+    "Ten stored controls and all presented UI class/geometry/font/parameter metadata preserved",
+    "Onset engine bytes and historical parent audio/API digest pinned, excluding only explicit calibration/UI additions",
+    "Seven historical RC1.1 startup regression checks: documented observer argument/property replay, no invented recording values, exact failure reasons, repeated refusal, stale terminal generation and escaped message punctuation",
+    "Nine RC1.2 diagnostic tests: absent channels, unrelated/periodic/success signal metrics, six rendered reasons, coherent poll order, stale-token suppression, repeated rejection and no new presentation/parameter controls",
+    "Eight RC1.3 multiband checks: spectral coloration, 48/96 kHz, conflicting/lone bands, fresh repeat, later-stage cancellation, N/S diagnostics and unchanged strict per-band checks",
+    "Eight RC1.4 temporal checks: provisional state, new acquisition success, changed delay, missing second reference, cancellation, new-token anchor reset, UI/guard failure and actual timing errors/Stop after confirmation",
+    "Eleven RC1.5 cancellation checks: unchanged numeric/source/DSP reports, genuine changes and explicit actions, ordering, latched causes, commit failure explanations and terminal text stability",
+    "Nine RC1.6 clock checks: isolated corrections, 1 ms holds, float32 wrap endpoints, persistent stall, large jumps, initial lock, independence from onset sync display, Stop/unknown guards and playing-observer binding"
   ],
   "gen_sha256": "5da751738b15e42bb4ad708eda7c8007a89c3a7b587823080fbe4941600f0945",
+  "calibration_sha256": "aff9dc55c09e0be43e781c34ac1f1aa6577d238e5add77c7ab782861f1d919e5",
   "not_executed": [
-    "Other operating systems, host versions and audio setups",
-    "Exhaustive native parameter combinations, dark-body restart and native multi-instance isolation",
-    "Sample-accurate automatic-stop latency and independent objective text-sharpness measurements"
+    "Cycling Gen compiler and host scheduling are not executed by the local automated harness.",
+    "Native CPU profiling, other OS/devices/audio configurations and exhaustive recording/configuration transitions remain unverified."
   ],
-  "native_test_status": "Owner accepted RC1.3 tested workflow on 2026-11-03; see HOST_VALIDATION.json for actual observations, evidence and limits. Native host results are not counted among the 155 automated checks.",
-  "preview_limit": "Pillow geometry approximation, DejaVu Sans substitute, synthetic waveforms; does not prove Segoe UI/Max native rendering or sharpness."
+  "preview_limit": "Approximate Pillow geometry with synthetic signals and substitute font; not native UI proof.",
+  "native_report": "HOST_VALIDATION.json"
 }

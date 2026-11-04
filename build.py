@@ -8,10 +8,11 @@ There is one JSON entry, no external scripts, images, abstractions or samples.
 from pathlib import Path
 import json
 import struct
+from latency_patch import apply_latency_popup, apply_latency_parent
 from studio_ui import apply_studio_ui, apply_readable_type, apply_device_theme
 
 ROOT = Path(__file__).resolve().parent
-NAME = 'Vocal_Timing_Monitor_v0_8_RC1_3_Studio'
+NAME = 'Vocal_Timing_Monitor_v0_9_RC1_6_Studio'
 BG = [0.055, 0.071, 0.098, 1.]
 CARD = [0.094, 0.118, 0.157, 1.]
 TEXT = [0.91, 0.94, 0.98, 1.]
@@ -244,6 +245,7 @@ def popup():
     compact_popup(u)
     add_persistent_controls(u, tags)
     apply_studio_ui(u, parameter_attributes)
+    apply_latency_popup(u)
     return u.p
 
 
@@ -652,7 +654,7 @@ def engine():
 def make_patch():
     p = Patch(360, 169)
     p.p.update(devicewidth=360., description='Audio onset grid proximity monitor',
-        digest='Vocal Timing Monitor 0.8 RC1.3 Studio - native embedded engine',
+        digest='Vocal Timing Monitor 0.9 RC1.6 Studio - native embedded engine',
         tags='audio timing monitor', latency=0, is_mpe=0,
         minimum_live_version='12.0.0', minimum_max_version='8.6.0',
         dependency_cache=[], parameters={'inherited_shortname': 1})
@@ -868,7 +870,7 @@ def make_patch():
         p.p['parameters']['popup::persist-'+kind] = [name, name, 0]
     p.p['parameters']['popup::theme'] = ['VTM Theme', 'VTM Theme', 0]
     for item in p.p['boxes']:
-        if item['box']['id']=='version':item['box']['text']='0.8 RC1.3 Studio | teme și setări salvate'
+        if item['box']['id']=='version':item['box']['text']='0.9 RC1.6 Studio | teme și setări salvate'
     def explicit_fanout(patcher):
         groups = {}
         for wrapped in patcher['lines']:
@@ -884,6 +886,7 @@ def make_patch():
                 explicit_fanout(wrapped['box']['patcher'])
     apply_readable_type(p.p)
     apply_device_theme(p)
+    apply_latency_parent(p, Patch)
     explicit_fanout(p.p)
     return {'patcher': p.p}
 
