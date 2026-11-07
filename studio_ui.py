@@ -74,7 +74,7 @@ def apply_studio_ui(u, parameter_attributes):
     for obj in b.values():
         obj.pop('presentation', None)
         obj.pop('presentation_rect', None)
-    u.p.update(title='Vocal Timing Monitor | 0.9 RC1.6 Studio',
+    u.p.update(title='Vocal Timing Monitor | 0.9 RC1.7.1 Studio',
                rect=[60., 50., WIDTH, COMPACT_HEIGHT],
                openrect=[60., 50., WIDTH, COMPACT_HEIGHT], bgcolor=PALETTES[0]['bg'])
     b['window-config']['text'] = ('window flags float nogrow nozoom, '
@@ -115,7 +115,7 @@ def apply_studio_ui(u, parameter_attributes):
     u.p['boxes'].remove(next(w for w in u.p['boxes'] if w['box']['id']=='studio-canvas'))
     u.p['boxes'].insert(0, {'box': canvas})
     place('title', [16, 10, 350, 27], 18, 'Vocal Timing Monitor')
-    place('version', [17, 37, 320, 14], 10, '0.9 RC1.6  ·  reper ritmic în timp real')
+    place('version', [17, 37, 320, 14], 10, '0.9 RC1.7.1  ·  reper ritmic în timp real')
     button('theme', 'Temă: întunecată', [386, 12, 144, 30], 'Temă: luminoasă')
     b['theme'].update(parameter_enable=1, parameter_mappable=0, varname='vtm_theme',
                       saved_attribute_attributes=parameter_attributes('VTM Theme', 0, 1, 0, 1, 12),
@@ -204,6 +204,12 @@ def apply_studio_ui(u, parameter_attributes):
     place('offsetms', [32, 476, 124, 30], 13, page='advanced')
     place('calibrate', [180, 476, 204, 30], 11, 'Preia întârzierea', 'advanced')
     b['calibrate']['texton'] = 'Preia întârzierea'
+    button('auto-calibrate', 'Calibrare auto: OFF', [400, 476, 200, 30], 'Calibrare auto: ON')
+    place('auto-calibrate', [400, 476, 200, 30], 11, page='advanced')
+    b['auto-calibrate'].update(parameter_enable=1, parameter_mappable=0,
+        varname='vtm_auto_calibrate',
+        saved_attribute_attributes=parameter_attributes('VTM Automatic calibration', 1, 1, 0, 1, 13),
+        hint='Măsoară când lipsește compensarea: instrumental pornit, fără voce, REC și Oprire auto OFF. Apoi păstrează valoarea salvată.')
     label('calibration-help', 'Folosește un impuls cunoscut pe grila 1/4.\nCompensarea schimbă rezultatul numeric; nu mută înregistrarea.',
           [32, 516, 560, 29], 10, 'advanced')
     card('zoom-card', [16, 566, 608, 80], 'advanced')
@@ -362,8 +368,8 @@ def apply_studio_ui(u, parameter_attributes):
                 if cls=='textbutton':
                     obj.update(usegradient=0, rounded=8., usetextovercolor=1)
                     attr(id,'textovercolor',palette['text'])
-                    attr(id,'bgoncolor',palette['stop_bg' if id=='autostop' else 'selected' if id in ['enabled','settings','advanced','theme'] else 'field'])
-                    attr(id,'textoncolor',palette['stop_text' if id=='autostop' else 'selected_text' if id in ['enabled','settings','advanced','theme'] else 'text'])
+                    attr(id,'bgoncolor',palette['stop_bg' if id=='autostop' else 'selected' if id in ['enabled','settings','advanced','theme','auto-calibrate'] else 'field'])
+                    attr(id,'textoncolor',palette['stop_text' if id=='autostop' else 'selected_text' if id in ['enabled','settings','advanced','theme','auto-calibrate'] else 'text'])
             elif cls=='live.numbox':
                 for name in ('activebgcolor','lcdbgcolor'):attr(id,name,palette['field'])
                 for name in ('textcolor','lcdcolor','inactivelcdcolor'):attr(id,name,palette['text'])

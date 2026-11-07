@@ -18,7 +18,7 @@ class StopReadbackTests(unittest.TestCase):
 
     def test_preview_mode_does_not_veto_explicitly_armed_request(self):
         g=Graph();g.initialize();g.emit('root/thisdevice',(1,),2)
-        g.click('autostop');g.emit('root/thisdevice',(1,),2)
+        g.toggle_stop_at_idle_poll();g.emit('root/thisdevice',(1,),2)
         self.assertEqual(g.params['autostop'],1)
         g.emit('root/snapshot-2',(1,));g.drain()
         self.assertEqual(g.calls,[('call','stop_playing')])
@@ -65,27 +65,27 @@ class StopReadbackTests(unittest.TestCase):
                 g=Graph();g.initialize()
                 if outlet is None:g.send(source,msg)
                 else:g.emit(source,msg,outlet)
-                g.click('autostop')
+                g.toggle_stop_at_idle_poll()
                 g.emit('root/snapshot-2',(1,));g.drain()
                 self.assertFalse(g.calls)
                 self.assertEqual(g.params['autostop'],0)
                 self.assertIn(note,self.label(g))
 
     def test_user_off_is_reported_as_cancelled(self):
-        g=Graph();g.initialize();g.click('autostop')
-        g.emit('root/snapshot-2',(1,));g.click('autostop');g.drain()
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
+        g.emit('root/snapshot-2',(1,));g.toggle_stop_at_idle_poll();g.drain()
         self.assertFalse(g.calls)
         self.assertIn('comutator OFF',self.label(g))
 
     def test_dispatch_alone_does_not_claim_stop_confirmation(self):
-        g=Graph();g.initialize();g.click('autostop')
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,));g.drain()
         self.assertEqual(len(g.calls),1)
         self.assertIn('comanda trimisa',self.label(g))
         self.assertNotIn('confirmata',self.label(g))
 
     def test_stopped_host_readback_confirms_one_request(self):
-        g=Graph();g.initialize();g.click('autostop')
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,));g.drain()
         g.advance(151);g.drain()
         self.assertIn('oprire confirmata',self.label(g))
@@ -93,7 +93,7 @@ class StopReadbackTests(unittest.TestCase):
         self.assertEqual(g.params['autostop'],0)
 
     def test_running_host_readback_is_not_falsely_confirmed(self):
-        g=Graph();g.simulate_stop_effect=False;g.initialize();g.click('autostop')
+        g=Graph();g.simulate_stop_effect=False;g.initialize();g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,));g.drain()
         g.advance(151);g.drain()
         self.assertIn('Live inca reda',self.label(g))
@@ -101,7 +101,7 @@ class StopReadbackTests(unittest.TestCase):
         self.assertEqual(g.params['autostop'],0)
 
     def test_api_loss_cancels_pending_property_query(self):
-        g=Graph();g.initialize();g.click('autostop')
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,));g.drain()
         g.emit('root/live-path',('id',0),1);g.drain()
         g.advance(151);g.drain()
@@ -112,14 +112,14 @@ class StopReadbackTests(unittest.TestCase):
         for source,msg,outlet,note in [
             ('root/snapshot-7',(0,),0,'fara ceas'),
             ('root/audio-off',(0,),0,'fara procesare audio')]:
-            g=Graph();g.initialize();g.click('autostop')
+            g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
             g.emit(source,msg,outlet)
             self.assertEqual(g.params['autostop'],0)
             self.assertIn(note,self.label(g))
             self.assertFalse(g.calls)
 
     def test_host_stop_after_request_does_not_overwrite_its_result(self):
-        g=Graph();g.initialize();g.click('autostop')
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,));g.drain();g.advance(151);g.drain()
         g.emit('root/snapshot-7',(0,))
         self.assertIn('oprire confirmata',self.label(g))

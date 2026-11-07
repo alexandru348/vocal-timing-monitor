@@ -61,7 +61,7 @@ class CalibrationDiagnosticTests(unittest.TestCase):
         self.assertIn('Mai multe întârzieri',label)
     def test_diagnostics_are_not_stored_controls_and_add_no_presentation_boxes(self):
         p=PATCH['patcher'];b=boxmap(p);u=b['popup']['patcher']
-        self.assertEqual(len(p['parameters'])-1,10)
+        self.assertEqual(len(p['parameters'])-1,12)
         self.assertTrue(all(not w['box'].get('presentation') for w in u['boxes'] if w['box']['id'].startswith('lat-diagnostic-')))
         self.assertEqual(b['lat-engine']['numoutlets'],13)
         self.assertFalse(any(s[0]=='lat-engine' and d[0] in ['engine','plugout'] for s,d in edges(p)))

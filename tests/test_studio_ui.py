@@ -32,7 +32,7 @@ class StudioTests(unittest.TestCase):
             self.assertEqual(g.state['root/open']['attrs'][attr],tuple(palette[role]))
 
     def test_device_body_theme_follows_live_toggle_in_both_directions(self):
-        g=Graph();g.initialize();g.click('autostop')
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
         before=dict(g.params);commands=list(g.state['root/beat-router']['commands'])
         for theme in (1,0,1,0):
             g.click('theme');self.assert_device_palette(g,theme)
@@ -50,7 +50,7 @@ class StudioTests(unittest.TestCase):
         g=Graph();g.initialize({'VTM Theme':1,'VTM Voice zoom':2.5,
                               'VTM Beat zoom':2,'VTM Compensation ms':92.2})
         self.assertEqual(g.openings,0);self.assert_device_palette(g,1)
-        g.click('autostop');saved=g.saved_parameters()
+        g.toggle_stop_at_idle_poll();saved=g.saved_parameters()
         for theme in (1,0):
             saved['VTM Theme']=theme
             reopened=Graph();reopened.initialize(saved)
@@ -64,7 +64,7 @@ class StudioTests(unittest.TestCase):
     def test_device_palette_outlet_is_local_and_cannot_reach_audio_or_actions(self):
         parent=PATCH['patcher'];b=boxmap(parent);ui=boxmap(b['popup']['patcher'])
         self.assertGreater(ui['ui-device-theme-out']['patching_rect'][0],ui['out']['patching_rect'][0])
-        self.assertEqual(b['popup']['numoutlets'],3)
+        self.assertEqual(b['popup']['numoutlets'],4)
         self.assertEqual([d for s,d in edges(parent) if s==('popup',1)],
                          [('ui-device-theme-select',0)])
         for theme in (0,1):
@@ -98,7 +98,7 @@ class StudioTests(unittest.TestCase):
         self.assertEqual(restored.state[P+'voice-gain']['value'],2)
 
     def test_theme_advanced_and_settings_never_change_audio_params_or_armed_stop(self):
-        g=Graph();g.initialize();g.click('autostop')
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
         before=dict(g.params);commands=list(g.state['root/beat-router']['commands'])
         for _ in range(6):
             g.click('theme');g.click('settings');g.click('advanced')
@@ -163,7 +163,7 @@ class StudioTests(unittest.TestCase):
             self.assertEqual(g.state[P+'offsetms']['hidden'],not bool(page))
 
     def test_repeated_ready_returns_basic_compact_without_rearming(self):
-        g=Graph();g.initialize({'VTM Theme':1});g.click('settings');g.click('advanced');g.click('autostop')
+        g=Graph();g.initialize({'VTM Theme':1});g.click('settings');g.click('advanced');g.toggle_stop_at_idle_poll()
         g.emit('root/thisdevice');g.drain()
         self.assertEqual(g.params['autostop'],0)
         self.assertEqual(g.state[P+'theme']['value'],1)
@@ -178,7 +178,7 @@ class StudioTests(unittest.TestCase):
         self.assertEqual(label(g,'sign-caption'),'Față de grila din Ableton')
 
     def test_zoom_unit_fields_keep_numeric_gain_range_restore_and_theme(self):
-        g=Graph();g.initialize();g.click('autostop');before=dict(g.params)
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll();before=dict(g.params)
         for id in ('voice-gain','beat-gain'):
             b=g.boxes[P+id];attrs=b['saved_attribute_attributes']['valueof']
             self.assertEqual(b['maxclass'],'live.numbox')

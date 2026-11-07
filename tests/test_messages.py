@@ -23,7 +23,7 @@ class MessageTests(unittest.TestCase):
         self.assertFalse(g.calls)
 
     def test_native_stop_disarms_before_single_call(self):
-        g=self.ready(); g.click('autostop')
+        g=self.ready(); g.toggle_stop_at_idle_poll()
         self.assertEqual(g.params['autostop'],1)
         g.emit('root/snapshot-2',(1,)); self.assertFalse(g.calls)
         g.drain()
@@ -33,31 +33,31 @@ class MessageTests(unittest.TestCase):
         self.assertEqual(len(g.calls),1)
 
     def test_off_after_queued_request_cancels_stop(self):
-        g=self.ready(); g.click('autostop')
+        g=self.ready(); g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,))
-        g.click('autostop'); g.drain()
+        g.toggle_stop_at_idle_poll(); g.drain()
         self.assertFalse(g.calls)
 
     def test_clock_loss_after_queued_request_cancels_stop(self):
-        g=self.ready(); g.click('autostop')
+        g=self.ready(); g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,))
         g.emit('root/snapshot-7',(0,)); g.drain()
         self.assertFalse(g.calls)
 
     def test_queued_stop_is_cancelled_by_reset_and_disable(self):
         for action in ['reset','enabled']:
-            g=self.ready(); g.click('autostop'); g.emit('root/snapshot-2',(1,))
+            g=self.ready(); g.toggle_stop_at_idle_poll(); g.emit('root/snapshot-2',(1,))
             g.click(action); g.drain(); self.assertFalse(g.calls)
 
     def test_queued_stop_cancelled_by_transport_api_and_bypass(self):
         for id,msg,outlet in [('root/snapshot-7',(0,),0),
             ('root/thisdevice',(0,),1),('root/live-path',('id',0),1)]:
-            g=self.ready(); g.click('autostop'); g.emit('root/snapshot-2',(1,))
+            g=self.ready(); g.toggle_stop_at_idle_poll(); g.emit('root/snapshot-2',(1,))
             g.emit(id,msg,outlet); g.drain(); self.assertFalse(g.calls)
 
     def test_settings_changes_disarm(self):
         for control,value in [('grid-ui',1),('redms',80),('offsetms',23)]:
-            g=self.ready(); g.click('autostop')
+            g=self.ready(); g.toggle_stop_at_idle_poll()
             g.send('root/popup/'+control,(value,))
             self.assertEqual(g.params['autostop'],0)
 

@@ -1,0 +1,277 @@
+{
+  "baseline_commit": "3a103caa0d669e71bcb50be313d48c8f0973260f",
+  "removed_boxes": [
+    [
+      55,
+      {
+        "box": {
+          "id": "disarm-ui",
+          "maxclass": "message",
+          "numinlets": 2,
+          "numoutlets": 1,
+          "patching_rect": [
+            20.0,
+            865.0,
+            185.0,
+            22.0
+          ],
+          "text": "disarm"
+        }
+      }
+    ]
+  ],
+  "removed_lines": [
+    [
+      20,
+      {
+        "patchline": {
+          "source": [
+            "control-route",
+            2
+          ],
+          "destination": [
+            "autostop-tag",
+            0
+          ],
+          "order": 0
+        }
+      }
+    ],
+    [
+      66,
+      {
+        "patchline": {
+          "source": [
+            "disarm-ui",
+            0
+          ],
+          "destination": [
+            "popup",
+            0
+          ]
+        }
+      }
+    ],
+    [
+      70,
+      {
+        "patchline": {
+          "source": [
+            "control-route",
+            3
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      71,
+      {
+        "patchline": {
+          "source": [
+            "control-route",
+            4
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      72,
+      {
+        "patchline": {
+          "source": [
+            "control-route",
+            5
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      73,
+      {
+        "patchline": {
+          "source": [
+            "control-route",
+            6
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      95,
+      {
+        "patchline": {
+          "source": [
+            "stop-defer",
+            0
+          ],
+          "destination": [
+            "stop-finalize",
+            0
+          ]
+        }
+      }
+    ],
+    [
+      98,
+      {
+        "patchline": {
+          "source": [
+            "stop-finalize",
+            0
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ]
+        }
+      }
+    ],
+    [
+      100,
+      {
+        "patchline": {
+          "source": [
+            "stop-trigger",
+            1
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ]
+        }
+      }
+    ],
+    [
+      118,
+      {
+        "patchline": {
+          "source": [
+            "control-route",
+            2
+          ],
+          "destination": [
+            "disarm-reason-gate",
+            0
+          ],
+          "order": 2
+        }
+      }
+    ],
+    [
+      122,
+      {
+        "patchline": {
+          "source": [
+            "api-lost",
+            0
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 2
+        }
+      }
+    ],
+    [
+      125,
+      {
+        "patchline": {
+          "source": [
+            "deviceon-change",
+            0
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      128,
+      {
+        "patchline": {
+          "source": [
+            "stopped-select",
+            0
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      131,
+      {
+        "patchline": {
+          "source": [
+            "audio-lost",
+            0
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      134,
+      {
+        "patchline": {
+          "source": [
+            "enabled-off",
+            0
+          ],
+          "destination": [
+            "disarm-ui",
+            0
+          ],
+          "order": 1
+        }
+      }
+    ],
+    [
+      151,
+      {
+        "patchline": {
+          "source": [
+            "stop-select",
+            0
+          ],
+          "destination": [
+            "stop-defer",
+            0
+          ]
+        }
+      }
+    ]
+  ],
+  "added_existing_lines": []
+}

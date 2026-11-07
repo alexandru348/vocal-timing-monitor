@@ -1,0 +1,41 @@
+test_amxd_container_roundtrip (test_static.StaticTests.test_amxd_container_roundtrip) ... ok
+test_analysis_is_parent_owned_and_popup_has_readonly_displays (test_static.StaticTests.test_analysis_is_parent_owned_and_popup_has_readonly_displays) ... ok
+test_audio_graph_and_silent_output (test_static.StaticTests.test_audio_graph_and_silent_output) ... ok
+test_deterministic_build (test_static.StaticTests.test_deterministic_build) ... ok
+test_documented_sync_contract (test_static.StaticTests.test_documented_sync_contract) ... ok
+test_embedded_gen_source_exact (test_static.StaticTests.test_embedded_gen_source_exact) ... ok
+test_fanout_order_is_explicit (test_static.StaticTests.test_fanout_order_is_explicit) ... ok
+test_ids_and_all_connections (test_static.StaticTests.test_ids_and_all_connections) ... ok
+test_initialized_native_live_api_and_deferred_stop (test_static.StaticTests.test_initialized_native_live_api_and_deferred_stop) ... ok
+test_no_external_runtime_dependencies (test_static.StaticTests.test_no_external_runtime_dependencies) ... ok
+test_no_unescaped_message_separators_in_object_expressions (test_static.StaticTests.test_no_unescaped_message_separators_in_object_expressions) ... ok
+test_popup_defaults_and_action_buttons (test_static.StaticTests.test_popup_defaults_and_action_buttons) ... ok
+test_presentation_bounds (test_static.StaticTests.test_presentation_bounds) ... ok
+test_snapshot_validity_precedes_delta (test_static.StaticTests.test_snapshot_validity_precedes_delta) ... ok
+test_ui_and_dsp_protocol_agree (test_static.StaticTests.test_ui_and_dsp_protocol_agree) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.076s
+
+OK
+
+test_basic_and_advanced_pages_visible_bounds_and_no_hit_target_overlap (test_studio_ui.StudioTests.test_basic_and_advanced_pages_visible_bounds_and_no_hit_target_overlap) ... ok
+test_device_body_restores_saved_theme_before_monitor_is_opened (test_studio_ui.StudioTests.test_device_body_restores_saved_theme_before_monitor_is_opened) ... ok
+test_device_body_theme_follows_live_toggle_in_both_directions (test_studio_ui.StudioTests.test_device_body_theme_follows_live_toggle_in_both_directions) ... ok
+test_device_palette_outlet_is_local_and_cannot_reach_audio_or_actions (test_studio_ui.StudioTests.test_device_palette_outlet_is_local_and_cannot_reach_audio_or_actions) ... ok
+test_display_modules_have_no_path_to_core (test_studio_ui.StudioTests.test_display_modules_have_no_path_to_core) ... ok
+test_dsp_source_matches_published_rc33 (test_studio_ui.StudioTests.test_dsp_source_matches_published_rc33) ... ok
+test_impossible_tolerance_warning_updates_in_both_directions (test_studio_ui.StudioTests.test_impossible_tolerance_warning_updates_in_both_directions) ... ok
+test_level_raw_peak_threshold_and_overload_are_visual_only (test_studio_ui.StudioTests.test_level_raw_peak_threshold_and_overload_are_visual_only) ... ok
+test_repeated_ready_returns_basic_compact_without_rearming (test_studio_ui.StudioTests.test_repeated_ready_returns_basic_compact_without_rearming) ... ok
+test_sign_labels_clear_with_measurement_validity (test_studio_ui.StudioTests.test_sign_labels_clear_with_measurement_validity) ... ok
+test_text_and_semantic_colors_have_readable_contrast_in_both_themes (test_studio_ui.StudioTests.test_text_and_semantic_colors_have_readable_contrast_in_both_themes) ... ok
+test_theme_advanced_and_settings_never_change_audio_params_or_armed_stop (test_studio_ui.StudioTests.test_theme_advanced_and_settings_never_change_audio_params_or_armed_stop) ... ok
+test_theme_is_stored_only_and_silent_restore_preserves_all_values (test_studio_ui.StudioTests.test_theme_is_stored_only_and_silent_restore_preserves_all_values) ... ok
+test_theme_switch_recolors_current_status_without_new_engine_packet (test_studio_ui.StudioTests.test_theme_switch_recolors_current_status_without_new_engine_packet) ... ok
+test_zoom_unit_fields_keep_numeric_gain_range_restore_and_theme (test_studio_ui.StudioTests.test_zoom_unit_fields_keep_numeric_gain_range_restore_and_theme) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.548s
+
+OK

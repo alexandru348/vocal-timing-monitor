@@ -55,6 +55,17 @@ class Graph:
         id = 'root/popup/' + name
         self.send(id, (1-int(self.state[id].get('value', 0)),))
 
+    def toggle_stop_at_idle_poll(self):
+        """Toggle, then model a fresh zero Stop snapshot before later events.
+
+        Legacy message-only tests previously armed instantaneously. RC1.7
+        requires an actual DSP-low acknowledgement, supplied explicitly here.
+        New handshake/race tests use click() without this convenience method.
+        """
+        self.click('autostop')
+        if self.state['root/popup/autostop']['value']:
+            self.emit('root/snapshot-2',(0,))
+
     def drain(self):
         while self.deferred:
             id, msg = self.deferred.pop(0); self.emit(id, msg)
@@ -320,6 +331,8 @@ class Graph:
         self.drain()
         self.emit('root/snapshot-7',(1,))
         self.emit('root/heartbeat-snapshot',(4410.,))
+        # A real polling cycle also observes the initially low DSP Stop latch.
+        self.emit('root/snapshot-2',(0,))
 
     def restore_parameters(self, saved):
         for id,b in self.boxes.items():

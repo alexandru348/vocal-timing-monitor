@@ -1,3 +1,7 @@
+# RC1.7.1 persistence — limited owner native observations
+
+Twelve stored-only values: the ten previous identities plus VTM Automatic calibration (default 1) and VTM Compensation valid (default 0). Auto Stop remains transient/default OFF on device initialization, but its visible session choice no longer clears on Stop, retries or temporary guard loss. Internal spent/low-seen/generation flags are NOT saved. Two additional controls use existing native parameter/pattr replay conventions. Stored OFF for automatic calibration is retained; successful zero compensation has validity 1. The owner saved Auto Stop ON / automatic calibration OFF / compensation 83.290486 ms and fully restarted Ableton: Auto Stop reopened OFF while the other two were retained. Re-enabling automatic calibration reused that value during full reference playback. Native conclusive-zero persistence remains untested. RC1.6 observations below are historical.
+
 # Persistence in 0.9 RC1
 
 The ten existing control identities and types are preserved. Only the established compensation value is updated by successful reference calibration and saved with Ctrl+S. The request token, correlation confidence, acquisition buffers and status are transient. Auto Stop still initializes OFF. See AUTO_CALIBRATION.md for guards and limits; current owner-observed restart retention of compensation/light themes and saved-ON/reopened-OFF Auto Stop is recorded in HOST_VALIDATION.json; exhaustive parameter/host combinations are not claimed.

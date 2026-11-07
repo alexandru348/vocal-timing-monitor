@@ -59,7 +59,7 @@ class CompactTests(unittest.TestCase):
         g.send('root/popup/beat-type',(3,))
         g.send('root/popup/beat-channel',(2,))
         g.send('root/popup/voice-gain',(2.,))
-        g.click('autostop')
+        g.toggle_stop_at_idle_poll()
         before = dict(g.params)
         commands = list(g.state['root/beat-router']['commands'])
         for _ in range(4):g.click('settings')
@@ -98,6 +98,21 @@ class CompactTests(unittest.TestCase):
         # Normalize the parameter registry and explicitly listed root UI copy
         # changes only. All audio/API objects and every parent edge stay pinned.
         p['parameters'] = {'inherited_shortname': 1}
+        # Reverse ONLY the explicitly inventoried RC1.7 session-intent rewires.
+        # The unchanged historical audio/API contract is still pinned below;
+        # the new module has separate session, deferred-race and PCM tests.
+        fixture=json.loads((ROOT/'tests/fixtures/rc16_session_rewire.json').read_text())
+        p['boxes']=[w for w in p['boxes'] if not w['box']['id'].startswith(('as-','ac-'))]
+        extra={tuple(e) for e in fixture['added_existing_lines']}
+        p['lines']=[w for w in p['lines']
+                    if not w['patchline']['source'][0].startswith(('as-','ac-'))
+                    and not w['patchline']['destination'][0].startswith(('as-','ac-'))
+                    and tuple(w['patchline']['source']+w['patchline']['destination']) not in extra]
+        # Fixture positions include the previously removed theme/latency module;
+        # those modules were appended AFTER the old contract, so insertion is
+        # clamped at the end only for non-contract indexes (none in this fixture).
+        for index,box in fixture['removed_boxes']:p['boxes'].insert(index,box)
+        for index,line in fixture['removed_lines']:p['lines'].insert(index,line)
         # Remove only the explicitly named display-only module. Keep every
         # original audio/control/Live API object and edge in the pinned digest.
         # Calibration has separate invariance, signal and transaction tests.

@@ -1,25 +1,21 @@
-# Verificare nativă 0.9 RC1.6 — protocol și rezultate
+# Verificarea RC1.7.1 în Ableton — protocol și observații
 
-Rezultatele sesiunii din 2026-11-04 sunt consemnate în [HOST_VALIDATION.json](HOST_VALIDATION.json). Calibrarea repetată, reperele cunoscute, oprirea automată în Arrangement, repornirea și cele două refuzuri de calibrare au fost observate. Alte configurații, toate tranzițiile Session/DSP și profilarea CPU rămân în afara validării native. Pașii de mai jos sunt protocolul reutilizabil, nu o listă integrală de teste executate.
+Păstrează RC1.6 și folosește o copie a proiectului, cu o singură instanță VTM activă. Nu modifica preferințele audio pentru acest test. O instanță nouă începe cu valorile sale inițiale.
 
-Păstrează versiunea 0.8 RC1.3. Încarcă 0.9 RC1.6 într-o copie a proiectului cu o singură instanță VTM activă pe pista de analiză. Instanța nouă are valorile inițiale: reintrodu setările dorite și sursa instrumentalului/Post Mixer; nu presupune că sunt copiate automat.
+## 1. Calibrare fără buton
 
-## Primul pas
+Selectează instrumentalul real, Post Mixer, și redă un pasaj variat prin difuzoare. Nu folosi clipul periodic de impulsuri pentru măsurarea întârzierii: poate fi ambiguu. REC global OFF, Oprire auto OFF, analiză activă. În Avansat, Calibrare auto ON și compensare inițială 0. Nu apăsa Preia întârzierea. Nu vorbi. Lasă aproximativ 20 de secunde; urmărește mesajul de măsurare/aplicare și compensarea. Dacă nu e concludent, valoarea se păstrează; oprește și reia pentru alt pasaj.
 
-Deschide monitorul, Setări, Avansat. Confirmă că aspectul și setările sunt cele cunoscute. Lasă REC și Oprire auto OFF. Alege un pasaj de instrumental variat care durează cel puțin douăzeci de secunde, redat prin difuzoarele captate de microfon. Pornește redarea și așteaptă sincronizarea.
+După aplicare, Ctrl+S. O nouă redare trebuie să reutilizeze valoarea. Cu Calibrare auto OFF nu trebuie să pornească o măsurare nouă. Butonul manual rămâne pentru recalibrare cu REC și Oprire auto OFF.
 
-Apasă o singură dată **Preia întârzierea**, apoi nu vorbi și nu apăsa taste douăzeci de secunde. Notează mesajul final și valoarea compensării. Trimite o captură numai după ce măsurarea s-a încheiat. Dacă apare un mesaj de compilare Max sau un salt mare de CPU, raportează-l înainte de înregistrare.
+## 2. Mai multe take-uri
 
-Pentru această etapă, la refuz trimite explicația completă cu C, candidat, A/B, M, D, N și S. Nu repeta alte pasaje până nu interpretăm valorile. Candidatul nu este compensarea aplicată. Reperul trebuie să fie același sunet atât pe intrarea digitală selectată, cât și în microfon.
+După calibrare selectează reperul cunoscut, oprește pista beat-ului original și păstrează traseul de analiză. Grilă 1/4, toleranță 100 ms, aceeași compensare. Pista de înregistrare separată pregătită; nu activa monitorizarea în difuzoare. Activează Oprire auto o singură dată. Revino la 1.1.1 și pornește cu F9 (pe configurația proprietarului F9 singur pornește REC). La prima secțiune +150 ms trebuie să oprească transportul, să păstreze clipul și să rămână ON.
 
-## După primul rezultat
+Repetă încă un take fără a atinge comutatorul. Verifică că pornește normal și nu se oprește pe vechea abatere, apoi se oprește la următoarea abatere reală. Folosește o zonă/copie potrivită pentru a nu suprascrie take-uri de păstrat. Manual OFF trebuie să împiedice Auto Stop.
 
-Repetă măsurarea în alt pasaj și verifică stabilitatea valorii. O valoare nouă nu se validează doar pentru că vocea pare mai aproape de grilă: verifică și un reper de timp cunoscut, păstrând neschimbată configurația audio. Diferența dintre intrări este o estimare efectivă a traseului, nu neapărat valoarea Overall Latency din Ableton.
+## 3. Redeschidere
 
-Cu REC sau Oprire auto ON, o cerere de calibrare nu trebuie să modifice compensarea sau să opereze transportul. Verifică anularea la oprirea redării / schimbarea sursei și păstrarea unei valori introduse manual în locul rezultatului vechi. După calibrare reușită, verifică vorbirea obișnuită și o încercare de înregistrare/Auto Stop; o abatere reală trebuie să rămână detectată.
+Salvează cu Oprire auto ON și o compensare aplicată, apoi închide/redeschide proiectul. Oprire auto trebuie să fie OFF; compensarea, preferința Calibrare auto, tema și celelalte setări trebuie păstrate. Modul automat nu trebuie să măsoare din nou dacă există compensare validă. Nu este necesară trimiterea vocii; sunt suficiente observațiile și capturile interfeței.
 
-Testele Session Record, restaurarea după repornire, DSP restart/configurație și încărcarea CPU în analiză sunt de asemenea verificări native; testele automate nu le înlocuiesc. Păstrează doar concluzii funcționale publice, fără fișierele/înregistrările private.
-
-Nu este nevoie de Reset între încercări: butonul începe o captură nouă. Reset în timpul calibrării o anulează. În RC1.3, N reprezintă numărul de benzi concludente și S diferența dintre întârzierile lor; două benzi pot confirma direct, iar o singură bandă necesită automat o a doua captură concludentă a aceleiași benzi, cu acord temporal în limita a 3 ms. Nu apăsa butonul din nou când apare Reconfirm: a doua captură pornește automat. Aceste cifre nu înlocuiesc verificarea ulterioară cu un reper de timp cunoscut.
-
-În RC1.5, o anulare afișează explicația și un cod [C...]. Trimite acel mesaj complet dacă apare; nu repeta alte pasaje înainte să interpretăm cauza. Noua versiune nu presupune că redarea este oprită doar pentru că cererea a fost anulată.
+Protocolul de mai sus este reutilizabil. Pe 7 noiembrie 2026, proprietarul a observat calibrarea fără buton, un nou take cu ON păstrat, dezactivarea manuală, salvarea/redeschiderea și reutilizarea compensării. Vezi HOST_VALIDATION.json pentru rezultate și limite. Oprirea inițială foarte timpurie la −264,2 ms are cauza neconfirmată; al doilea take a avansat și s-a oprit la +159,5 ms. Nu toate variantele protocolului au fost executate exhaustiv.

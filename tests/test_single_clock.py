@@ -25,7 +25,7 @@ class Pipeline:
         frames = []
         for start in range(0, len(audio), 882):
             if arm_at is not None and start >= arm_at * self.e.sr:
-                self.g.click('autostop'); arm_at = None
+                self.g.toggle_stop_at_idle_poll(); arm_at = None
             if flag_at is not None and start >= flag_at[0] * self.e.sr:
                 _, value, outlet = flag_at
                 self.g.emit('root/thisdevice', (value,), outlet); flag_at = None
@@ -108,7 +108,7 @@ class SingleClockTests(unittest.TestCase):
             self.assertFalse(p.g.calls)
 
     def test_api_loss_disarms_and_recovery_does_not_rearm(self):
-        g = Graph(); g.initialize(); g.click('autostop')
+        g = Graph(); g.initialize(); g.toggle_stop_at_idle_poll()
         g.emit('root/live-path',('id',0),1)
         self.assertEqual(g.params['autostop'],0)
         g.emit('root/live-path',('id',99),1)
@@ -118,7 +118,7 @@ class SingleClockTests(unittest.TestCase):
     def test_rejected_stop_request_is_consumed_and_disarmed(self):
         g=Graph();g.initialize()
         g.emit('root/thisdevice',(0,),1)  # disabled device is unsafe for side effects
-        g.click('autostop')
+        g.toggle_stop_at_idle_poll()
         g.emit('root/snapshot-2',(1,));g.drain()
         self.assertEqual(g.params['autostop'],0)
         self.assertFalse(g.calls)
@@ -136,7 +136,7 @@ class SingleClockTests(unittest.TestCase):
         self.assertEqual(p.g.openings,2)
 
     def test_stopped_phase_disarms_pending_stop_and_blocks_audio_events(self):
-        p = Pipeline(); p.run(np.zeros(8820)); p.g.click('autostop')
+        p = Pipeline(); p.run(np.zeros(8820)); p.g.toggle_stop_at_idle_poll()
         p.e.play=0
         p.run(pulse_train(44100,1.,[.2,.8]))
         self.assertEqual(p.label('count-text'),'0')

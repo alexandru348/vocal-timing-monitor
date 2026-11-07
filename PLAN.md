@@ -1,9 +1,9 @@
-# 0.9 RC1.6 — owner-tested release candidate
+# 0.9 RC1.7.1 Studio — owner-tested prerelease
 
-Implemented and frozen: reference-based delay calibration, strict signal qualification and temporal reconfirmation, guarded one-shot compensation writes, detailed cancellation reasons, bounded calibration clock liveness and independent read-only playback state. The tested AMXD, onset engine, presentation and stored parameter identities are unchanged for publication.
+Implemented and owner-observed on the tested Windows / Live 12 / 44.1 kHz setup: session Auto Stop ON retention, second F9 recording attempt without reactivation, manual OFF, automatic first-use calibration, saved automatic-calibration OFF/compensation after restart, Auto Stop OFF on reload, saved-value reuse and shortened calibration-help text. Both calibration controls are retained by explicit user decision.
 
-Completed native session: repeated acoustic calibration; known 0/+150/-150 ms sampled references; Arrangement recording and automatic Stop with retained clip/host confirmation; saved compensation/light themes after full restart and saved-ON/reopened-OFF Auto Stop; refusal of calibration with Auto Stop ON and active Arrangement REC. See docs/HOST_VALIDATION.json.
+The owner-tested AMXD is frozen; publication changes documentation only. Offline evidence: inherited 250-test RC1.7 run and 30 targeted checks for the copy-only RC1.7.1 correction, not 280 distinct checks. Both DSP source files remain byte-identical to RC1.6.
 
-229 automated checks pass separately from native observations. Release status is RC with limited native scope, not universal certification. An isolated earlier +231.9 ms display remains unexplained. Future investigation may collect controlled event distributions and native transport/configuration traces without publishing private media. CPU profiling, other hardware/rates/OS, Session transitions and configuration races remain extensions of validation, not claimed passes.
+Publish current sources, documentation and the exact AMXD as a prerelease. Preserve RC1.6 release/tag/checkpoint as a recovery version. +231.9 ms (historical) and the early -264.2 ms Stop have cause unconfirmed. No private media or Live Sets.
 
-Publish current sources, documentation and the byte-identical tested AMXD while preserving the 0.8 RC1.3 checkpoint. Never include owner audio, Sets, screenshots or raw routing/input diagnostics.
+Further validation scope, not claimed passes: native conclusive-zero persistence, all missing/ambiguous-reference and Session/transport races, CPU peaks, other hardware/OS/rates and vocal timing error distributions. See docs/HOST_VALIDATION.json.

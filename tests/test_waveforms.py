@@ -170,7 +170,7 @@ class WaveformTests(unittest.TestCase):
         self.assertEqual(g.params,before);self.assertFalse(g.calls)
 
     def test_new_ui_controls_cannot_arm_or_cancel_explicit_autostop(self):
-        g=Graph();g.initialize();g.click('autostop');before=dict(g.params)
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll();before=dict(g.params)
         g.send('root/popup/voice-gain',(8.,));g.send('root/popup/beat-gain',(3.,))
         g.send('root/popup/beat-type',(2,));g.click('beat-refresh')
         self.assertEqual(g.params,before);self.assertEqual(g.params['autostop'],1)

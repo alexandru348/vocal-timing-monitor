@@ -24,14 +24,14 @@ class PersistenceTests(unittest.TestCase):
     def test_all_nine_saved_parameters_are_registered_stored_only(self):
         root=PATCH['patcher']; ui=boxmap(boxmap(root)['popup']['patcher'])
         registry={k:v for k,v in root['parameters'].items() if k!='inherited_shortname'}
-        self.assertEqual(len(registry),10)
+        self.assertEqual(len(registry),12)
         for path,value in registry.items():
             b=ui[path.split('::')[1]]; a=b['saved_attribute_attributes']['valueof']
             self.assertEqual(parameter_enabled(b),1)
             self.assertEqual(a['parameter_invisible'],1)  # Stored Only
             self.assertEqual(value[:2],[a['parameter_longname']]*2)
             self.assertTrue(b['varname'].startswith('vtm_'))
-        self.assertEqual(len({b['varname'] for b in ui.values() if parameter_enabled(b)}),10)
+        self.assertEqual(len({b['varname'] for b in ui.values() if parameter_enabled(b)}),12)
 
     def test_pattr_blob_attributes_use_native_wrapped_object_serialization(self):
         # Regression from the actual RC3 .als: the top-level flag + text
@@ -85,14 +85,14 @@ class PersistenceTests(unittest.TestCase):
     def test_repeated_ready_bangs_preserve_saved_controls_and_disarm_stop(self):
         g=Graph();g.initialize({'VTM Compensation ms':92.2,'VTM Analysis':0})
         for _ in range(3):
-            g.click('autostop');g.emit('root/thisdevice');g.drain()
+            g.toggle_stop_at_idle_poll();g.emit('root/thisdevice');g.drain()
             self.assertEqual(g.params['offsetms'],92.2)
             self.assertEqual(g.params['enabled'],0)
             self.assertEqual(g.params['autostop'],0)
         self.assertFalse(g.calls)
 
     def test_save_with_auto_stop_armed_does_not_rearm_after_reopen(self):
-        g=Graph();g.initialize();g.click('autostop')
+        g=Graph();g.initialize();g.toggle_stop_at_idle_poll()
         self.assertEqual(g.params['autostop'],1)
         saved=g.saved_parameters()
         self.assertFalse(any('stop' in name.lower() for name in saved))
@@ -226,7 +226,7 @@ class PersistenceTests(unittest.TestCase):
             attrs=ui['persist-'+kind]['saved_attribute_attributes']['valueof']
             self.assertEqual(attrs['parameter_type'],3)
         self.assertNotIn('pattrstorage',str(ui))
-        self.assertEqual(len(Graph().saved_parameters()),10)
+        self.assertEqual(len(Graph().saved_parameters()),12)
 
 
 if __name__=='__main__':unittest.main()

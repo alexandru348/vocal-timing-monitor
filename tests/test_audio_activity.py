@@ -25,14 +25,14 @@ class AudioActivityTests(unittest.TestCase):
         self.assertIn((('engine',10),('heartbeat-snapshot',0)),edges(PATCH['patcher']))
 
     def test_live_counter_does_not_disarm_manual_autostop(self):
-        g=self.ready();g.click('autostop')
+        g=self.ready();g.toggle_stop_at_idle_poll()
         for i in range(1,20):
             g.advance(20);g.emit('root/heartbeat-snapshot',(4410.+i*882,))
         self.assertEqual(g.params['autostop'],1)
         self.assertFalse(g.calls)
 
     def test_stalled_counter_disarms_and_invalidates_sync(self):
-        g=self.ready();g.click('autostop')
+        g=self.ready();g.toggle_stop_at_idle_poll()
         g.advance(200);g.emit('root/heartbeat-snapshot',(4410.,)) # same frozen sample
         g.advance(51)
         self.assertEqual(g.params['autostop'],0)
@@ -50,7 +50,7 @@ class AudioActivityTests(unittest.TestCase):
         self.assertIn('sincronizat',self.label(g,'clock-text'))
 
     def test_audio_loss_cancels_queued_stop(self):
-        g=self.ready();g.click('autostop');g.emit('root/snapshot-2',(1,))
+        g=self.ready();g.toggle_stop_at_idle_poll();g.emit('root/snapshot-2',(1,))
         g.advance(251);g.drain()
         self.assertFalse(g.calls)
 

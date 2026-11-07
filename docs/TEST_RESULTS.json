@@ -1,35 +1,39 @@
 {
-  "version": "0.9 RC1.6 Studio",
-  "date": "2026-11-04",
-  "tests_run": 229,
+  "version": "0.9 RC1.7.1 Studio",
+  "date": "2026-11-07",
+  "tests_run": 250,
   "failures": 0,
   "errors": 0,
   "skipped": 0,
   "passed": true,
-  "status": "229 AUTOMATED CHECKS PASSED; SEPARATE LIMITED NATIVE RC VALIDATION RECORDED",
+  "status": "OFFLINE PASS; SEPARATE LIMITED OWNER NATIVE RC1.7.1 CHECKS RECORDED",
+  "baseline_commit": "3a103caa0d669e71bcb50be313d48c8f0973260f",
   "scope": [
-    "155 baseline automated tests retained, with obsolete calibration-copy assertions replaced by reference-only behavior",
-    "22 reference-calibration arithmetic and native-message transaction tests",
-    "Exact GenExpr arithmetic compiled into C++ harness with explicit Data/History semantics, not native Gen",
-    "Synthetic 0/23.6/92.2/173/-74 ms at 44.1/48/96 kHz within 0.6 ms",
-    "Stereo polarity, noise/echo, absent/unrelated/periodic reference, changing delay and boundaries",
-    "Measured compensation preserves real ±140 ms timing errors and automatic-stop decisions",
-    "Recording/API/lifecycle/source/buffer/manual cancellation, stale-generation and one-shot application",
-    "Ten stored controls and all presented UI class/geometry/font/parameter metadata preserved",
-    "Onset engine bytes and historical parent audio/API digest pinned, excluding only explicit calibration/UI additions",
-    "Seven historical RC1.1 startup regression checks: documented observer argument/property replay, no invented recording values, exact failure reasons, repeated refusal, stale terminal generation and escaped message punctuation",
-    "Nine RC1.2 diagnostic tests: absent channels, unrelated/periodic/success signal metrics, six rendered reasons, coherent poll order, stale-token suppression, repeated rejection and no new presentation/parameter controls",
-    "Eight RC1.3 multiband checks: spectral coloration, 48/96 kHz, conflicting/lone bands, fresh repeat, later-stage cancellation, N/S diagnostics and unchanged strict per-band checks",
-    "Eight RC1.4 temporal checks: provisional state, new acquisition success, changed delay, missing second reference, cancellation, new-token anchor reset, UI/guard failure and actual timing errors/Stop after confirmation",
-    "Eleven RC1.5 cancellation checks: unchanged numeric/source/DSP reports, genuine changes and explicit actions, ordering, latched causes, commit failure explanations and terminal text stability",
-    "Nine RC1.6 clock checks: isolated corrections, 1 ms holds, float32 wrap endpoints, persistent stall, large jumps, initial lock, independence from onset sync display, Stop/unknown guards and playing-observer binding"
+    "Inherited 250-test RC1.7 run; RC1.7.1 copy-only correction checked separately with 15 static/container and 15 UI tests, identical normalized patch and unchanged DSP/session logic.",
+    "229 prior tests retained; obsolete session-disarm assumptions and stored-count/outlet expectations updated explicitly",
+    "21 new session-intent and automatic-scheduling tests",
+    "Exact onset arithmetic plus generated graph: five off-grid takes, then an on-grid take, one UI activation, at 44.1/48/96 kHz",
+    "Deferred Stop/Start and OFF/ON generation invalidation, fresh-low handshake, retained session intent, failed Stop without repeated calls",
+    "Default/saved automatic calibration, missing reference, known/unknown REC modes, Auto Stop guard, manual request independence, conclusive zero persistence and one scheduling attempt per playback",
+    "Original onset and reference GenExpr bytes unchanged; previous parent contract pinned after reversing the inventoried session rewires",
+    "Approximate UI layout for both themes/pages: zero reported overflow; manual visual inspection of advanced preview"
   ],
+  "not_executed": [
+    "The offline harness does not execute Cycling compiler, native Max scheduler, Live serialization or actual recording. Separate owner observations are in HOST_VALIDATION.json.",
+    "Native CPU profiling, other hardware/OS/rates and exhaustive transitions remain unverified."
+  ],
+  "native_report": "HOST_VALIDATION.json",
+  "historical_report": "history/RC1_6_TEST_RESULTS.json",
   "gen_sha256": "5da751738b15e42bb4ad708eda7c8007a89c3a7b587823080fbe4941600f0945",
   "calibration_sha256": "aff9dc55c09e0be43e781c34ac1f1aa6577d238e5add77c7ab782861f1d919e5",
-  "not_executed": [
-    "Cycling Gen compiler and host scheduling are not executed by the local automated harness.",
-    "Native CPU profiling, other OS/devices/audio configurations and exhaustive recording/configuration transitions remain unverified."
-  ],
-  "preview_limit": "Approximate Pillow geometry with synthetic signals and substitute font; not native UI proof.",
-  "native_report": "HOST_VALIDATION.json"
+  "artifact_sha256": "893eb2d8f00e39485a52badf2331b138dd21a0d0008756ae8e18b6db18fcda57",
+  "ui_correction_checks": {
+    "tests_run": 30,
+    "failures": 0,
+    "errors": 0,
+    "patch_diff": "Only calibration help and version strings changed",
+    "approximate_text_width_px": 376.14,
+    "available_width_px": 560,
+    "native_text_recheck": "Owner confirmed shortened help fits the reviewed native window on 2026-11-07."
+  }
 }

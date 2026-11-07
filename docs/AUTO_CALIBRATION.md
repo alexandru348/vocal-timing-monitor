@@ -1,3 +1,9 @@
+# RC1.7.1 scheduling — limited owner native observations
+
+Automatic first-use is ON by default, stored, and starts only if compensation is missing and all existing calibration guards permit it, including Auto Stop OFF, known Arrangement/Session recording OFF, active analysis/API/DSP and playback. Selected reference peak must exceed 0.001 and eligibility remain for 1000 ms. One request per playback; restart or toggle preference for another attempt after failure. Manual recalibration remains available. No continuous updates during takes. A stored validity marker distinguishes conclusive zero; nonzero manual/legacy values are adopted as already supplied. Changing relevant audio paths still requires manual revalidation. Turning automatic mode OFF cancels its own pending measurement, including deferred commit, without cancelling a manual request.
+
+On 2026-11-07 the owner observed automatic first-use acquisition at 83.290486 ms, persistence of automatic-calibration OFF and compensation after restart, and unchanged compensation after automatic mode was re-enabled and the whole timing reference played. These observations do not establish physical-latency ground truth or all native guard/cancellation cases. See HOST_VALIDATION.json. The signal estimator, multiband/temporal qualification and clock rules below are unchanged. Earlier sections describe historical candidate development, including manual-button initiation in RC1.6; they are not native RC1.7 evidence.
+
 # 0.9 RC1.6 — reference-based acoustic calibration
 
 This is an owner-tested RC with limited native scope. Current observations are recorded in HOST_VALIDATION.json and the publication section below. Keep the owner-tested 0.8 RC1.3 available; earlier-version reports remain historical evidence.

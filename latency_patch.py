@@ -75,6 +75,7 @@ def apply_latency_popup(u):
         112:'Ableton a schimbat canalul instrumentalului.',113:'Dispozitivul a fost reinițializat.',
         114:'Condițiile de calibrare s-au schimbat.',115:'Starea procesării audio s-a schimbat.',
         116:'Rata de eșantionare s-a schimbat.',117:'Vectorul DSP s-a schimbat.',118:'Vectorul audio I/O s-a schimbat.',
+        119:'Calibrarea automată a fost dezactivată.',
         200:'Condițiile de calibrare s-au schimbat fără un motiv disponibil.',
         201:'Analiza a fost oprită.',202:'Oprirea automată a fost activată.',
         203:'Redarea a fost oprită.',204:'Conexiunea cu Ableton s-a întrerupt.',

@@ -1,103 +1,110 @@
 {
-  "version": "0.9 RC1.6 Studio",
-  "date": "2026-11-04",
-  "status": "OWNER-TESTED RELEASE CANDIDATE; LIMITED NATIVE SCOPE",
-  "baseline_commit": "ba89bffe136ef72381ae9e0d5c8b0280f60b9def",
-  "artifact_sha256": "c25358cb4f89a85e6bdcbc0e44a6323b463bf6c650427209cc12b8e51a6609e3",
-  "evidence": "Owner reports and original screenshots reviewed during the native test session. Public summary only; no private media included.",
+  "version": "0.9 RC1.7.1 Studio",
+  "date": "2026-11-07",
+  "status": "OWNER-TESTED PRERELEASE; LIMITED NATIVE SCOPE",
+  "baseline_commit": "3a103caa0d669e71bcb50be313d48c8f0973260f",
+  "artifact_sha256": "893eb2d8f00e39485a52badf2331b138dd21a0d0008756ae8e18b6db18fcda57",
+  "evidence": "Owner reports and native screenshots reviewed in the test session. Public summary only; no private media included.",
   "environment": {
     "os": "Windows 11",
     "host": "Ableton Live 12 Suite / Max for Live",
     "sample_rate_hz": 44100,
     "audio_path": "Laptop speakers and integrated microphone",
-    "driver_and_buffer": "Session setup reported ASIO4ALL v2 / 256 samples; not independently re-read during every trial"
+    "driver_and_buffer": "Previously reported ASIO4ALL v2 / 256 samples; not independently re-read in each trial."
   },
   "checks": [
     {
-      "test": "Native device load and functional DSP execution",
-      "result": "observed_pass",
-      "limit": "Functional runtime observed; no native compiler log or exhaustive Max-version matrix collected."
-    },
-    {
-      "test": "Quiet reference calibration and same-version repeat",
-      "result": "observed_pass",
-      "applied_ms": [
-        93.056351,
-        92.885786
-      ],
-      "difference_ms": 0.170565
-    },
-    {
-      "test": "Known acoustic timing reference with compensation 92.885786 ms",
-      "result": "observed_samples_match",
-      "expected_ms": [
-        0,
-        150,
-        -150
-      ],
-      "displayed_ms": [
-        -0.2,
-        149.8,
-        -150.1
-      ],
-      "limit": "Individual sampled displays, not an error distribution or a general sub-millisecond accuracy guarantee."
-    },
-    {
-      "test": "Automatic stop during Arrangement recording with compensated reference",
+      "test": "Native load and shortened startup calibration help",
       "result": "owner_confirmed_pass",
-      "displayed_ms": 149.9,
-      "stopped_position": "5.1.2 at 100 BPM",
-      "count": 17,
+      "limit": "The reported clipping is absent in the reviewed advanced-settings capture. Not a proof of every message/font/scale combination."
+    },
+    {
+      "test": "First-use calibration without pressing manual button",
+      "result": "owner_confirmed_pass",
+      "initial_compensation_ms": 0,
+      "applied_compensation_ms": 83.290486,
+      "automatic_calibration": "ON",
+      "auto_stop": "OFF",
+      "recording": "OFF",
+      "reference": "Varied original instrumental",
+      "limit": "Successful acquisition observed. The numerical value is not an independently measured physical-latency ground truth."
+    },
+    {
+      "test": "Automatic Stop with retained visible ON and compensation",
+      "result": "owner_confirmed_pass",
+      "displayed_ms": -264.2,
+      "attack_count": 2,
+      "host_confirmation": "Ultimul Stop: oprire confirmata de Live",
+      "compensation_ms": 83.290486,
       "clip_retained": true,
-      "host_confirmation": "Ultimul Stop: oprire confirmata de Live"
+      "limit": "Stopped early, before the deliberate +150 ms section. Trigger cause unconfirmed."
     },
     {
-      "test": "Full application close/reopen after saving Auto Stop ON",
+      "test": "Second F9 take without touching ON toggle or resetting measurements",
       "result": "owner_confirmed_pass",
-      "restored_compensation_ms": 92.885786,
+      "displayed_ms": 159.5,
+      "attack_count": 19,
+      "stopped_position": "5.1.2 at 100 BPM",
+      "auto_stop": "ON",
+      "clip_retained": true,
+      "limit": "Owner confirmed the next recording started and progressed; the reviewed capture shows its later stopped state. No exhaustive scheduler/race timing matrix."
+    },
+    {
+      "test": "Manual Auto Stop OFF permits continuing past over-tolerance section",
+      "result": "owner_confirmed_pass",
+      "displayed_ms": 148.5,
+      "auto_stop": "OFF",
+      "recording": "Continued; owner subsequently stopped manually."
+    },
+    {
+      "test": "Full Ableton close/reopen after saving Auto Stop ON and automatic calibration OFF",
+      "result": "owner_confirmed_pass",
       "auto_stop_after_reopen": "OFF",
-      "light_monitor_and_device_themes": "retained",
+      "automatic_calibration_after_reopen": "OFF",
+      "compensation_after_reopen_ms": 83.290486,
       "attack_count_after_reopen": 0
     },
     {
-      "test": "Calibration request with Auto Stop ON",
-      "result": "observed_pass",
-      "message": "Lasa Oprire auto OFF in timpul calibrarii.",
-      "compensation_unchanged_ms": 92.885786,
-      "transport": "remained stopped"
+      "test": "Reuse saved compensation after turning automatic calibration ON",
+      "result": "owner_confirmed_pass",
+      "playback": "Entire 28.8-second synthetic reference WAV, without REC or manual calibration request",
+      "compensation_ms": 83.290486,
+      "automatic_calibration": "ON",
+      "auto_stop": "OFF",
+      "limit": "Value remained unchanged; capture/report supports reuse, not exhaustive inspection of all internal request states."
     },
     {
-      "test": "Calibration request during Arrangement REC",
-      "result": "observed_pass",
-      "message": "Opreste REC pentru calibrare.",
-      "compensation_unchanged_ms": 92.885786,
-      "recording": "continued; owner subsequently switched REC off while playback continued"
-    },
-    {
-      "test": "Native CPU during all calibration stages",
-      "result": "not_profiled",
-      "limit": "No benchmark, peak capture or performance guarantee."
-    },
-    {
-      "test": "Current RC missing/ambiguous reference rejection, pending-result Stop/configuration races and Session Record transitions",
-      "result": "automated_only",
-      "limit": "Covered in arithmetic/message models; not exhaustively rechecked natively in RC1.6."
+      "test": "Last sampled display after full reference playback",
+      "result": "observed_sample",
+      "expected_final_section_ms": -150,
+      "displayed_ms": -140.5,
+      "attack_count": 49,
+      "limit": "One retained last-onset display, not a full event distribution or an accuracy bound. Do not attribute discrepancy or extra counted events to a proven cause."
     }
   ],
   "unresolved_observations": [
     {
+      "version": "RC1.6",
       "displayed_ms": 231.9,
-      "expected_section_ms": 150,
-      "status": "Cause unconfirmed. A later capture in the same section showed 149.8 ms. Do not discard the earlier observation or attribute it to hardware/user error without evidence."
+      "status": "Cause unconfirmed; retained from the previous published report. Not claimed fixed."
+    },
+    {
+      "version": "RC1.7.1",
+      "displayed_ms": -264.2,
+      "status": "Cause unconfirmed."
     }
   ],
-  "limits": [
-    "Amplitude onset detection can count keyboard, room noise and speaker bleed; it does not identify vocal syllables.",
-    "Calibration measures effective relative reference-to-microphone delay, not every recording-latency component or recorded-clip placement.",
-    "A saved value requires revalidation after relevant audio-path/configuration changes.",
-    "Other sample rates, devices, operating systems and full recording transition combinations lack native validation."
+  "native_checks_not_exhaustively_executed": [
+    "Missing/ambiguous-reference rejection and automatic-calibration cancellation during all native host transitions.",
+    "Conclusive zero-compensation validity through native save/reopen.",
+    "Native CPU profiling, all Session Record/configuration races, other hardware/OS/sample rates and musical vocal-accuracy distributions."
   ],
-  "protocol": "TESTARE_0_9.md",
-  "previous_candidate_report": "history/RC1_5_0_9_HOST_OBSERVATIONS.json",
-  "privacy": "No owner audio, Live Sets, original/annotated screenshots or raw routing/input diagnostics are published."
+  "limits": [
+    "Amplitude onset detection can count keyboard/room sounds and speaker bleed; it does not classify syllables or musical intent.",
+    "Calibration measures relative digital-reference/acoustic-return delay, not recorded-clip placement.",
+    "Relevant audio-path changes require manual recalibration; valid saved compensation is reused rather than automatically reacquired each take.",
+    "Offline models and owner-observed native checks are separate evidence."
+  ],
+  "historical_report": "history/RC1_6_HOST_VALIDATION.json",
+  "privacy": "No owner audio, Live Sets, screenshots or raw routing/input dumps are included."
 }
