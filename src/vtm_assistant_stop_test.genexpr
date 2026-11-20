@@ -1,0 +1,47 @@
+// Emit two controlled timing observations during an actual Arrangement recording.
+// in1: recording, in2: synchronized, in3: ready to evaluate timing.
+// out1: test state, out2: event, out3: known observed offset in ms.
+Param request(0);
+Param cancel(0);
+History previousRequest(0);
+History previousCancel(0);
+History state(0);
+History age(0);
+History emitted(0);
+
+newTest = request != previousRequest;
+canceled = cancel != previousCancel;
+nextState = state;
+nextAge = age;
+nextEmitted = emitted;
+event = 0;
+observed = 0;
+if (newTest) {
+    nextState = 1;
+    nextAge = 0;
+    nextEmitted = 0;
+} else if ((state == 1) || (state == 2)) {
+    if (canceled || (in1 != 1) || (in2 != 1) || (age >= 3 * samplerate)) {
+        nextState = 6;
+    } else {
+        nextAge = age + 1;
+        nextState = 2;
+        wait = emitted == 0 ? 0.75 : 1.5;
+        if ((age >= floor(samplerate * wait + 0.5)) && (in3 == 1)) {
+            event = 1;
+            observed = emitted == 0 ? 0 : -150;
+            nextAge = 0;
+            nextEmitted = emitted + 1;
+            if (nextEmitted == 2) { nextState = 5; }
+        }
+    }
+}
+
+out1 = nextState;
+out2 = event;
+out3 = observed;
+state = nextState;
+age = nextAge;
+emitted = nextEmitted;
+previousRequest = request;
+previousCancel = cancel;

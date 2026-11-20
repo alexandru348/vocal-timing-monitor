@@ -1,0 +1,125 @@
+// Compare onset levels with a held-out beat-only interval. An exceedance
+// indicates extra acoustic energy. It does not identify the source as voice.
+// in1..3 microphone band levels, in4 frame pulse, in5 onset candidate,
+// in6..9 permit, epoch, source/timing revisions, in10 guided stage,
+// in11 digital instrumental activity.
+Param shortframes(0);
+History previousStage(0);
+History previousEpoch(0);
+History sourceRevision(0);
+History timingRevision(0);
+History state(0);
+History elapsed(0);
+History warmup(0);
+History lowPeak(0);
+History midPeak(0);
+History highPeak(0);
+History lowMax(0);
+History midMax(0);
+History highMax(0);
+History totalMax(0);
+History fitFrames(0);
+History validationFrames(0);
+History validationEvents(0);
+History validationAbove(0);
+History speechEvents(0);
+History speechAbove(0);
+History speechPeak(0);
+
+hop = max(1, floor(samplerate * (shortframes == 1 ? 0.002 : 0.005) + 0.5));
+warmupFrames = shortframes == 1 ? 10 : 4;
+frame = in4 == 1;
+stage = in10;
+quiet = stage == 2;
+speaking = stage == 3;
+newQuiet = quiet && (previousStage != 2);
+newProbe = (stage == 1) && (previousStage != 1);
+sameEpoch = in7 == previousEpoch;
+permitted = (in6 == 1) && (in11 == 1) && sameEpoch;
+frameRise = exp(-hop / (0.020 * samplerate));
+nLow = lowPeak;
+nMid = midPeak;
+nHigh = highPeak;
+if (!permitted) {
+    nLow = 0; nMid = 0; nHigh = 0;
+} else if (frame) {
+    nLow = max(in1, frameRise * lowPeak);
+    nMid = max(in2, frameRise * midPeak);
+    nHigh = max(in3, frameRise * highPeak);
+}
+nWarmup = permitted ? min(warmup + frame, warmupFrames) : 0;
+allBands = nLow + nMid + nHigh;
+ns = state;
+ne = elapsed; nf = fitFrames; nv = validationFrames;
+nValidationEvents = validationEvents; nValidationAbove = validationAbove;
+nSpeechEvents = speechEvents; nSpeechAbove = speechAbove;
+nSpeechPeak = speechPeak;
+nLowMax = lowMax; nMidMax = midMax; nHighMax = highMax; nTotalMax = totalMax;
+nSource = sourceRevision; nTiming = timingRevision;
+above = (allBands > 1.20 * totalMax + 0.0015) &&
+        ((nLow > 1.20 * lowMax + 0.0005) ||
+         (nMid > 1.20 * midMax + 0.0005) || (nHigh > 1.20 * highMax + 0.0005));
+eligible = permitted && (nWarmup >= warmupFrames);
+contextChanged = (in8 != sourceRevision) || (in9 != timingRevision);
+attackAbove = 0;
+if (newProbe || newQuiet) {
+    ns = newQuiet ? 1 : 0;
+    ne = 0; nf = 0; nv = 0;
+    nLowMax = 0; nMidMax = 0; nHighMax = 0; nTotalMax = 0;
+    nValidationEvents = 0; nValidationAbove = 0;
+    nSpeechEvents = 0; nSpeechAbove = 0;
+    nSpeechPeak = 0;
+    nSource = in8; nTiming = in9;
+} else if ((state > 0) && ((stage == 6) || ((quiet || speaking) && contextChanged))) {
+    ns = 3;
+} else if ((state == 1) && quiet) {
+    ne = elapsed + frame;
+    if (eligible) {
+        if (elapsed * hop < 3 * samplerate) {
+            nf = fitFrames + frame;
+            nLowMax = max(lowMax, nLow);
+            nMidMax = max(midMax, nMid);
+            nHighMax = max(highMax, nHigh);
+            nTotalMax = max(totalMax, allBands);
+        } else {
+            nv = validationFrames + frame;
+            nValidationEvents = validationEvents + (in5 == 1);
+            nValidationAbove = validationAbove + ((in5 == 1) && above);
+        }
+    }
+} else if ((state == 1) && speaking) {
+    // Keep the benchmark only if beat-only levels were usable in both parts
+    // and no held-out beat candidate would have been flagged as extra sound.
+    ns = ((fitFrames * hop >= 2 * samplerate) && (validationFrames * hop >= samplerate) &&
+          (validationEvents >= 6) && (validationAbove == 0) && (totalMax >= 0.003)) ? 2 : 3;
+} else if ((state == 2) && speaking && eligible && (in5 == 1)) {
+    nSpeechEvents = speechEvents + 1;
+    nSpeechAbove = speechAbove + above;
+    nSpeechPeak = max(speechPeak, allBands);
+    attackAbove = above;
+}
+
+out1 = ns;
+out2 = nf * hop * 1000 / samplerate;
+out3 = nv * hop * 1000 / samplerate;
+out4 = nValidationEvents;
+out5 = nValidationAbove;
+out6 = nSpeechEvents;
+out7 = nSpeechAbove;
+out8 = 1.20 * nTotalMax + 0.0015;
+out9 = nSpeechPeak;
+out10 = attackAbove;
+out11 = allBands;
+// Supply the same held-out interval and threshold to the independent frame detector.
+out12 = eligible && !contextChanged && ((quiet && (state == 1) && (elapsed * hop >= 3 * samplerate)) ||
+         (speaking && (ns == 2)));
+out13 = in1 + in2 + in3;
+previousStage = stage; previousEpoch = in7;
+sourceRevision = nSource; timingRevision = nTiming;
+state = ns; elapsed = ne; warmup = nWarmup;
+lowPeak = nLow; midPeak = nMid; highPeak = nHigh;
+lowMax = nLowMax; midMax = nMidMax; highMax = nHighMax; totalMax = nTotalMax;
+fitFrames = nf; validationFrames = nv;
+validationEvents = nValidationEvents; validationAbove = nValidationAbove;
+speechEvents = nSpeechEvents; speechAbove = nSpeechAbove;
+speechPeak = nSpeechPeak;

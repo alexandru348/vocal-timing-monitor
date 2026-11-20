@@ -1,0 +1,20 @@
+// One attack compared with an explicitly matched reference onset.
+// in1 event, in2 expected ms, in3 observed compensated ms, in4 error bound ms,
+// in5 valid context, in6 confirmed unique match, in7 recording in progress.
+// out1 0 idle, 1 uncertain, 2 within tolerance, 3 early, 4 late.
+// out2 signed deviation for a valid match, out3 eligible Stop request pulse.
+Param tolerancems(100);
+
+event = in1 == 1;
+settingsValid = (tolerancems >= 10) && (tolerancems <= 300) && (in4 >= 0);
+matched = event && settingsValid && (in5 == 1) && (in6 == 1);
+deviation = in3 - in2;
+earliest = deviation - in4;
+latest = deviation + in4;
+within = matched && (earliest >= -tolerancems) && (latest <= tolerancems);
+early = matched && (latest < -tolerancems);
+late = matched && (earliest > tolerancems);
+
+out1 = !event ? 0 : (within ? 2 : (early ? 3 : (late ? 4 : 1)));
+out2 = matched ? deviation : 0;
+out3 = (early || late) && (in7 == 1);

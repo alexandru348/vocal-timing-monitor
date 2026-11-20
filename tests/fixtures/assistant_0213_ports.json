@@ -1,0 +1,20 @@
+{
+  "boxes": [
+    {
+      "box": {
+        "id": "aq-engine",
+        "numinlets": 7,
+        "numoutlets": 174,
+        "text": "gen~"
+      }
+    },
+    {
+      "box": {
+        "id": "aq-diagnostic-poll",
+        "numinlets": 1,
+        "numoutlets": 146,
+        "text": "t b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b"
+      }
+    }
+  ]
+}

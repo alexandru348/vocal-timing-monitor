@@ -1,0 +1,2740 @@
+{
+  "boxes": [
+    {
+      "box": {
+        "id": "aq-engine",
+        "numinlets": 7,
+        "numoutlets": 124,
+        "patcher": {
+          "boxes": [
+            {
+              "box": {
+                "maxclass": "codebox",
+                "code": "// Acoustic envelope comparison only: NOT voice recognition or separation.\n// in1/2: raw mic stereo; in3/4: digital reference stereo.\n// in5: preflight detectpermit; in6: preflight epoch; in7: validated offset ms.\n// Compare 600 ms of three-band envelopes, allowing +/-20 ms around the\n// existing calibration. Four fixed stereo reference views: peak, mono, L, R.\n// No fitted acoustic model, automatic offset learning or audio output.\nParam profilevalid(0);\nParam sourcemode(0);\n// Explicit user-declared quiet capture; never infer that speakers are muted.\nParam backgroundrequest(0);\n// User-declared speaker reactivation. It does not change Windows or Live.\nParam speakersrequest(0);\nHistory testphase(0);\nHistory testrequest(0);\nHistory testgate(0);\nHistory mutedwindows(0);\nHistory mutedwithin(0);\nHistory mutedabove(0);\nHistory muteduncertain(0);\nHistory mutedstart(0);\nHistory mutedend(0);\nHistory mutedmean0(0);\nHistory mutedfraction0(0);\nHistory mutedbandwindows0(0);\nHistory mutedmean1(0);\nHistory mutedfraction1(0);\nHistory mutedbandwindows1(0);\nHistory mutedmean2(0);\nHistory mutedfraction2(0);\nHistory mutedbandwindows2(0);\nHistory audiblewindows(0);\nHistory audiblewithin(0);\nHistory audibleabove(0);\nHistory audibleuncertain(0);\nHistory audiblestart(0);\nHistory audibleend(0);\nHistory audiblemean0(0);\nHistory audiblefraction0(0);\nHistory audiblebandwindows0(0);\nHistory audiblemean1(0);\nHistory audiblefraction1(0);\nHistory audiblebandwindows1(0);\nHistory audiblemean2(0);\nHistory audiblefraction2(0);\nHistory audiblebandwindows2(0);\nHistory bgstate(0);\nHistory bgrequest(0);\nHistory bgcount(0);\nHistory bgskipframe(0);\nHistory bgmean0(0);\nHistory bgmean1(0);\nHistory bgmean2(0);\nHistory bgm20(0);\nHistory bgm21(0);\nHistory bgm22(0);\n\nHistory bgcmpstate(0);\nHistory bgcmpcount(0);\nHistory bgcmpframes(0);\nHistory bgcmpwindows(0);\nHistory bgcmpmask(0);\nHistory bgcmpend(0);\nHistory bgcmpwithin(0);\nHistory bgcmpabove(0);\nHistory bgcmpuncertain(0);\nHistory bgcmpsum0(0);\nHistory bgcmpexceed0(0);\nHistory bgcmplevel0(0);\nHistory bgcmpfraction0(0);\nHistory bgcmpsum1(0);\nHistory bgcmpexceed1(0);\nHistory bgcmplevel1(0);\nHistory bgcmpfraction1(0);\nHistory bgcmpsum2(0);\nHistory bgcmpexceed2(0);\nHistory bgcmplevel2(0);\nHistory bgcmpfraction2(0);\n\nHistory lastepoch(-1);\nHistory lastoffset(0);\nHistory lastprofile(0);\nHistory lastmode(0);\nHistory framesamples(0);\nHistory writepos(0);\nHistory filled(0);\nHistory hop(0);\nHistory state(0);\nHistory match(0);\nHistory distinct(0);\nHistory inputlevel(0);\nHistory reflevel(0);\nHistory activity(0);\nHistory bestmodel(0);\nHistory bestlagms(0);\nHistory bandmatch0(0);\nHistory bandmatch1(0);\nHistory bandmatch2(0);\nHistory usablebands(0);\nHistory micvariationindex(0);\nHistory peakmatch(0);\nHistory band_input_level_low(0);\nHistory band_input_level_mid(0);\nHistory band_input_level_high(0);\nHistory band_reference_level_low(0);\nHistory band_reference_level_mid(0);\nHistory band_reference_level_high(0);\nHistory band_input_variation_low(0);\nHistory band_input_variation_mid(0);\nHistory band_input_variation_high(0);\nHistory band_reference_variation_low(0);\nHistory band_reference_variation_mid(0);\nHistory band_reference_variation_high(0);\nHistory band_weight_low(0);\nHistory band_weight_mid(0);\nHistory band_weight_high(0);\nHistory usable_band_mask(0);\nHistory reference_supported_band_mask(0);\nHistory partial_reference_windows(0);\nHistory band_reference_windows_low(0);\nHistory band_reference_windows_mid(0);\nHistory band_reference_windows_high(0);\nHistory lastclass(0);\nHistory classrun(0);\nHistory cliphold(0);\nHistory referencewindows(0);\nHistory distinctwindows(0);\nHistory uncertainwindows(0);\n// Lifetime diagnostics survive invalidations but NEVER authorize evaluation.\nHistory runlength(0);\nHistory longestrun(0);\nHistory resetepisodes(0);\nHistory previousreset(0);\nHistory lastreason(0);\nHistory windowscomputed(0);\nHistory epochchanges(0);\nHistory offsetchanges(0);\nHistory permitlosses(0);\nHistory profilechanges(0);\nHistory modechanges(0);\nHistory lastpermit(0);\nHistory clock(0);\nHistory mldc(0);\nHistory mllow(0);\nHistory mlupper(0);\nHistory mrdc(0);\nHistory mrlow(0);\nHistory mrupper(0);\nHistory rldc(0);\nHistory rllow(0);\nHistory rlupper(0);\nHistory rrdc(0);\nHistory rrlow(0);\nHistory rrupper(0);\nHistory rmdc(0);\nHistory rmlow(0);\nHistory rmupper(0);\nHistory msum0(0);\nData mdata0(256);\nHistory rsum0(0);\nData rdata0(256);\nHistory msum1(0);\nData mdata1(256);\nHistory rsum1(0);\nData rdata1(256);\nHistory msum2(0);\nData mdata2(256);\nHistory rsum2(0);\nData rdata2(256);\nHistory rlframe0(0);\nHistory rlframe1(0);\nHistory rlframe2(0);\nHistory rrframe0(0);\nHistory rrframe1(0);\nHistory rrframe2(0);\nHistory rmframe0(0);\nHistory rmframe1(0);\nHistory rmframe2(0);\nData rleft0(256);\nData rleft1(256);\nData rleft2(256);\nData rright0(256);\nData rright1(256);\nData rright2(256);\nData rmono0(256);\nData rmono1(256);\nData rmono2(256);\n\noperating = (in5 == 1) && (profilevalid == 1) && (sourcemode == 1);\nepochchanged = in6 != lastepoch;\n// A stable anchor ignores sub-nanosecond numerical noise; cumulative drift\n// still crosses the threshold. Meaningful offset edits always invalidate.\noffsetchanged = abs(in7 - lastoffset) > 0.000001;\nprofilechanged = profilevalid != lastprofile;\nmodechanged = sourcemode != lastmode;\nchanged = epochchanged || offsetchanged || profilechanged || modechanged;\npeak = max(max(abs(in1), abs(in2)), max(abs(in3), abs(in4)));\nncliphold = peak >= 0.98 ? samplerate * 0.250 : max(0, cliphold - 1);\nresetnow = !operating || changed || (ncliphold > 0);\nreason = (in5 != 1) + 2 * epochchanged + 4 * offsetchanged + 8 * (profilevalid != 1 || profilechanged) + 16 * (sourcemode != 1 || modechanged) + 32 * (ncliphold > 0);\nnrunlength = resetnow ? 0 : min(runlength + 1, 1000000000);\nnlongestrun = max(longestrun, nrunlength);\nnresetepisodes = min(1000000000, resetepisodes + (resetnow && !previousreset));\nnlastreason = resetnow ? reason : lastreason;\nnwindowscomputed = windowscomputed;\nnepochchanges = min(1000000000, epochchanges + epochchanged);\nnoffsetchanges = min(1000000000, offsetchanges + offsetchanged);\nnpermitlosses = min(1000000000, permitlosses + ((in5 != 1) && (lastpermit == 1)));\nnprofilechanges = min(1000000000, profilechanges + profilechanged);\nnmodechanges = min(1000000000, modechanges + modechanged);\n// Smooth DC rejection and broad bands, independently per stereo channel.\nc20 = exp(-6.28318530718 * 20 / samplerate);\nc400 = exp(-6.28318530718 * 400 / samplerate);\nc1800 = exp(-6.28318530718 * 1800 / samplerate);\nnmldc = in1 + c20 * (mldc - in1);\nmlhp = in1 - nmldc;\nnmllow = mlhp + c400 * (mllow - mlhp);\nnmlupper = mlhp + c1800 * (mlupper - mlhp);\nnmrdc = in2 + c20 * (mrdc - in2);\nmrhp = in2 - nmrdc;\nnmrlow = mrhp + c400 * (mrlow - mrhp);\nnmrupper = mrhp + c1800 * (mrupper - mrhp);\nnrldc = in3 + c20 * (rldc - in3);\nrlhp = in3 - nrldc;\nnrllow = rlhp + c400 * (rllow - rlhp);\nnrlupper = rlhp + c1800 * (rlupper - rlhp);\nnrrdc = in4 + c20 * (rrdc - in4);\nrrhp = in4 - nrrdc;\nnrrlow = rrhp + c400 * (rrlow - rrhp);\nnrrupper = rrhp + c1800 * (rrupper - rrhp);\n// Mix before rectification: summing envelopes would miss stereo cancellation.\nrm = (in3 + in4) * 0.5;\nnrmdc = rm + c20 * (rmdc - rm);\nrmhp = rm - nrmdc;\nnrmlow = rmhp + c400 * (rmlow - rmhp);\nnrmupper = rmhp + c1800 * (rmupper - rmhp);\nnrlframe0 = rlframe0 + abs(nrllow);\nnrlframe1 = rlframe1 + abs(nrlupper - nrllow);\nnrlframe2 = rlframe2 + abs(rlhp - nrlupper);\nnrrframe0 = rrframe0 + abs(nrrlow);\nnrrframe1 = rrframe1 + abs(nrrupper - nrrlow);\nnrrframe2 = rrframe2 + abs(rrhp - nrrupper);\nnrmframe0 = rmframe0 + abs(nrmlow);\nnrmframe1 = rmframe1 + abs(nrmupper - nrmlow);\nnrmframe2 = rmframe2 + abs(rmhp - nrmupper);\nnmsum0 = msum0 + max(abs(nmllow), abs(nmrlow));\nnmsum1 = msum1 + max(abs(nmlupper - nmllow), abs(nmrupper - nmrlow));\nnmsum2 = msum2 + max(abs(mlhp - nmlupper), abs(mrhp - nmrupper));\nnrsum0 = rsum0 + max(abs(nrllow), abs(nrrlow));\nnrsum1 = rsum1 + max(abs(nrlupper - nrllow), abs(nrrupper - nrrlow));\nnrsum2 = rsum2 + max(abs(rlhp - nrlupper), abs(rrhp - nrrupper));\nnframesamples = framesamples + 1;\nnwritepos = writepos;\nnfilled = filled;\nnhop = hop;\nnstate = state;\nnmatch = match;\nndistinct = distinct;\nninputlevel = inputlevel;\nnreflevel = reflevel;\nnactivity = activity;\nnmodel = bestmodel;\nnlagms = bestlagms;\nnbandmatch0 = bandmatch0;\nnbandmatch1 = bandmatch1;\nnbandmatch2 = bandmatch2;\nnusablebands = usablebands;\nnmicvariationindex = micvariationindex;\nnpeakmatch = peakmatch;\nnband_input_level_low = band_input_level_low;\nnband_input_level_mid = band_input_level_mid;\nnband_input_level_high = band_input_level_high;\nnband_reference_level_low = band_reference_level_low;\nnband_reference_level_mid = band_reference_level_mid;\nnband_reference_level_high = band_reference_level_high;\nnband_input_variation_low = band_input_variation_low;\nnband_input_variation_mid = band_input_variation_mid;\nnband_input_variation_high = band_input_variation_high;\nnband_reference_variation_low = band_reference_variation_low;\nnband_reference_variation_mid = band_reference_variation_mid;\nnband_reference_variation_high = band_reference_variation_high;\nnband_weight_low = band_weight_low;\nnband_weight_mid = band_weight_mid;\nnband_weight_high = band_weight_high;\nnusable_band_mask = usable_band_mask;\nnreference_supported_band_mask = reference_supported_band_mask;\nnpartial_reference_windows = partial_reference_windows;\nnband_reference_windows_low = band_reference_windows_low;\nnband_reference_windows_mid = band_reference_windows_mid;\nnband_reference_windows_high = band_reference_windows_high;\nnlastclass = lastclass;\nnclassrun = classrun;\nnreferencewindows = referencewindows;\nndistinctwindows = distinctwindows;\nnuncertainwindows = uncertainwindows;\n// The background profile is session/context-scoped and diagnostic only.\n// Starting a new request discards the partial leading 10 ms frame and waits\n// at least 500 ms so the button click is not part of the declared baseline.\nframelen = max(1, floor(samplerate * 0.010));\nnbgstate = bgstate;\nnbgrequest = bgrequest;\nnbgcount = bgcount;\nnbgskipframe = bgskipframe;\nnbgmean0 = bgmean0;\nnbgmean1 = bgmean1;\nnbgmean2 = bgmean2;\nnbgm20 = bgm20;\nnbgm21 = bgm21;\nnbgm22 = bgm22;\nnbgcmpstate = bgcmpstate;\nnbgcmpcount = bgcmpcount;\nnbgcmpframes = bgcmpframes;\nnbgcmpwindows = bgcmpwindows;\nnbgcmpmask = bgcmpmask;\nnbgcmpend = bgcmpend;\nnbgcmpwithin = bgcmpwithin;\nnbgcmpabove = bgcmpabove;\nnbgcmpuncertain = bgcmpuncertain;\nnbgcmpsum0 = bgcmpsum0;\nnbgcmpexceed0 = bgcmpexceed0;\nnbgcmplevel0 = bgcmplevel0;\nnbgcmpfraction0 = bgcmpfraction0;\nnbgcmpsum1 = bgcmpsum1;\nnbgcmpexceed1 = bgcmpexceed1;\nnbgcmplevel1 = bgcmplevel1;\nnbgcmpfraction1 = bgcmpfraction1;\nnbgcmpsum2 = bgcmpsum2;\nnbgcmpexceed2 = bgcmpexceed2;\nnbgcmplevel2 = bgcmplevel2;\nnbgcmpfraction2 = bgcmpfraction2;\nbgnewrequest = backgroundrequest != bgrequest;\nif (bgnewrequest) {\n    nbgstate = backgroundrequest > 0 ? 1 : 0;\n    nbgrequest = backgroundrequest;\n    nbgcount = 0;\n    nbgskipframe = 1 + floor(samplerate * 0.5 / framelen + 0.999999999);\n    nbgmean0 = 0;\n    nbgmean1 = 0;\n    nbgmean2 = 0;\n    nbgm20 = 0;\n    nbgm21 = 0;\n    nbgm22 = 0;\n}\nif (resetnow) {\n    nbgstate = (bgstate != 0 || bgnewrequest) ? 3 : 0;\n    nbgcount = 0;\n    nbgskipframe = 0;\n    nbgmean0 = 0;\n    nbgmean1 = 0;\n    nbgmean2 = 0;\n    nbgm20 = 0;\n    nbgm21 = 0;\n    nbgm22 = 0;\n}\n// Heuristic limits on the SAME disjoint 10 ms envelopes as acquisition.\n// Three population SDs is a margin, NOT a confidence interval or voice test.\n// Relative/absolute floors avoid hypersensitivity to constant/zero baselines.\nbgcmplimit0 = nbgmean0 + max(0.00001, max(0.1 * nbgmean0, 3 * sqrt(max(0, nbgm20 / max(1, nbgcount)))));\nbgcmplimit1 = nbgmean1 + max(0.00001, max(0.1 * nbgmean1, 3 * sqrt(max(0, nbgm21 / max(1, nbgcount)))));\nbgcmplimit2 = nbgmean2 + max(0.00001, max(0.1 * nbgmean2, 3 * sqrt(max(0, nbgm22 / max(1, nbgcount)))));\nif (resetnow || bgnewrequest || (nbgstate != 2)) {\n    nbgcmpstate = 0;\n    nbgcmpcount = 0;\n    nbgcmpframes = 0;\n    nbgcmpwindows = 0;\n    nbgcmpmask = 0;\n    nbgcmpend = 0;\n    nbgcmpwithin = 0;\n    nbgcmpabove = 0;\n    nbgcmpuncertain = 0;\n    nbgcmpsum0 = 0;\n    nbgcmpexceed0 = 0;\n    nbgcmplevel0 = 0;\n    nbgcmpfraction0 = 0;\n    nbgcmpsum1 = 0;\n    nbgcmpexceed1 = 0;\n    nbgcmplevel1 = 0;\n    nbgcmpfraction1 = 0;\n    nbgcmpsum2 = 0;\n    nbgcmpexceed2 = 0;\n    nbgcmplevel2 = 0;\n    nbgcmpfraction2 = 0;\n}\n// Separate declared-condition phases. No mute inference and no timed\n// assumption about when the user reactivates the speakers.\nntestphase = testphase;\nntestrequest = testrequest;\nntestgate = testgate;\nnmutedwindows = mutedwindows;\nnmutedwithin = mutedwithin;\nnmutedabove = mutedabove;\nnmuteduncertain = muteduncertain;\nnmutedstart = mutedstart;\nnmutedend = mutedend;\nnmutedmean0 = mutedmean0;\nnmutedfraction0 = mutedfraction0;\nnmutedbandwindows0 = mutedbandwindows0;\nnmutedmean1 = mutedmean1;\nnmutedfraction1 = mutedfraction1;\nnmutedbandwindows1 = mutedbandwindows1;\nnmutedmean2 = mutedmean2;\nnmutedfraction2 = mutedfraction2;\nnmutedbandwindows2 = mutedbandwindows2;\nnaudiblewindows = audiblewindows;\nnaudiblewithin = audiblewithin;\nnaudibleabove = audibleabove;\nnaudibleuncertain = audibleuncertain;\nnaudiblestart = audiblestart;\nnaudibleend = audibleend;\nnaudiblemean0 = audiblemean0;\nnaudiblefraction0 = audiblefraction0;\nnaudiblebandwindows0 = audiblebandwindows0;\nnaudiblemean1 = audiblemean1;\nnaudiblefraction1 = audiblefraction1;\nnaudiblebandwindows1 = audiblebandwindows1;\nnaudiblemean2 = audiblemean2;\nnaudiblefraction2 = audiblefraction2;\nnaudiblebandwindows2 = audiblebandwindows2;\ntestnewrequest = speakersrequest != testrequest;\nntestrequest = speakersrequest;\nif (bgnewrequest || resetnow || (nbgstate != 2)) {\n    ntestphase = 0;\n    ntestgate = 0;\n    nmutedwindows = 0;\n    nmutedwithin = 0;\n    nmutedabove = 0;\n    nmuteduncertain = 0;\n    nmutedstart = 0;\n    nmutedend = 0;\n    nmutedmean0 = 0;\n    nmutedfraction0 = 0;\n    nmutedbandwindows0 = 0;\n    nmutedmean1 = 0;\n    nmutedfraction1 = 0;\n    nmutedbandwindows1 = 0;\n    nmutedmean2 = 0;\n    nmutedfraction2 = 0;\n    nmutedbandwindows2 = 0;\n    naudiblewindows = 0;\n    naudiblewithin = 0;\n    naudibleabove = 0;\n    naudibleuncertain = 0;\n    naudiblestart = 0;\n    naudibleend = 0;\n    naudiblemean0 = 0;\n    naudiblefraction0 = 0;\n    naudiblebandwindows0 = 0;\n    naudiblemean1 = 0;\n    naudiblefraction1 = 0;\n    naudiblebandwindows1 = 0;\n    naudiblemean2 = 0;\n    naudiblefraction2 = 0;\n    naudiblebandwindows2 = 0;\n    ntestphase = (nbgstate == 3) ? 6 : 0;\n} else if (testnewrequest && (testphase == 2) && (speakersrequest > 0)) {\n    // Wait at least 500 ms after the declaration/click. Accept only comparison\n    // windows whose ENTIRE raw envelope span begins after this gate.\n    ntestphase = 3;\n    ntestgate = clock + floor(samplerate * 0.5 + 0.999999999);\n} else if ((testphase == 3) && (clock >= testgate)) {\n    ntestphase = 4;\n}\nframems = 1000 * framelen / samplerate;\n// Signed offsets: delay the reference for positive offsets and microphone\n// envelopes for negative offsets. Never read unwritten or previous-epoch data.\nrdelay = floor(max(0, clamp(in7, -500, 500)) / framems + 0.5);\nmdelay = floor(max(0, -clamp(in7, -500, 500)) / framems + 0.5);\nif (resetnow) {\n    nframesamples = 0;\n    nwritepos = 0;\n    nfilled = 0;\n    nhop = 0;\n    nstate = 1;\n    nmatch = 0;\n    ndistinct = 0;\n    ninputlevel = 0;\n    nreflevel = 0;\n    nactivity = 0;\n    nmodel = 0;\n    nlagms = 0;\n    nbandmatch0 = 0;\n    nbandmatch1 = 0;\n    nbandmatch2 = 0;\n    nusablebands = 0;\n    nmicvariationindex = 0;\n    npeakmatch = 0;\n    nband_input_level_low = 0;\n    nband_input_level_mid = 0;\n    nband_input_level_high = 0;\n    nband_reference_level_low = 0;\n    nband_reference_level_mid = 0;\n    nband_reference_level_high = 0;\n    nband_input_variation_low = 0;\n    nband_input_variation_mid = 0;\n    nband_input_variation_high = 0;\n    nband_reference_variation_low = 0;\n    nband_reference_variation_mid = 0;\n    nband_reference_variation_high = 0;\n    nband_weight_low = 0;\n    nband_weight_mid = 0;\n    nband_weight_high = 0;\n    nusable_band_mask = 0;\n    nreference_supported_band_mask = 0;\n    npartial_reference_windows = 0;\n    nband_reference_windows_low = 0;\n    nband_reference_windows_mid = 0;\n    nband_reference_windows_high = 0;\n    nlastclass = 0;\n    nclassrun = 0;\n    nreferencewindows = 0;\n    ndistinctwindows = 0;\n    nuncertainwindows = 0;\n    nmsum0 = 0;\n    nrsum0 = 0;\n    nmsum1 = 0;\n    nrsum1 = 0;\n    nmsum2 = 0;\n    nrsum2 = 0;\n    nmldc = 0;\n    nmllow = 0;\n    nmlupper = 0;\n    nmrdc = 0;\n    nmrlow = 0;\n    nmrupper = 0;\n    nrldc = 0;\n    nrllow = 0;\n    nrlupper = 0;\n    nrrdc = 0;\n    nrrlow = 0;\n    nrrupper = 0;\n    nrmdc = 0;\n    nrmlow = 0;\n    nrmupper = 0;\n    nrlframe0 = 0; nrlframe1 = 0; nrlframe2 = 0;\n    nrrframe0 = 0; nrrframe1 = 0; nrrframe2 = 0;\n    nrmframe0 = 0; nrmframe1 = 0; nrmframe2 = 0;\n} else if (nframesamples >= framelen) {\n    // Capture disjoint complete microphone frames, independent of reference\n    // matching, lag selection, or overlapping comparison windows. Welford\n    // moments retain the mean and population variance without cancellation.\n    if (nbgstate == 1) {\n        if (nbgskipframe > 0) { nbgskipframe = nbgskipframe - 1; }\n        else {\n            nbgcount = nbgcount + 1;\n            bgvalue0 = nmsum0 / nframesamples;\n            bgdelta0 = bgvalue0 - nbgmean0;\n            nbgmean0 = nbgmean0 + bgdelta0 / nbgcount;\n            nbgm20 = nbgm20 + bgdelta0 * (bgvalue0 - nbgmean0);\n            bgvalue1 = nmsum1 / nframesamples;\n            bgdelta1 = bgvalue1 - nbgmean1;\n            nbgmean1 = nbgmean1 + bgdelta1 / nbgcount;\n            nbgm21 = nbgm21 + bgdelta1 * (bgvalue1 - nbgmean1);\n            bgvalue2 = nmsum2 / nframesamples;\n            bgdelta2 = bgvalue2 - nbgmean2;\n            nbgmean2 = nbgmean2 + bgdelta2 / nbgcount;\n            nbgm22 = nbgm22 + bgdelta2 * (bgvalue2 - nbgmean2);\n            if (nbgcount * framelen >= samplerate * 5) { nbgstate = 2; }\n        }\n    }\n\n    // Start on the first full frame AFTER acquisition; never compare the\n    // acquisition's final frame with a baseline containing that same frame.\n    if ((bgstate == 2) && (nbgstate == 2) && !bgnewrequest) {\n        nbgcmpstate = bgcmpstate == 0 ? 1 : bgcmpstate;\n        nbgcmpcount = bgcmpcount + 1;\n        nbgcmpsum0 = bgcmpsum0 + nmsum0 / nframesamples;\n        nbgcmpexceed0 = bgcmpexceed0 + (nmsum0 / nframesamples > bgcmplimit0);\n        nbgcmpsum1 = bgcmpsum1 + nmsum1 / nframesamples;\n        nbgcmpexceed1 = bgcmpexceed1 + (nmsum1 / nframesamples > bgcmplimit1);\n        nbgcmpsum2 = bgcmpsum2 + nmsum2 / nframesamples;\n        nbgcmpexceed2 = bgcmpexceed2 + (nmsum2 / nframesamples > bgcmplimit2);\n        if (nbgcmpcount * framelen >= samplerate) {\n            nbgcmpframes = nbgcmpcount;\n            nbgcmpwindows = min(1000000000, bgcmpwindows + 1);\n            nbgcmpend = clock;\n            nbgcmplevel0 = nbgcmpsum0 / nbgcmpcount;\n            nbgcmpfraction0 = nbgcmpexceed0 / nbgcmpcount;\n            nbgcmplevel1 = nbgcmpsum1 / nbgcmpcount;\n            nbgcmpfraction1 = nbgcmpexceed1 / nbgcmpcount;\n            nbgcmplevel2 = nbgcmpsum2 / nbgcmpcount;\n            nbgcmpfraction2 = nbgcmpexceed2 / nbgcmpcount;\n            // >=60% over the limit is persistent in this one-second window.\n            // <=10% in every band is within; intermediate occupancy is uncertain.\n            nbgcmpmask = (nbgcmpfraction0 >= 0.6) + 2 * (nbgcmpfraction1 >= 0.6) + 4 * (nbgcmpfraction2 >= 0.6);\n            bgcmpquiet = max(nbgcmpfraction0, max(nbgcmpfraction1, nbgcmpfraction2)) <= 0.1;\n            nbgcmpstate = nbgcmpmask > 0 ? 3 : (bgcmpquiet ? 2 : 4);\n            nbgcmpwithin = min(1000000000, bgcmpwithin + (nbgcmpstate == 2));\n            nbgcmpabove = min(1000000000, bgcmpabove + (nbgcmpstate == 3));\n            nbgcmpuncertain = min(1000000000, bgcmpuncertain + (nbgcmpstate == 4));\n            nbgcmpcount = 0;\n            nbgcmpsum0 = 0; nbgcmpexceed0 = 0;\n            nbgcmpsum1 = 0; nbgcmpexceed1 = 0;\n            nbgcmpsum2 = 0; nbgcmpexceed2 = 0;\n        }\n    }\n\n    poke(mdata0, nmsum0 / nframesamples, writepos);\n    poke(rdata0, nrsum0 / nframesamples, writepos);\n    poke(mdata1, nmsum1 / nframesamples, writepos);\n    poke(rdata1, nrsum1 / nframesamples, writepos);\n    poke(mdata2, nmsum2 / nframesamples, writepos);\n    poke(rdata2, nrsum2 / nframesamples, writepos);\n    poke(rleft0, nrlframe0 / nframesamples, writepos);\n    poke(rleft1, nrlframe1 / nframesamples, writepos);\n    poke(rleft2, nrlframe2 / nframesamples, writepos);\n    poke(rright0, nrrframe0 / nframesamples, writepos);\n    poke(rright1, nrrframe1 / nframesamples, writepos);\n    poke(rright2, nrrframe2 / nframesamples, writepos);\n    poke(rmono0, nrmframe0 / nframesamples, writepos);\n    poke(rmono1, nrmframe1 / nframesamples, writepos);\n    poke(rmono2, nrmframe2 / nframesamples, writepos);\n    nfilled = min(256, filled + 1);\n    nhop = hop + 1;\n    // Ring guard covers the full window, both delay signs and all search lags.\n    if ((nfilled >= 64 + max(rdelay, mdelay)) && (nhop >= 10)) {\n        nwindowscomputed = min(1000000000, windowscomputed + 1);\n        bestmatch = -1;\n        bestmic = 0;\n        bestref = 0;\n        bestactivity = 0;\n        bestvariation = 0;\n        bestbands = 0;\n        peakviewmatch = 0;\n        bestband0 = 0; bestband1 = 0; bestband2 = 0;\n        // Fixed reference views only. A good match can also contain other\n        // sounds; a poor match does not establish an independent source.\n        for (model = 0; model < 4; model = model + 1) {\n        // 5 hypotheses in ENVELOPE frames. This is not a delay estimator.\n        for (lag = -2; lag <= 2; lag = lag + 1) {\n            weighted = 0;\n            weight = 0;\n            micmean = 0;\n            refmean = 0;\n            micvariation = 0;\n            bands = 0;\n            activeframes = 0;\n            sx0 = 0; sy0 = 0; sxx0 = 0; syy0 = 0; sxy0 = 0;\n            sx1 = 0; sy1 = 0; sxx1 = 0; syy1 = 0; sxy1 = 0;\n            sx2 = 0; sy2 = 0; sxx2 = 0; syy2 = 0; sxy2 = 0;\n            for (k = 0; k < 60; k = k + 1) {\n                mi = writepos - 2 - mdelay - k;\n                ri = writepos - 2 - rdelay - lag - k;\n                mi = mi < 0 ? mi + 256 : mi;\n                ri = ri < 0 ? ri + 256 : ri;\n                micframe = 0;\n                x0 = peek(mdata0, mi);\n                y0 = model == 0 ? peek(rdata0, ri) : (model == 1 ? peek(rmono0, ri) : (model == 2 ? peek(rleft0, ri) : peek(rright0, ri)));\n                sx0 = sx0 + x0; sy0 = sy0 + y0;\n                sxx0 = sxx0 + x0 * x0; syy0 = syy0 + y0 * y0;\n                sxy0 = sxy0 + x0 * y0;\n                micframe = micframe + x0;\n                x1 = peek(mdata1, mi);\n                y1 = model == 0 ? peek(rdata1, ri) : (model == 1 ? peek(rmono1, ri) : (model == 2 ? peek(rleft1, ri) : peek(rright1, ri)));\n                sx1 = sx1 + x1; sy1 = sy1 + y1;\n                sxx1 = sxx1 + x1 * x1; syy1 = syy1 + y1 * y1;\n                sxy1 = sxy1 + x1 * y1;\n                micframe = micframe + x1;\n                x2 = peek(mdata2, mi);\n                y2 = model == 0 ? peek(rdata2, ri) : (model == 1 ? peek(rmono2, ri) : (model == 2 ? peek(rleft2, ri) : peek(rright2, ri)));\n                sx2 = sx2 + x2; sy2 = sy2 + y2;\n                sxx2 = sxx2 + x2 * x2; syy2 = syy2 + y2 * y2;\n                sxy2 = sxy2 + x2 * y2;\n                micframe = micframe + x2;\n                activeframes = activeframes + (micframe >= 0.004);\n            }\n            vx0 = max(0, sxx0 - sx0 * sx0 / 60);\n            vy0 = max(0, syy0 - sy0 * sy0 / 60);\n            cov0 = max(0, sxy0 - sx0 * sy0 / 60);\n            varied0 = (vx0 > max(0.00000001, sx0 * sx0 / 60 * 0.01)) && (vy0 > max(0.00000001, sy0 * sy0 / 60 * 0.01));\n            usable0 = varied0 && (sx0 / 60 >= 0.0003) && (sy0 / 60 >= 0.0001);\n            score0 = clamp(cov0 * cov0 / max(0.000000000000000000000001, vx0 * vy0), 0, 1);\n            weighted = weighted + (usable0 ? score0 * vx0 : 0);\n            weight = weight + (usable0 ? vx0 : 0);\n            micmean = micmean + sx0 / 60;\n            refmean = refmean + sy0 / 60;\n            micvariation = micvariation + vx0 / 60;\n            bands = bands + usable0;\n            vx1 = max(0, sxx1 - sx1 * sx1 / 60);\n            vy1 = max(0, syy1 - sy1 * sy1 / 60);\n            cov1 = max(0, sxy1 - sx1 * sy1 / 60);\n            varied1 = (vx1 > max(0.00000001, sx1 * sx1 / 60 * 0.01)) && (vy1 > max(0.00000001, sy1 * sy1 / 60 * 0.01));\n            usable1 = varied1 && (sx1 / 60 >= 0.0003) && (sy1 / 60 >= 0.0001);\n            score1 = clamp(cov1 * cov1 / max(0.000000000000000000000001, vx1 * vy1), 0, 1);\n            weighted = weighted + (usable1 ? score1 * vx1 : 0);\n            weight = weight + (usable1 ? vx1 : 0);\n            micmean = micmean + sx1 / 60;\n            refmean = refmean + sy1 / 60;\n            micvariation = micvariation + vx1 / 60;\n            bands = bands + usable1;\n            vx2 = max(0, sxx2 - sx2 * sx2 / 60);\n            vy2 = max(0, syy2 - sy2 * sy2 / 60);\n            cov2 = max(0, sxy2 - sx2 * sy2 / 60);\n            varied2 = (vx2 > max(0.00000001, sx2 * sx2 / 60 * 0.01)) && (vy2 > max(0.00000001, sy2 * sy2 / 60 * 0.01));\n            usable2 = varied2 && (sx2 / 60 >= 0.0003) && (sy2 / 60 >= 0.0001);\n            score2 = clamp(cov2 * cov2 / max(0.000000000000000000000001, vx2 * vy2), 0, 1);\n            weighted = weighted + (usable2 ? score2 * vx2 : 0);\n            weight = weight + (usable2 ? vx2 : 0);\n            micmean = micmean + sx2 / 60;\n            refmean = refmean + sy2 / 60;\n            micvariation = micvariation + vx2 / 60;\n            bands = bands + usable2;\n            score = weight > 0 ? weighted / weight : 0;\n            if (model == 0) { peakviewmatch = max(peakviewmatch, score); }\n            if (score > bestmatch) {\n                bestmatch = score;\n                bestmic = micmean;\n                bestref = refmean;\n                bestactivity = activeframes / 60;\n                bestvariation = micvariation / max(0.00000001, micmean * micmean);\n                bestbands = bands;\n                bestband0 = usable0 ? score0 : 0;\n                bestband1 = usable1 ? score1 : 0;\n                bestband2 = usable2 ? score2 : 0;\n                nmodel = model;\n                nlagms = lag * framems;\n                nband_input_level_low = sx0 / 60;\n                nband_reference_level_low = sy0 / 60;\n                nband_input_variation_low = vx0 / max(0.000000000001, sx0 * sx0 / 60);\n                nband_reference_variation_low = vy0 / max(0.000000000001, sy0 * sy0 / 60);\n                nband_weight_low = usable0 ? vx0 / max(0.000000000000000000000001, weight) : 0;\n                nband_input_level_mid = sx1 / 60;\n                nband_reference_level_mid = sy1 / 60;\n                nband_input_variation_mid = vx1 / max(0.000000000001, sx1 * sx1 / 60);\n                nband_reference_variation_mid = vy1 / max(0.000000000001, sy1 * sy1 / 60);\n                nband_weight_mid = usable1 ? vx1 / max(0.000000000000000000000001, weight) : 0;\n                nband_input_level_high = sx2 / 60;\n                nband_reference_level_high = sy2 / 60;\n                nband_input_variation_high = vx2 / max(0.000000000001, sx2 * sx2 / 60);\n                nband_reference_variation_high = vy2 / max(0.000000000001, sy2 * sy2 / 60);\n                nband_weight_high = usable2 ? vx2 / max(0.000000000000000000000001, weight) : 0;\n                nusable_band_mask = usable0 + 2 * usable1 + 4 * usable2;\n                nreference_supported_band_mask = (usable0 && (score0 > 0.50)) + 2 * (usable1 && (score1 > 0.50)) + 4 * (usable2 && (score2 > 0.50));\n            }\n        }\n        }\n        ninputlevel = bestmic;\n        nreflevel = bestref;\n        nactivity = bestactivity;\n        nmatch = max(0, bestmatch);\n        nbandmatch0 = bestband0;\n        nbandmatch1 = bestband1;\n        nbandmatch2 = bestband2;\n        nusablebands = bestbands;\n        nmicvariationindex = bestvariation;\n        npeakmatch = peakviewmatch;\n        // This index is unexplained envelope VARIATION, not residual audio,\n        // SNR, voice probability, or a calibrated confidence score.\n        ndistinct = bestbands >= 2 ? 1 - nmatch : 0;\n        rawclass = 7;\n        if (bestref < 0.0004) { rawclass = 4; }\n        else if ((bestmic < 0.004) || (bestactivity < 0.20)) { rawclass = 3; }\n        else if ((bestbands >= 2) && (nmatch >= 0.72)) { rawclass = 5; }\n        // Preserve uncertainty if any usable band still follows the reference.\n        // Class 6 means only LOW resemblance, never proven distinct sound.\n        else if ((bestbands >= 2) && (nmatch <= 0.35) && (max(bestband0, max(bestband1, bestband2)) <= 0.50) && (bestvariation >= 0.05) && (bestactivity >= 0.50)) { rawclass = 6; }\n        // Explain the previous uncertainty veto without claiming a source or\n        // discarding the other bands. No threshold or matching score changes.\n        else if ((bestbands >= 2) && (max(bestband0, max(bestband1, bestband2)) > 0.50)) { rawclass = 10; }\n        nclassrun = rawclass == lastclass ? min(3, classrun + 1) : 1;\n        nlastclass = rawclass;\n        // Stabilize claims across three overlapping windows. These are not\n        // independent experiments; counters are diagnostic observations only.\n        nstate = ((rawclass == 5) || (rawclass == 6) || (rawclass == 10)) && (nclassrun < 3) ? 7 : rawclass;\n        npartial_reference_windows = min(1000000000, partial_reference_windows + (nstate == 10));\n        nband_reference_windows_low = min(1000000000, band_reference_windows_low + ((rawclass != 3) && (rawclass != 4) && (bestband0 > 0.50)));\n        nband_reference_windows_mid = min(1000000000, band_reference_windows_mid + ((rawclass != 3) && (rawclass != 4) && (bestband1 > 0.50)));\n        nband_reference_windows_high = min(1000000000, band_reference_windows_high + ((rawclass != 3) && (rawclass != 4) && (bestband2 > 0.50)));\n        nreferencewindows = referencewindows + (nstate == 5);\n        ndistinctwindows = distinctwindows + (nstate == 6);\n        nuncertainwindows = uncertainwindows + (nstate == 7);\n        nhop = 0;\n    }\n    nwritepos = writepos >= 255 ? 0 : writepos + 1;\n    nframesamples = 0;\n    nmsum0 = 0;\n    nrsum0 = 0;\n    nmsum1 = 0;\n    nrsum1 = 0;\n    nmsum2 = 0;\n    nrsum2 = 0;\n    nrlframe0 = 0; nrlframe1 = 0; nrlframe2 = 0;\n    nrrframe0 = 0; nrrframe1 = 0; nrrframe2 = 0;\n    nrmframe0 = 0; nrmframe1 = 0; nrmframe2 = 0;\n}\n// Only a newly completed one-second comparison can update a phase.\n// The existing comparison path and its first 86 outputs are not modified.\nif (!resetnow && !bgnewrequest && (nbgstate == 2)) {\n    if (bgstate == 1) { ntestphase = 1; }\n    testwindowstart = clock - nbgcmpframes * framelen + 1;\n    if (nbgcmpwindows > bgcmpwindows) {\n        if (ntestphase == 1) {\n            nmutedwindows = mutedwindows + 1;\n            nmutedwithin = mutedwithin + (nbgcmpstate == 2);\n            nmutedabove = mutedabove + (nbgcmpstate == 3);\n            nmuteduncertain = muteduncertain + (nbgcmpstate == 4);\n            nmutedstart = mutedwindows == 0 ? testwindowstart : mutedstart;\n            nmutedend = clock;\n            nmutedmean0 = mutedmean0 + (nbgcmplevel0 - mutedmean0) / nmutedwindows;\n            nmutedfraction0 = mutedfraction0 + (nbgcmpfraction0 - mutedfraction0) / nmutedwindows;\n            nmutedbandwindows0 = mutedbandwindows0 + (nbgcmpfraction0 >= 0.6);\n            nmutedmean1 = mutedmean1 + (nbgcmplevel1 - mutedmean1) / nmutedwindows;\n            nmutedfraction1 = mutedfraction1 + (nbgcmpfraction1 - mutedfraction1) / nmutedwindows;\n            nmutedbandwindows1 = mutedbandwindows1 + (nbgcmpfraction1 >= 0.6);\n            nmutedmean2 = mutedmean2 + (nbgcmplevel2 - mutedmean2) / nmutedwindows;\n            nmutedfraction2 = mutedfraction2 + (nbgcmpfraction2 - mutedfraction2) / nmutedwindows;\n            nmutedbandwindows2 = mutedbandwindows2 + (nbgcmpfraction2 >= 0.6);\n            if (nmutedwindows >= 10) { ntestphase = 2; }\n        }\n        if ((ntestphase == 4) && (testwindowstart >= ntestgate)) {\n            naudiblewindows = audiblewindows + 1;\n            naudiblewithin = audiblewithin + (nbgcmpstate == 2);\n            naudibleabove = audibleabove + (nbgcmpstate == 3);\n            naudibleuncertain = audibleuncertain + (nbgcmpstate == 4);\n            naudiblestart = audiblewindows == 0 ? testwindowstart : audiblestart;\n            naudibleend = clock;\n            naudiblemean0 = audiblemean0 + (nbgcmplevel0 - audiblemean0) / naudiblewindows;\n            naudiblefraction0 = audiblefraction0 + (nbgcmpfraction0 - audiblefraction0) / naudiblewindows;\n            naudiblebandwindows0 = audiblebandwindows0 + (nbgcmpfraction0 >= 0.6);\n            naudiblemean1 = audiblemean1 + (nbgcmplevel1 - audiblemean1) / naudiblewindows;\n            naudiblefraction1 = audiblefraction1 + (nbgcmpfraction1 - audiblefraction1) / naudiblewindows;\n            naudiblebandwindows1 = audiblebandwindows1 + (nbgcmpfraction1 >= 0.6);\n            naudiblemean2 = audiblemean2 + (nbgcmplevel2 - audiblemean2) / naudiblewindows;\n            naudiblefraction2 = audiblefraction2 + (nbgcmpfraction2 - audiblefraction2) / naudiblewindows;\n            naudiblebandwindows2 = audiblebandwindows2 + (nbgcmpfraction2 >= 0.6);\n            if (naudiblewindows >= 20) { ntestphase = 5; }\n        }\n    }\n}\n// Immediate revocation takes priority over any stored observation.\noutstate = nstate;\nif (ncliphold > 0) { outstate = 2; }\nelse if (in5 != 1) { outstate = 0; }\nelse if (sourcemode != 1) { outstate = 9; }\nelse if (profilevalid != 1) { outstate = 8; }\nout1 = outstate;\nout2 = nmatch;\nout3 = ndistinct;\nout4 = ninputlevel;\nout5 = nreflevel;\nout6 = nfilled >= 64 + max(rdelay, mdelay) ? 60 * framems : 0;\nout7 = nactivity;\nout8 = in6;\n// Deliberately never promote quality: unrelated sound can also be noise.\nout9 = 0;\nout10 = nreferencewindows;\nout11 = ndistinctwindows;\nout12 = nuncertainwindows;\n// Diagnostic histories below span contexts; they are not current evidence.\nout13 = nfilled;\nout14 = nframesamples;\nout15 = nrunlength * 1000 / samplerate;\nout16 = nlongestrun * 1000 / samplerate;\nout17 = nlastreason;\nout18 = nresetepisodes;\nout19 = nwindowscomputed;\nout20 = nepochchanges;\nout21 = noffsetchanges;\nout22 = npermitlosses;\nout23 = nprofilechanges;\nout24 = nmodechanges;\nout25 = clock;\n// Descriptive scores for the chosen fixed view, not confidence or voice SNR.\nout26 = nmodel;\nout27 = nlagms;\nout28 = nbandmatch0;\nout29 = nbandmatch1;\nout30 = nbandmatch2;\nout31 = nusablebands;\nout32 = nmicvariationindex;\nout33 = npeakmatch;\nout34 = nband_input_level_low;\nout35 = nband_input_level_mid;\nout36 = nband_input_level_high;\nout37 = nband_reference_level_low;\nout38 = nband_reference_level_mid;\nout39 = nband_reference_level_high;\nout40 = nband_input_variation_low;\nout41 = nband_input_variation_mid;\nout42 = nband_input_variation_high;\nout43 = nband_reference_variation_low;\nout44 = nband_reference_variation_mid;\nout45 = nband_reference_variation_high;\nout46 = nband_weight_low;\nout47 = nband_weight_mid;\nout48 = nband_weight_high;\nout49 = nusable_band_mask;\nout50 = nreference_supported_band_mask;\nout51 = npartial_reference_windows;\nout52 = nband_reference_windows_low;\nout53 = nband_reference_windows_mid;\nout54 = nband_reference_windows_high;\n// Background fields stay separate from current comparison evidence.\nout55 = nbgstate;\nout56 = nbgrequest;\nout57 = nbgcount;\nout58 = nbgcount * framelen * 1000 / samplerate;\nout59 = nbgmean0;\nout60 = nbgmean1;\nout61 = nbgmean2;\nout62 = max(0, nbgm20 / max(1, nbgcount));\nout63 = max(0, nbgm21 / max(1, nbgcount));\nout64 = max(0, nbgm22 / max(1, nbgcount));\n// Independent completed comparison window, never a voice/SNR estimate.\nout65 = nbgcmpstate;\nout66 = nbgcmpframes;\nout67 = nbgcmpframes * framelen * 1000 / samplerate;\nout68 = nbgcmpwindows;\nout69 = nbgcmpmask;\nout70 = nbgcmpend;\nout71 = nbgcmplevel0;\nout72 = nbgcmplevel1;\nout73 = nbgcmplevel2;\nout74 = nbgstate == 2 ? bgcmplimit0 : 0;\nout75 = nbgstate == 2 ? bgcmplimit1 : 0;\nout76 = nbgstate == 2 ? bgcmplimit2 : 0;\nout77 = nbgcmpfraction0;\nout78 = nbgcmpfraction1;\nout79 = nbgcmpfraction2;\nout80 = nbgcmpframes > 0 ? (nbgmean0 > 0.00000001) + 2 * (nbgmean1 > 0.00000001) + 4 * (nbgmean2 > 0.00000001) : 0;\nout81 = (nbgcmpframes > 0) && (nbgmean0 > 0.00000001) ? nbgcmplevel0 / max(0.00000001, nbgmean0) : 0;\nout82 = (nbgcmpframes > 0) && (nbgmean1 > 0.00000001) ? nbgcmplevel1 / max(0.00000001, nbgmean1) : 0;\nout83 = (nbgcmpframes > 0) && (nbgmean2 > 0.00000001) ? nbgcmplevel2 / max(0.00000001, nbgmean2) : 0;\nout84 = nbgcmpwithin;\nout85 = nbgcmpabove;\nout86 = nbgcmpuncertain;\n// Phase summaries are frozen on completion and revoked on context loss.\nout87 = ntestphase;\nout88 = ntestrequest;\nout89 = ntestgate;\nout90 = (nmutedwindows >= 10) + 2 * (naudiblewindows >= 20);\nout91 = nmutedwindows;\nout92 = nmutedwindows * nbgcmpframes * framelen * 1000 / samplerate;\nout93 = nmutedwithin;\nout94 = nmutedabove;\nout95 = nmuteduncertain;\nout96 = nmutedstart;\nout97 = nmutedend;\nout98 = nmutedmean0;\nout99 = nmutedmean1;\nout100 = nmutedmean2;\nout101 = nmutedfraction0;\nout102 = nmutedfraction1;\nout103 = nmutedfraction2;\nout104 = nmutedbandwindows0;\nout105 = nmutedbandwindows1;\nout106 = nmutedbandwindows2;\nout107 = naudiblewindows;\nout108 = naudiblewindows * nbgcmpframes * framelen * 1000 / samplerate;\nout109 = naudiblewithin;\nout110 = naudibleabove;\nout111 = naudibleuncertain;\nout112 = naudiblestart;\nout113 = naudibleend;\nout114 = naudiblemean0;\nout115 = naudiblemean1;\nout116 = naudiblemean2;\nout117 = naudiblefraction0;\nout118 = naudiblefraction1;\nout119 = naudiblefraction2;\nout120 = naudiblebandwindows0;\nout121 = naudiblebandwindows1;\nout122 = naudiblebandwindows2;\ntestphase = ntestphase;\ntestrequest = ntestrequest;\ntestgate = ntestgate;\nmutedwindows = nmutedwindows;\nmutedwithin = nmutedwithin;\nmutedabove = nmutedabove;\nmuteduncertain = nmuteduncertain;\nmutedstart = nmutedstart;\nmutedend = nmutedend;\nmutedmean0 = nmutedmean0;\nmutedfraction0 = nmutedfraction0;\nmutedbandwindows0 = nmutedbandwindows0;\nmutedmean1 = nmutedmean1;\nmutedfraction1 = nmutedfraction1;\nmutedbandwindows1 = nmutedbandwindows1;\nmutedmean2 = nmutedmean2;\nmutedfraction2 = nmutedfraction2;\nmutedbandwindows2 = nmutedbandwindows2;\naudiblewindows = naudiblewindows;\naudiblewithin = naudiblewithin;\naudibleabove = naudibleabove;\naudibleuncertain = naudibleuncertain;\naudiblestart = naudiblestart;\naudibleend = naudibleend;\naudiblemean0 = naudiblemean0;\naudiblefraction0 = naudiblefraction0;\naudiblebandwindows0 = naudiblebandwindows0;\naudiblemean1 = naudiblemean1;\naudiblefraction1 = naudiblefraction1;\naudiblebandwindows1 = naudiblebandwindows1;\naudiblemean2 = naudiblemean2;\naudiblefraction2 = naudiblefraction2;\naudiblebandwindows2 = naudiblebandwindows2;\nbgcmpstate = nbgcmpstate;\nbgcmpcount = nbgcmpcount;\nbgcmpframes = nbgcmpframes;\nbgcmpwindows = nbgcmpwindows;\nbgcmpmask = nbgcmpmask;\nbgcmpend = nbgcmpend;\nbgcmpwithin = nbgcmpwithin;\nbgcmpabove = nbgcmpabove;\nbgcmpuncertain = nbgcmpuncertain;\nbgcmpsum0 = nbgcmpsum0;\nbgcmpexceed0 = nbgcmpexceed0;\nbgcmplevel0 = nbgcmplevel0;\nbgcmpfraction0 = nbgcmpfraction0;\nbgcmpsum1 = nbgcmpsum1;\nbgcmpexceed1 = nbgcmpexceed1;\nbgcmplevel1 = nbgcmplevel1;\nbgcmpfraction1 = nbgcmpfraction1;\nbgcmpsum2 = nbgcmpsum2;\nbgcmpexceed2 = nbgcmpexceed2;\nbgcmplevel2 = nbgcmplevel2;\nbgcmpfraction2 = nbgcmpfraction2;\nbgstate = nbgstate;\nbgrequest = nbgrequest;\nbgcount = nbgcount;\nbgskipframe = nbgskipframe;\nbgmean0 = nbgmean0;\nbgmean1 = nbgmean1;\nbgmean2 = nbgmean2;\nbgm20 = nbgm20;\nbgm21 = nbgm21;\nbgm22 = nbgm22;\nlastepoch = in6;\nlastoffset = offsetchanged ? in7 : lastoffset;\nlastprofile = profilevalid;\nlastmode = sourcemode;\nframesamples = nframesamples;\nwritepos = nwritepos;\nfilled = nfilled;\nhop = nhop;\nstate = nstate;\nmatch = nmatch;\ndistinct = ndistinct;\ninputlevel = ninputlevel;\nreflevel = nreflevel;\nactivity = nactivity;\nbestmodel = nmodel;\nbestlagms = nlagms;\nbandmatch0 = nbandmatch0;\nbandmatch1 = nbandmatch1;\nbandmatch2 = nbandmatch2;\nusablebands = nusablebands;\nmicvariationindex = nmicvariationindex;\npeakmatch = npeakmatch;\nband_input_level_low = nband_input_level_low;\nband_input_level_mid = nband_input_level_mid;\nband_input_level_high = nband_input_level_high;\nband_reference_level_low = nband_reference_level_low;\nband_reference_level_mid = nband_reference_level_mid;\nband_reference_level_high = nband_reference_level_high;\nband_input_variation_low = nband_input_variation_low;\nband_input_variation_mid = nband_input_variation_mid;\nband_input_variation_high = nband_input_variation_high;\nband_reference_variation_low = nband_reference_variation_low;\nband_reference_variation_mid = nband_reference_variation_mid;\nband_reference_variation_high = nband_reference_variation_high;\nband_weight_low = nband_weight_low;\nband_weight_mid = nband_weight_mid;\nband_weight_high = nband_weight_high;\nusable_band_mask = nusable_band_mask;\nreference_supported_band_mask = nreference_supported_band_mask;\npartial_reference_windows = npartial_reference_windows;\nband_reference_windows_low = nband_reference_windows_low;\nband_reference_windows_mid = nband_reference_windows_mid;\nband_reference_windows_high = nband_reference_windows_high;\nlastclass = nlastclass;\nclassrun = nclassrun;\ncliphold = ncliphold;\nreferencewindows = nreferencewindows;\ndistinctwindows = ndistinctwindows;\nuncertainwindows = nuncertainwindows;\nrunlength = nrunlength;\nlongestrun = nlongestrun;\nresetepisodes = nresetepisodes;\npreviousreset = resetnow;\nlastreason = nlastreason;\nwindowscomputed = nwindowscomputed;\nepochchanges = nepochchanges;\noffsetchanges = noffsetchanges;\npermitlosses = npermitlosses;\nprofilechanges = nprofilechanges;\nmodechanges = nmodechanges;\nlastpermit = in5;\nclock = clock + 1;\nmldc = nmldc;\nmllow = nmllow;\nmlupper = nmlupper;\nmrdc = nmrdc;\nmrlow = nmrlow;\nmrupper = nmrupper;\nrldc = nrldc;\nrllow = nrllow;\nrlupper = nrlupper;\nrrdc = nrrdc;\nrrlow = nrrlow;\nrrupper = nrrupper;\nrmdc = nrmdc;\nrmlow = nrmlow;\nrmupper = nrmupper;\nrlframe0 = nrlframe0; rlframe1 = nrlframe1; rlframe2 = nrlframe2;\nrrframe0 = nrrframe0; rrframe1 = nrrframe1; rrframe2 = nrrframe2;\nrmframe0 = nrmframe0; rmframe1 = nrmframe1; rmframe2 = nrmframe2;\nmsum0 = nmsum0;\nrsum0 = nrsum0;\nmsum1 = nmsum1;\nrsum1 = nrsum1;\nmsum2 = nmsum2;\nrsum2 = nrsum2;\n\n// Context passed to the lightweight result keeper, below the observed failing port range.\nout123 = sourcemode;\nout124 = profilevalid;\n"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "box": {
+        "id": "aq-result-engine",
+        "numinlets": 51,
+        "numoutlets": 53,
+        "patcher": {
+          "boxes": [
+            {
+              "box": {
+                "maxclass": "codebox",
+                "code": "// Read-only completed probe keeper. No audio processing or host permission.\n// Receives the main engine's CURRENT sample, including its completed phase.\n// Capture is synchronous; independent of Max UI polling and export timing.\n// in1: test_phase_state\n// in2: sampleclock\n// in3: epoch\n// in4: offset_ms\n// in5: background_request\n// in6: source_mode\n// in7: profile_valid\n// in8: completed_phase_mask\n// in9: background_frames\n// in10: background_duration_ms\n// in11: background_mean_low\n// in12: background_mean_mid\n// in13: background_mean_high\n// in14: background_variance_low\n// in15: background_variance_mid\n// in16: background_variance_high\n// in17: background_limit_low\n// in18: background_limit_mid\n// in19: background_limit_high\n// in20: muted_windows\n// in21: muted_duration_ms\n// in22: muted_within_windows\n// in23: muted_above_windows\n// in24: muted_uncertain_windows\n// in25: muted_start_sampleclock\n// in26: muted_end_sampleclock\n// in27: muted_mean_low\n// in28: muted_mean_mid\n// in29: muted_mean_high\n// in30: muted_above_fraction_low\n// in31: muted_above_fraction_mid\n// in32: muted_above_fraction_high\n// in33: muted_above_windows_low\n// in34: muted_above_windows_mid\n// in35: muted_above_windows_high\n// in36: audible_windows\n// in37: audible_duration_ms\n// in38: audible_within_windows\n// in39: audible_above_windows\n// in40: audible_uncertain_windows\n// in41: audible_start_sampleclock\n// in42: audible_end_sampleclock\n// in43: audible_mean_low\n// in44: audible_mean_mid\n// in45: audible_mean_high\n// in46: audible_above_fraction_low\n// in47: audible_above_fraction_mid\n// in48: audible_above_fraction_high\n// in49: audible_above_windows_low\n// in50: audible_above_windows_mid\n// in51: audible_above_windows_high\nHistory lastphase(0);\nHistory lastrequest(0);\nHistory result0(0);\nHistory result1(0);\nHistory result2(0);\nHistory result3(0);\nHistory result4(0);\nHistory result5(0);\nHistory result6(0);\nHistory result7(0);\nHistory result8(0);\nHistory result9(0);\nHistory result10(0);\nHistory result11(0);\nHistory result12(0);\nHistory result13(0);\nHistory result14(0);\nHistory result15(0);\nHistory result16(0);\nHistory result17(0);\nHistory result18(0);\nHistory result19(0);\nHistory result20(0);\nHistory result21(0);\nHistory result22(0);\nHistory result23(0);\nHistory result24(0);\nHistory result25(0);\nHistory result26(0);\nHistory result27(0);\nHistory result28(0);\nHistory result29(0);\nHistory result30(0);\nHistory result31(0);\nHistory result32(0);\nHistory result33(0);\nHistory result34(0);\nHistory result35(0);\nHistory result36(0);\nHistory result37(0);\nHistory result38(0);\nHistory result39(0);\nHistory result40(0);\nHistory result41(0);\nHistory result42(0);\nHistory result43(0);\nHistory result44(0);\nHistory result45(0);\nHistory result46(0);\nHistory result47(0);\nHistory result48(0);\nHistory result49(0);\nHistory result50(0);\nHistory result51(0);\nnresult0 = result0;\nnresult1 = result1;\nnresult2 = result2;\nnresult3 = result3;\nnresult4 = result4;\nnresult5 = result5;\nnresult6 = result6;\nnresult7 = result7;\nnresult8 = result8;\nnresult9 = result9;\nnresult10 = result10;\nnresult11 = result11;\nnresult12 = result12;\nnresult13 = result13;\nnresult14 = result14;\nnresult15 = result15;\nnresult16 = result16;\nnresult17 = result17;\nnresult18 = result18;\nnresult19 = result19;\nnresult20 = result20;\nnresult21 = result21;\nnresult22 = result22;\nnresult23 = result23;\nnresult24 = result24;\nnresult25 = result25;\nnresult26 = result26;\nnresult27 = result27;\nnresult28 = result28;\nnresult29 = result29;\nnresult30 = result30;\nnresult31 = result31;\nnresult32 = result32;\nnresult33 = result33;\nnresult34 = result34;\nnresult35 = result35;\nnresult36 = result36;\nnresult37 = result37;\nnresult38 = result38;\nnresult39 = result39;\nnresult40 = result40;\nnresult41 = result41;\nnresult42 = result42;\nnresult43 = result43;\nnresult44 = result44;\nnresult45 = result45;\nnresult46 = result46;\nnresult47 = result47;\nnresult48 = result48;\nnresult49 = result49;\nnresult50 = result50;\nnresult51 = result51;\nnewrequest = in5 != lastrequest;\nif (newrequest) {\n    nresult0 = 0;\n    nresult1 = 0;\n    nresult2 = 0;\n    nresult3 = 0;\n    nresult4 = 0;\n    nresult5 = 0;\n    nresult6 = 0;\n    nresult7 = 0;\n    nresult8 = 0;\n    nresult9 = 0;\n    nresult10 = 0;\n    nresult11 = 0;\n    nresult12 = 0;\n    nresult13 = 0;\n    nresult14 = 0;\n    nresult15 = 0;\n    nresult16 = 0;\n    nresult17 = 0;\n    nresult18 = 0;\n    nresult19 = 0;\n    nresult20 = 0;\n    nresult21 = 0;\n    nresult22 = 0;\n    nresult23 = 0;\n    nresult24 = 0;\n    nresult25 = 0;\n    nresult26 = 0;\n    nresult27 = 0;\n    nresult28 = 0;\n    nresult29 = 0;\n    nresult30 = 0;\n    nresult31 = 0;\n    nresult32 = 0;\n    nresult33 = 0;\n    nresult34 = 0;\n    nresult35 = 0;\n    nresult36 = 0;\n    nresult37 = 0;\n    nresult38 = 0;\n    nresult39 = 0;\n    nresult40 = 0;\n    nresult41 = 0;\n    nresult42 = 0;\n    nresult43 = 0;\n    nresult44 = 0;\n    nresult45 = 0;\n    nresult46 = 0;\n    nresult47 = 0;\n    nresult48 = 0;\n    nresult49 = 0;\n    nresult50 = 0;\n    nresult51 = 0;\n} else if ((in1 == 5) && (lastphase != 5) && (in8 == 3) && (in20 == 10) && (in36 == 20) && (in6 == 1) && (in7 == 1)) {\n    nresult0 = 1;\n    nresult1 = in2;\n    nresult2 = in3;\n    nresult3 = in4;\n    nresult4 = samplerate;\n    nresult5 = in5;\n    nresult6 = in6;\n    nresult7 = in7;\n    nresult8 = in8;\n    nresult9 = in9;\n    nresult10 = in10;\n    nresult11 = in11;\n    nresult12 = in12;\n    nresult13 = in13;\n    nresult14 = in14;\n    nresult15 = in15;\n    nresult16 = in16;\n    nresult17 = in17;\n    nresult18 = in18;\n    nresult19 = in19;\n    nresult20 = in20;\n    nresult21 = in21;\n    nresult22 = in22;\n    nresult23 = in23;\n    nresult24 = in24;\n    nresult25 = in25;\n    nresult26 = in26;\n    nresult27 = in27;\n    nresult28 = in28;\n    nresult29 = in29;\n    nresult30 = in30;\n    nresult31 = in31;\n    nresult32 = in32;\n    nresult33 = in33;\n    nresult34 = in34;\n    nresult35 = in35;\n    nresult36 = in36;\n    nresult37 = in37;\n    nresult38 = in38;\n    nresult39 = in39;\n    nresult40 = in40;\n    nresult41 = in41;\n    nresult42 = in42;\n    nresult43 = in43;\n    nresult44 = in44;\n    nresult45 = in45;\n    nresult46 = in46;\n    nresult47 = in47;\n    nresult48 = in48;\n    nresult49 = in49;\n    nresult50 = in50;\n    nresult51 = in51;\n}\nout1 = nresult0;\nout2 = nresult1;\nout3 = nresult2;\nout4 = nresult3;\nout5 = nresult4;\nout6 = nresult5;\nout7 = nresult6;\nout8 = nresult7;\nout9 = nresult8;\nout10 = nresult9;\nout11 = nresult10;\nout12 = nresult11;\nout13 = nresult12;\nout14 = nresult13;\nout15 = nresult14;\nout16 = nresult15;\nout17 = nresult16;\nout18 = nresult17;\nout19 = nresult18;\nout20 = nresult19;\nout21 = nresult20;\nout22 = nresult21;\nout23 = nresult22;\nout24 = nresult23;\nout25 = nresult24;\nout26 = nresult25;\nout27 = nresult26;\nout28 = nresult27;\nout29 = nresult28;\nout30 = nresult29;\nout31 = nresult30;\nout32 = nresult31;\nout33 = nresult32;\nout34 = nresult33;\nout35 = nresult34;\nout36 = nresult35;\nout37 = nresult36;\nout38 = nresult37;\nout39 = nresult38;\nout40 = nresult39;\nout41 = nresult40;\nout42 = nresult41;\nout43 = nresult42;\nout44 = nresult43;\nout45 = nresult44;\nout46 = nresult45;\nout47 = nresult46;\nout48 = nresult47;\nout49 = nresult48;\nout50 = nresult49;\nout51 = nresult50;\nout52 = nresult51;\nout53 = (nresult0 == 1) && (in1 == 6) ? 7 : in1;\nresult0 = nresult0;\nresult1 = nresult1;\nresult2 = nresult2;\nresult3 = nresult3;\nresult4 = nresult4;\nresult5 = nresult5;\nresult6 = nresult6;\nresult7 = nresult7;\nresult8 = nresult8;\nresult9 = nresult9;\nresult10 = nresult10;\nresult11 = nresult11;\nresult12 = nresult12;\nresult13 = nresult13;\nresult14 = nresult14;\nresult15 = nresult15;\nresult16 = nresult16;\nresult17 = nresult17;\nresult18 = nresult18;\nresult19 = nresult19;\nresult20 = nresult20;\nresult21 = nresult21;\nresult22 = nresult22;\nresult23 = nresult23;\nresult24 = nresult24;\nresult25 = nresult25;\nresult26 = nresult26;\nresult27 = nresult27;\nresult28 = nresult28;\nresult29 = nresult29;\nresult30 = nresult30;\nresult31 = nresult31;\nresult32 = nresult32;\nresult33 = nresult33;\nresult34 = nresult34;\nresult35 = nresult35;\nresult36 = nresult36;\nresult37 = nresult37;\nresult38 = nresult38;\nresult39 = nresult39;\nresult40 = nresult40;\nresult41 = nresult41;\nresult42 = nresult42;\nresult43 = nresult43;\nresult44 = nresult44;\nresult45 = nresult45;\nresult46 = nresult46;\nresult47 = nresult47;\nresult48 = nresult48;\nresult49 = nresult49;\nresult50 = nresult50;\nresult51 = nresult51;\nlastphase = in1;\nlastrequest = in5;\n"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "lines": [
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          86
+        ],
+        "destination": [
+          "aq-result-engine",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          24
+        ],
+        "destination": [
+          "aq-result-engine",
+          1
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          7
+        ],
+        "destination": [
+          "aq-result-engine",
+          2
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "apf-engine",
+          11
+        ],
+        "destination": [
+          "aq-result-engine",
+          3
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          55
+        ],
+        "destination": [
+          "aq-result-engine",
+          4
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          122
+        ],
+        "destination": [
+          "aq-result-engine",
+          5
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          123
+        ],
+        "destination": [
+          "aq-result-engine",
+          6
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          89
+        ],
+        "destination": [
+          "aq-result-engine",
+          7
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          56
+        ],
+        "destination": [
+          "aq-result-engine",
+          8
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          57
+        ],
+        "destination": [
+          "aq-result-engine",
+          9
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          58
+        ],
+        "destination": [
+          "aq-result-engine",
+          10
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          59
+        ],
+        "destination": [
+          "aq-result-engine",
+          11
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          60
+        ],
+        "destination": [
+          "aq-result-engine",
+          12
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          61
+        ],
+        "destination": [
+          "aq-result-engine",
+          13
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          62
+        ],
+        "destination": [
+          "aq-result-engine",
+          14
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          63
+        ],
+        "destination": [
+          "aq-result-engine",
+          15
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          73
+        ],
+        "destination": [
+          "aq-result-engine",
+          16
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          74
+        ],
+        "destination": [
+          "aq-result-engine",
+          17
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          75
+        ],
+        "destination": [
+          "aq-result-engine",
+          18
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          90
+        ],
+        "destination": [
+          "aq-result-engine",
+          19
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          91
+        ],
+        "destination": [
+          "aq-result-engine",
+          20
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          92
+        ],
+        "destination": [
+          "aq-result-engine",
+          21
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          93
+        ],
+        "destination": [
+          "aq-result-engine",
+          22
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          94
+        ],
+        "destination": [
+          "aq-result-engine",
+          23
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          95
+        ],
+        "destination": [
+          "aq-result-engine",
+          24
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          96
+        ],
+        "destination": [
+          "aq-result-engine",
+          25
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          97
+        ],
+        "destination": [
+          "aq-result-engine",
+          26
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          98
+        ],
+        "destination": [
+          "aq-result-engine",
+          27
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          99
+        ],
+        "destination": [
+          "aq-result-engine",
+          28
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          100
+        ],
+        "destination": [
+          "aq-result-engine",
+          29
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          101
+        ],
+        "destination": [
+          "aq-result-engine",
+          30
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          102
+        ],
+        "destination": [
+          "aq-result-engine",
+          31
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          103
+        ],
+        "destination": [
+          "aq-result-engine",
+          32
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          104
+        ],
+        "destination": [
+          "aq-result-engine",
+          33
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          105
+        ],
+        "destination": [
+          "aq-result-engine",
+          34
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          106
+        ],
+        "destination": [
+          "aq-result-engine",
+          35
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          107
+        ],
+        "destination": [
+          "aq-result-engine",
+          36
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          108
+        ],
+        "destination": [
+          "aq-result-engine",
+          37
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          109
+        ],
+        "destination": [
+          "aq-result-engine",
+          38
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          110
+        ],
+        "destination": [
+          "aq-result-engine",
+          39
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          111
+        ],
+        "destination": [
+          "aq-result-engine",
+          40
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          112
+        ],
+        "destination": [
+          "aq-result-engine",
+          41
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          113
+        ],
+        "destination": [
+          "aq-result-engine",
+          42
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          114
+        ],
+        "destination": [
+          "aq-result-engine",
+          43
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          115
+        ],
+        "destination": [
+          "aq-result-engine",
+          44
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          116
+        ],
+        "destination": [
+          "aq-result-engine",
+          45
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          117
+        ],
+        "destination": [
+          "aq-result-engine",
+          46
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          118
+        ],
+        "destination": [
+          "aq-result-engine",
+          47
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          119
+        ],
+        "destination": [
+          "aq-result-engine",
+          48
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          120
+        ],
+        "destination": [
+          "aq-result-engine",
+          49
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          121
+        ],
+        "destination": [
+          "aq-result-engine",
+          50
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          0
+        ],
+        "destination": [
+          "aq-state",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          1
+        ],
+        "destination": [
+          "aq-envelope_match",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          2
+        ],
+        "destination": [
+          "aq-unexplained_variation",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          3
+        ],
+        "destination": [
+          "aq-input_level",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          4
+        ],
+        "destination": [
+          "aq-reference_level",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          5
+        ],
+        "destination": [
+          "aq-window_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          6
+        ],
+        "destination": [
+          "aq-input_activity",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          7
+        ],
+        "destination": [
+          "aq-epoch",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          8
+        ],
+        "destination": [
+          "aq-voice_confirmed",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          9
+        ],
+        "destination": [
+          "aq-reference_like_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          10
+        ],
+        "destination": [
+          "aq-distinct_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          11
+        ],
+        "destination": [
+          "aq-uncertain_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          12
+        ],
+        "destination": [
+          "aq-filled_frames",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          13
+        ],
+        "destination": [
+          "aq-frame_samples",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          14
+        ],
+        "destination": [
+          "aq-current_run_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          15
+        ],
+        "destination": [
+          "aq-longest_run_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          16
+        ],
+        "destination": [
+          "aq-last_reset_reason",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          17
+        ],
+        "destination": [
+          "aq-reset_episodes",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          18
+        ],
+        "destination": [
+          "aq-lifetime_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          19
+        ],
+        "destination": [
+          "aq-epoch_changes",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          20
+        ],
+        "destination": [
+          "aq-offset_changes",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          21
+        ],
+        "destination": [
+          "aq-permit_interruptions",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          22
+        ],
+        "destination": [
+          "aq-profile_changes",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          23
+        ],
+        "destination": [
+          "aq-source_changes",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          24
+        ],
+        "destination": [
+          "aq-sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          25
+        ],
+        "destination": [
+          "aq-reference_model",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          26
+        ],
+        "destination": [
+          "aq-comparison_lag_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          27
+        ],
+        "destination": [
+          "aq-band_match_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          28
+        ],
+        "destination": [
+          "aq-band_match_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          29
+        ],
+        "destination": [
+          "aq-band_match_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          30
+        ],
+        "destination": [
+          "aq-usable_bands",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          31
+        ],
+        "destination": [
+          "aq-input_variation",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          32
+        ],
+        "destination": [
+          "aq-peak_reference_match",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          33
+        ],
+        "destination": [
+          "aq-band_input_level_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          34
+        ],
+        "destination": [
+          "aq-band_input_level_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          35
+        ],
+        "destination": [
+          "aq-band_input_level_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          36
+        ],
+        "destination": [
+          "aq-band_reference_level_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          37
+        ],
+        "destination": [
+          "aq-band_reference_level_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          38
+        ],
+        "destination": [
+          "aq-band_reference_level_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          39
+        ],
+        "destination": [
+          "aq-band_input_variation_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          40
+        ],
+        "destination": [
+          "aq-band_input_variation_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          41
+        ],
+        "destination": [
+          "aq-band_input_variation_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          42
+        ],
+        "destination": [
+          "aq-band_reference_variation_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          43
+        ],
+        "destination": [
+          "aq-band_reference_variation_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          44
+        ],
+        "destination": [
+          "aq-band_reference_variation_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          45
+        ],
+        "destination": [
+          "aq-band_weight_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          46
+        ],
+        "destination": [
+          "aq-band_weight_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          47
+        ],
+        "destination": [
+          "aq-band_weight_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          48
+        ],
+        "destination": [
+          "aq-usable_band_mask",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          49
+        ],
+        "destination": [
+          "aq-reference_supported_band_mask",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          50
+        ],
+        "destination": [
+          "aq-partial_reference_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          51
+        ],
+        "destination": [
+          "aq-band_reference_windows_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          52
+        ],
+        "destination": [
+          "aq-band_reference_windows_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          53
+        ],
+        "destination": [
+          "aq-band_reference_windows_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          54
+        ],
+        "destination": [
+          "aq-background_state",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          55
+        ],
+        "destination": [
+          "aq-background_request",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          56
+        ],
+        "destination": [
+          "aq-background_frames",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          57
+        ],
+        "destination": [
+          "aq-background_duration_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          58
+        ],
+        "destination": [
+          "aq-background_mean_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          59
+        ],
+        "destination": [
+          "aq-background_mean_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          60
+        ],
+        "destination": [
+          "aq-background_mean_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          61
+        ],
+        "destination": [
+          "aq-background_variance_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          62
+        ],
+        "destination": [
+          "aq-background_variance_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          63
+        ],
+        "destination": [
+          "aq-background_variance_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          64
+        ],
+        "destination": [
+          "aq-background_comparison_state",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          65
+        ],
+        "destination": [
+          "aq-background_comparison_frames",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          66
+        ],
+        "destination": [
+          "aq-background_comparison_duration_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          67
+        ],
+        "destination": [
+          "aq-background_comparison_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          68
+        ],
+        "destination": [
+          "aq-background_above_band_mask",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          69
+        ],
+        "destination": [
+          "aq-background_comparison_end_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          70
+        ],
+        "destination": [
+          "aq-background_current_mean_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          71
+        ],
+        "destination": [
+          "aq-background_current_mean_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          72
+        ],
+        "destination": [
+          "aq-background_current_mean_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          73
+        ],
+        "destination": [
+          "aq-background_limit_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          74
+        ],
+        "destination": [
+          "aq-background_limit_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          75
+        ],
+        "destination": [
+          "aq-background_limit_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          76
+        ],
+        "destination": [
+          "aq-background_above_fraction_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          77
+        ],
+        "destination": [
+          "aq-background_above_fraction_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          78
+        ],
+        "destination": [
+          "aq-background_above_fraction_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          79
+        ],
+        "destination": [
+          "aq-background_ratio_valid_band_mask",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          80
+        ],
+        "destination": [
+          "aq-background_mean_ratio_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          81
+        ],
+        "destination": [
+          "aq-background_mean_ratio_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          82
+        ],
+        "destination": [
+          "aq-background_mean_ratio_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          83
+        ],
+        "destination": [
+          "aq-background_within_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          84
+        ],
+        "destination": [
+          "aq-background_above_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          85
+        ],
+        "destination": [
+          "aq-background_uncertain_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          52
+        ],
+        "destination": [
+          "aq-test_phase_state",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          87
+        ],
+        "destination": [
+          "aq-test_speakers_request",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          88
+        ],
+        "destination": [
+          "aq-test_audible_gate_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          89
+        ],
+        "destination": [
+          "aq-test_completed_phase_mask",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          90
+        ],
+        "destination": [
+          "aq-test_muted_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          91
+        ],
+        "destination": [
+          "aq-test_muted_duration_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          92
+        ],
+        "destination": [
+          "aq-test_muted_within_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          93
+        ],
+        "destination": [
+          "aq-test_muted_above_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          94
+        ],
+        "destination": [
+          "aq-test_muted_uncertain_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          95
+        ],
+        "destination": [
+          "aq-test_muted_start_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          96
+        ],
+        "destination": [
+          "aq-test_muted_end_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          97
+        ],
+        "destination": [
+          "aq-test_muted_mean_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          98
+        ],
+        "destination": [
+          "aq-test_muted_mean_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          99
+        ],
+        "destination": [
+          "aq-test_muted_mean_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          100
+        ],
+        "destination": [
+          "aq-test_muted_above_fraction_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          101
+        ],
+        "destination": [
+          "aq-test_muted_above_fraction_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          102
+        ],
+        "destination": [
+          "aq-test_muted_above_fraction_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          103
+        ],
+        "destination": [
+          "aq-test_muted_above_windows_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          104
+        ],
+        "destination": [
+          "aq-test_muted_above_windows_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          105
+        ],
+        "destination": [
+          "aq-test_muted_above_windows_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          106
+        ],
+        "destination": [
+          "aq-test_audible_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          107
+        ],
+        "destination": [
+          "aq-test_audible_duration_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          108
+        ],
+        "destination": [
+          "aq-test_audible_within_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          109
+        ],
+        "destination": [
+          "aq-test_audible_above_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          110
+        ],
+        "destination": [
+          "aq-test_audible_uncertain_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          111
+        ],
+        "destination": [
+          "aq-test_audible_start_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          112
+        ],
+        "destination": [
+          "aq-test_audible_end_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          113
+        ],
+        "destination": [
+          "aq-test_audible_mean_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          114
+        ],
+        "destination": [
+          "aq-test_audible_mean_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          115
+        ],
+        "destination": [
+          "aq-test_audible_mean_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          116
+        ],
+        "destination": [
+          "aq-test_audible_above_fraction_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          117
+        ],
+        "destination": [
+          "aq-test_audible_above_fraction_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          118
+        ],
+        "destination": [
+          "aq-test_audible_above_fraction_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          119
+        ],
+        "destination": [
+          "aq-test_audible_above_windows_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          120
+        ],
+        "destination": [
+          "aq-test_audible_above_windows_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-engine",
+          121
+        ],
+        "destination": [
+          "aq-test_audible_above_windows_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          0
+        ],
+        "destination": [
+          "aq-completed_result_available",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          1
+        ],
+        "destination": [
+          "aq-completed_result_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          2
+        ],
+        "destination": [
+          "aq-completed_result_epoch",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          3
+        ],
+        "destination": [
+          "aq-completed_result_offset_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          4
+        ],
+        "destination": [
+          "aq-completed_result_samplerate",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          5
+        ],
+        "destination": [
+          "aq-completed_result_background_request",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          6
+        ],
+        "destination": [
+          "aq-completed_result_source_mode",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          7
+        ],
+        "destination": [
+          "aq-completed_result_profile_valid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          8
+        ],
+        "destination": [
+          "aq-completed_result_completed_phase_mask",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          9
+        ],
+        "destination": [
+          "aq-completed_result_background_frames",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          10
+        ],
+        "destination": [
+          "aq-completed_result_background_duration_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          11
+        ],
+        "destination": [
+          "aq-completed_result_background_mean_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          12
+        ],
+        "destination": [
+          "aq-completed_result_background_mean_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          13
+        ],
+        "destination": [
+          "aq-completed_result_background_mean_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          14
+        ],
+        "destination": [
+          "aq-completed_result_background_variance_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          15
+        ],
+        "destination": [
+          "aq-completed_result_background_variance_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          16
+        ],
+        "destination": [
+          "aq-completed_result_background_variance_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          17
+        ],
+        "destination": [
+          "aq-completed_result_background_limit_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          18
+        ],
+        "destination": [
+          "aq-completed_result_background_limit_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          19
+        ],
+        "destination": [
+          "aq-completed_result_background_limit_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          20
+        ],
+        "destination": [
+          "aq-completed_result_muted_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          21
+        ],
+        "destination": [
+          "aq-completed_result_muted_duration_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          22
+        ],
+        "destination": [
+          "aq-completed_result_muted_within_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          23
+        ],
+        "destination": [
+          "aq-completed_result_muted_above_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          24
+        ],
+        "destination": [
+          "aq-completed_result_muted_uncertain_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          25
+        ],
+        "destination": [
+          "aq-completed_result_muted_start_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          26
+        ],
+        "destination": [
+          "aq-completed_result_muted_end_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          27
+        ],
+        "destination": [
+          "aq-completed_result_muted_mean_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          28
+        ],
+        "destination": [
+          "aq-completed_result_muted_mean_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          29
+        ],
+        "destination": [
+          "aq-completed_result_muted_mean_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          30
+        ],
+        "destination": [
+          "aq-completed_result_muted_above_fraction_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          31
+        ],
+        "destination": [
+          "aq-completed_result_muted_above_fraction_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          32
+        ],
+        "destination": [
+          "aq-completed_result_muted_above_fraction_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          33
+        ],
+        "destination": [
+          "aq-completed_result_muted_above_windows_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          34
+        ],
+        "destination": [
+          "aq-completed_result_muted_above_windows_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          35
+        ],
+        "destination": [
+          "aq-completed_result_muted_above_windows_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          36
+        ],
+        "destination": [
+          "aq-completed_result_audible_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          37
+        ],
+        "destination": [
+          "aq-completed_result_audible_duration_ms",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          38
+        ],
+        "destination": [
+          "aq-completed_result_audible_within_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          39
+        ],
+        "destination": [
+          "aq-completed_result_audible_above_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          40
+        ],
+        "destination": [
+          "aq-completed_result_audible_uncertain_windows",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          41
+        ],
+        "destination": [
+          "aq-completed_result_audible_start_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          42
+        ],
+        "destination": [
+          "aq-completed_result_audible_end_sampleclock",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          43
+        ],
+        "destination": [
+          "aq-completed_result_audible_mean_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          44
+        ],
+        "destination": [
+          "aq-completed_result_audible_mean_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          45
+        ],
+        "destination": [
+          "aq-completed_result_audible_mean_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          46
+        ],
+        "destination": [
+          "aq-completed_result_audible_above_fraction_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          47
+        ],
+        "destination": [
+          "aq-completed_result_audible_above_fraction_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          48
+        ],
+        "destination": [
+          "aq-completed_result_audible_above_fraction_high",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          49
+        ],
+        "destination": [
+          "aq-completed_result_audible_above_windows_low",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          50
+        ],
+        "destination": [
+          "aq-completed_result_audible_above_windows_mid",
+          0
+        ]
+      }
+    },
+    {
+      "patchline": {
+        "source": [
+          "aq-result-engine",
+          51
+        ],
+        "destination": [
+          "aq-completed_result_audible_above_windows_high",
+          0
+        ]
+      }
+    }
+  ]
+}

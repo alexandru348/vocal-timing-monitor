@@ -1,0 +1,903 @@
+// Read-only completed probe keeper. No audio processing or host permission.
+// Receives the main engine's CURRENT sample, including its completed phase.
+// Capture is synchronous; independent of Max UI polling and export timing.
+// in1: test_phase_state
+// in2: sampleclock
+// in3: epoch
+// in4: offset_ms
+// in5: background_request
+// in6: source_mode
+// in7: profile_valid
+// in8: completed_phase_mask
+// in9: background_frames
+// in10: background_duration_ms
+// in11: background_mean_low
+// in12: background_mean_mid
+// in13: background_mean_high
+// in14: background_variance_low
+// in15: background_variance_mid
+// in16: background_variance_high
+// in17: background_limit_low
+// in18: background_limit_mid
+// in19: background_limit_high
+// in20: muted_windows
+// in21: muted_duration_ms
+// in22: muted_within_windows
+// in23: muted_above_windows
+// in24: muted_uncertain_windows
+// in25: muted_start_sampleclock
+// in26: muted_end_sampleclock
+// in27: muted_mean_low
+// in28: muted_mean_mid
+// in29: muted_mean_high
+// in30: muted_above_fraction_low
+// in31: muted_above_fraction_mid
+// in32: muted_above_fraction_high
+// in33: muted_above_windows_low
+// in34: muted_above_windows_mid
+// in35: muted_above_windows_high
+// in36: audible_windows
+// in37: audible_duration_ms
+// in38: audible_within_windows
+// in39: audible_above_windows
+// in40: audible_uncertain_windows
+// in41: audible_start_sampleclock
+// in42: audible_end_sampleclock
+// in43: audible_mean_low
+// in44: audible_mean_mid
+// in45: audible_mean_high
+// in46: audible_above_fraction_low
+// in47: audible_above_fraction_mid
+// in48: audible_above_fraction_high
+// in49: audible_above_windows_low
+// in50: audible_above_windows_mid
+// in51: audible_above_windows_high
+// in52: joint_window_end_sampleclock
+// in53: joint_band_codes (three base-8 categories)
+// in54: joint_above_counts (three base-64 counts over the same 60 frames)
+// Separate bounded summaries of matched 600 ms observations, once per phase second.
+History jlastmuted(0);
+History jlastaudible(0);
+History guidedbefore(0);
+History guidedspeech(0);
+History guidedafter(0);
+History jmuted_observations(0);
+History jmuted_skipped(0);
+History jmuted_first_window_start_sampleclock(0);
+History jmuted_last_window_end_sampleclock(0);
+History jmuted_within_low(0);
+History jmuted_within_mid(0);
+History jmuted_within_high(0);
+History jmuted_intermittent_low(0);
+History jmuted_intermittent_mid(0);
+History jmuted_intermittent_high(0);
+History jmuted_above_reference_low(0);
+History jmuted_above_reference_mid(0);
+History jmuted_above_reference_high(0);
+History jmuted_above_low_match_low(0);
+History jmuted_above_low_match_mid(0);
+History jmuted_above_low_match_high(0);
+History jmuted_above_unusable_low(0);
+History jmuted_above_unusable_mid(0);
+History jmuted_above_unusable_high(0);
+History jaudible_observations(0);
+History jaudible_skipped(0);
+History jaudible_first_window_start_sampleclock(0);
+History jaudible_last_window_end_sampleclock(0);
+History jaudible_within_low(0);
+History jaudible_within_mid(0);
+History jaudible_within_high(0);
+History jaudible_intermittent_low(0);
+History jaudible_intermittent_mid(0);
+History jaudible_intermittent_high(0);
+History jaudible_above_reference_low(0);
+History jaudible_above_reference_mid(0);
+History jaudible_above_reference_high(0);
+History jaudible_above_low_match_low(0);
+History jaudible_above_low_match_mid(0);
+History jaudible_above_low_match_high(0);
+History jaudible_above_unusable_low(0);
+History jaudible_above_unusable_mid(0);
+History jaudible_above_unusable_high(0);
+History jr0(0);
+History jr1(0);
+History jr2(0);
+History jr3(0);
+History jr4(0);
+History jr5(0);
+History jr6(0);
+History jr7(0);
+History jr8(0);
+History jr9(0);
+History jr10(0);
+History jr11(0);
+History jr12(0);
+History jr13(0);
+History jr14(0);
+History jr15(0);
+History jr16(0);
+History jr17(0);
+History jr18(0);
+History jr19(0);
+History jr20(0);
+History jr21(0);
+History jr22(0);
+History jr23(0);
+History jr24(0);
+History jr25(0);
+History jr26(0);
+History jr27(0);
+History jr28(0);
+History jr29(0);
+History jr30(0);
+History jr31(0);
+History jr32(0);
+History jr33(0);
+History jr34(0);
+History jr35(0);
+History jr36(0);
+History jr37(0);
+History jr38(0);
+History lastphase(0);
+History lastrequest(0);
+History result0(0);
+History result1(0);
+History result2(0);
+History result3(0);
+History result4(0);
+History result5(0);
+History result6(0);
+History result7(0);
+History result8(0);
+History result9(0);
+History result10(0);
+History result11(0);
+History result12(0);
+History result13(0);
+History result14(0);
+History result15(0);
+History result16(0);
+History result17(0);
+History result18(0);
+History result19(0);
+History result20(0);
+History result21(0);
+History result22(0);
+History result23(0);
+History result24(0);
+History result25(0);
+History result26(0);
+History result27(0);
+History result28(0);
+History result29(0);
+History result30(0);
+History result31(0);
+History result32(0);
+History result33(0);
+History result34(0);
+History result35(0);
+History result36(0);
+History result37(0);
+History result38(0);
+History result39(0);
+History result40(0);
+History result41(0);
+History result42(0);
+History result43(0);
+History result44(0);
+History result45(0);
+History result46(0);
+History result47(0);
+History result48(0);
+History result49(0);
+History result50(0);
+History result51(0);
+nresult0 = result0;
+nresult1 = result1;
+nresult2 = result2;
+nresult3 = result3;
+nresult4 = result4;
+nresult5 = result5;
+nresult6 = result6;
+nresult7 = result7;
+nresult8 = result8;
+nresult9 = result9;
+nresult10 = result10;
+nresult11 = result11;
+nresult12 = result12;
+nresult13 = result13;
+nresult14 = result14;
+nresult15 = result15;
+nresult16 = result16;
+nresult17 = result17;
+nresult18 = result18;
+nresult19 = result19;
+nresult20 = result20;
+nresult21 = result21;
+nresult22 = result22;
+nresult23 = result23;
+nresult24 = result24;
+nresult25 = result25;
+nresult26 = result26;
+nresult27 = result27;
+nresult28 = result28;
+nresult29 = result29;
+nresult30 = result30;
+nresult31 = result31;
+nresult32 = result32;
+nresult33 = result33;
+nresult34 = result34;
+nresult35 = result35;
+nresult36 = result36;
+nresult37 = result37;
+nresult38 = result38;
+nresult39 = result39;
+nresult40 = result40;
+nresult41 = result41;
+nresult42 = result42;
+nresult43 = result43;
+nresult44 = result44;
+nresult45 = result45;
+nresult46 = result46;
+nresult47 = result47;
+nresult48 = result48;
+nresult49 = result49;
+nresult50 = result50;
+nresult51 = result51;
+newrequest = in5 != lastrequest;
+// Occupancy and reference category describe identical microphone frames.
+jend = in52;
+jduration = 60 * max(1, floor(samplerate * 0.01));
+jstart = jend - jduration + 1;
+jc0 = floor(in53 / 1) - 8 * floor(in53 / 8);
+jx0 = floor(in54 / 1) - 64 * floor(in54 / 64);
+jvalid0 = (jc0 >= 1) && (jc0 <= 5) && (jx0 <= 60) && ((jc0 == 1) ? (jx0 <= 6) : ((jc0 == 2) ? ((jx0 > 6) && (jx0 < 36)) : (jx0 >= 36)));
+jc1 = floor(in53 / 8) - 8 * floor(in53 / 64);
+jx1 = floor(in54 / 64) - 64 * floor(in54 / 4096);
+jvalid1 = (jc1 >= 1) && (jc1 <= 5) && (jx1 <= 60) && ((jc1 == 1) ? (jx1 <= 6) : ((jc1 == 2) ? ((jx1 > 6) && (jx1 < 36)) : (jx1 >= 36)));
+jc2 = floor(in53 / 64) - 8 * floor(in53 / 512);
+jx2 = floor(in54 / 4096) - 64 * floor(in54 / 262144);
+jvalid2 = (jc2 >= 1) && (jc2 <= 5) && (jx2 <= 60) && ((jc2 == 1) ? (jx2 <= 6) : ((jc2 == 2) ? ((jx2 > 6) && (jx2 < 36)) : (jx2 >= 36)));
+jvalid = (jend > 0) && jvalid0 && jvalid1 && jvalid2;
+njmuted_observations = jmuted_observations;
+njmuted_skipped = jmuted_skipped;
+njmuted_first_window_start_sampleclock = jmuted_first_window_start_sampleclock;
+njmuted_last_window_end_sampleclock = jmuted_last_window_end_sampleclock;
+njmuted_within_low = jmuted_within_low;
+njmuted_within_mid = jmuted_within_mid;
+njmuted_within_high = jmuted_within_high;
+njmuted_intermittent_low = jmuted_intermittent_low;
+njmuted_intermittent_mid = jmuted_intermittent_mid;
+njmuted_intermittent_high = jmuted_intermittent_high;
+njmuted_above_reference_low = jmuted_above_reference_low;
+njmuted_above_reference_mid = jmuted_above_reference_mid;
+njmuted_above_reference_high = jmuted_above_reference_high;
+njmuted_above_low_match_low = jmuted_above_low_match_low;
+njmuted_above_low_match_mid = jmuted_above_low_match_mid;
+njmuted_above_low_match_high = jmuted_above_low_match_high;
+njmuted_above_unusable_low = jmuted_above_unusable_low;
+njmuted_above_unusable_mid = jmuted_above_unusable_mid;
+njmuted_above_unusable_high = jmuted_above_unusable_high;
+njaudible_observations = jaudible_observations;
+njaudible_skipped = jaudible_skipped;
+njaudible_first_window_start_sampleclock = jaudible_first_window_start_sampleclock;
+njaudible_last_window_end_sampleclock = jaudible_last_window_end_sampleclock;
+njaudible_within_low = jaudible_within_low;
+njaudible_within_mid = jaudible_within_mid;
+njaudible_within_high = jaudible_within_high;
+njaudible_intermittent_low = jaudible_intermittent_low;
+njaudible_intermittent_mid = jaudible_intermittent_mid;
+njaudible_intermittent_high = jaudible_intermittent_high;
+njaudible_above_reference_low = jaudible_above_reference_low;
+njaudible_above_reference_mid = jaudible_above_reference_mid;
+njaudible_above_reference_high = jaudible_above_reference_high;
+njaudible_above_low_match_low = jaudible_above_low_match_low;
+njaudible_above_low_match_mid = jaudible_above_low_match_mid;
+njaudible_above_low_match_high = jaudible_above_low_match_high;
+njaudible_above_unusable_low = jaudible_above_unusable_low;
+njaudible_above_unusable_mid = jaudible_above_unusable_mid;
+njaudible_above_unusable_high = jaudible_above_unusable_high;
+njr0 = jr0;
+njr1 = jr1;
+njr2 = jr2;
+njr3 = jr3;
+njr4 = jr4;
+njr5 = jr5;
+njr6 = jr6;
+njr7 = jr7;
+njr8 = jr8;
+njr9 = jr9;
+njr10 = jr10;
+njr11 = jr11;
+njr12 = jr12;
+njr13 = jr13;
+njr14 = jr14;
+njr15 = jr15;
+njr16 = jr16;
+njr17 = jr17;
+njr18 = jr18;
+njr19 = jr19;
+njr20 = jr20;
+njr21 = jr21;
+njr22 = jr22;
+njr23 = jr23;
+njr24 = jr24;
+njr25 = jr25;
+njr26 = jr26;
+njr27 = jr27;
+njr28 = jr28;
+njr29 = jr29;
+njr30 = jr30;
+njr31 = jr31;
+njr32 = jr32;
+njr33 = jr33;
+njr34 = jr34;
+njr35 = jr35;
+njr36 = jr36;
+njr37 = jr37;
+njr38 = jr38;
+if (newrequest || (in1 == 0) || (in1 == 6) || (in1 == 8)) {
+    njmuted_observations = 0;
+    njmuted_skipped = 0;
+    njmuted_first_window_start_sampleclock = 0;
+    njmuted_last_window_end_sampleclock = 0;
+    njmuted_within_low = 0;
+    njmuted_within_mid = 0;
+    njmuted_within_high = 0;
+    njmuted_intermittent_low = 0;
+    njmuted_intermittent_mid = 0;
+    njmuted_intermittent_high = 0;
+    njmuted_above_reference_low = 0;
+    njmuted_above_reference_mid = 0;
+    njmuted_above_reference_high = 0;
+    njmuted_above_low_match_low = 0;
+    njmuted_above_low_match_mid = 0;
+    njmuted_above_low_match_high = 0;
+    njmuted_above_unusable_low = 0;
+    njmuted_above_unusable_mid = 0;
+    njmuted_above_unusable_high = 0;
+    njaudible_observations = 0;
+    njaudible_skipped = 0;
+    njaudible_first_window_start_sampleclock = 0;
+    njaudible_last_window_end_sampleclock = 0;
+    njaudible_within_low = 0;
+    njaudible_within_mid = 0;
+    njaudible_within_high = 0;
+    njaudible_intermittent_low = 0;
+    njaudible_intermittent_mid = 0;
+    njaudible_intermittent_high = 0;
+    njaudible_above_reference_low = 0;
+    njaudible_above_reference_mid = 0;
+    njaudible_above_reference_high = 0;
+    njaudible_above_low_match_low = 0;
+    njaudible_above_low_match_mid = 0;
+    njaudible_above_low_match_high = 0;
+    njaudible_above_unusable_low = 0;
+    njaudible_above_unusable_mid = 0;
+    njaudible_above_unusable_high = 0;
+} else {
+    if (in20 > jlastmuted) {
+        if (jvalid && (jstart >= in25) && (jend <= in26) && (jend > jmuted_last_window_end_sampleclock)) {
+            njmuted_observations = jmuted_observations + 1;
+            njmuted_first_window_start_sampleclock = jmuted_observations == 0 ? jstart : jmuted_first_window_start_sampleclock;
+            njmuted_last_window_end_sampleclock = jend;
+            njmuted_within_low = jmuted_within_low + (jc0 == 1);
+            njmuted_within_mid = jmuted_within_mid + (jc1 == 1);
+            njmuted_within_high = jmuted_within_high + (jc2 == 1);
+            njmuted_intermittent_low = jmuted_intermittent_low + (jc0 == 2);
+            njmuted_intermittent_mid = jmuted_intermittent_mid + (jc1 == 2);
+            njmuted_intermittent_high = jmuted_intermittent_high + (jc2 == 2);
+            njmuted_above_reference_low = jmuted_above_reference_low + (jc0 == 3);
+            njmuted_above_reference_mid = jmuted_above_reference_mid + (jc1 == 3);
+            njmuted_above_reference_high = jmuted_above_reference_high + (jc2 == 3);
+            njmuted_above_low_match_low = jmuted_above_low_match_low + (jc0 == 4);
+            njmuted_above_low_match_mid = jmuted_above_low_match_mid + (jc1 == 4);
+            njmuted_above_low_match_high = jmuted_above_low_match_high + (jc2 == 4);
+            njmuted_above_unusable_low = jmuted_above_unusable_low + (jc0 == 5);
+            njmuted_above_unusable_mid = jmuted_above_unusable_mid + (jc1 == 5);
+            njmuted_above_unusable_high = jmuted_above_unusable_high + (jc2 == 5);
+        } else { njmuted_skipped = jmuted_skipped + 1; }
+    }
+    if (in36 > jlastaudible) {
+        if (jvalid && (jstart >= in41) && (jend <= in42) && (jend > jaudible_last_window_end_sampleclock)) {
+            njaudible_observations = jaudible_observations + 1;
+            njaudible_first_window_start_sampleclock = jaudible_observations == 0 ? jstart : jaudible_first_window_start_sampleclock;
+            njaudible_last_window_end_sampleclock = jend;
+            njaudible_within_low = jaudible_within_low + (jc0 == 1);
+            njaudible_within_mid = jaudible_within_mid + (jc1 == 1);
+            njaudible_within_high = jaudible_within_high + (jc2 == 1);
+            njaudible_intermittent_low = jaudible_intermittent_low + (jc0 == 2);
+            njaudible_intermittent_mid = jaudible_intermittent_mid + (jc1 == 2);
+            njaudible_intermittent_high = jaudible_intermittent_high + (jc2 == 2);
+            njaudible_above_reference_low = jaudible_above_reference_low + (jc0 == 3);
+            njaudible_above_reference_mid = jaudible_above_reference_mid + (jc1 == 3);
+            njaudible_above_reference_high = jaudible_above_reference_high + (jc2 == 3);
+            njaudible_above_low_match_low = jaudible_above_low_match_low + (jc0 == 4);
+            njaudible_above_low_match_mid = jaudible_above_low_match_mid + (jc1 == 4);
+            njaudible_above_low_match_high = jaudible_above_low_match_high + (jc2 == 4);
+            njaudible_above_unusable_low = jaudible_above_unusable_low + (jc0 == 5);
+            njaudible_above_unusable_mid = jaudible_above_unusable_mid + (jc1 == 5);
+            njaudible_above_unusable_high = jaudible_above_unusable_high + (jc2 == 5);
+        } else { njaudible_skipped = jaudible_skipped + 1; }
+    }
+}
+if (newrequest) {
+    njr0 = 0;
+    njr1 = 0;
+    njr2 = 0;
+    njr3 = 0;
+    njr4 = 0;
+    njr5 = 0;
+    njr6 = 0;
+    njr7 = 0;
+    njr8 = 0;
+    njr9 = 0;
+    njr10 = 0;
+    njr11 = 0;
+    njr12 = 0;
+    njr13 = 0;
+    njr14 = 0;
+    njr15 = 0;
+    njr16 = 0;
+    njr17 = 0;
+    njr18 = 0;
+    njr19 = 0;
+    njr20 = 0;
+    njr21 = 0;
+    njr22 = 0;
+    njr23 = 0;
+    njr24 = 0;
+    njr25 = 0;
+    njr26 = 0;
+    njr27 = 0;
+    njr28 = 0;
+    njr29 = 0;
+    njr30 = 0;
+    njr31 = 0;
+    njr32 = 0;
+    njr33 = 0;
+    njr34 = 0;
+    njr35 = 0;
+    njr36 = 0;
+    njr37 = 0;
+    njr38 = 0;
+} else if ((in1 == 5) && (lastphase != 5) && (in8 == 3) && (in20 == 10) && (in36 == 20) && (in6 == 1) && (in7 == 1)) {
+    njr0 = (njmuted_observations > 0) && (njaudible_observations > 0);
+    njr1 = njmuted_observations;
+    njr2 = njmuted_skipped;
+    njr3 = njmuted_first_window_start_sampleclock;
+    njr4 = njmuted_last_window_end_sampleclock;
+    njr5 = njmuted_within_low;
+    njr6 = njmuted_within_mid;
+    njr7 = njmuted_within_high;
+    njr8 = njmuted_intermittent_low;
+    njr9 = njmuted_intermittent_mid;
+    njr10 = njmuted_intermittent_high;
+    njr11 = njmuted_above_reference_low;
+    njr12 = njmuted_above_reference_mid;
+    njr13 = njmuted_above_reference_high;
+    njr14 = njmuted_above_low_match_low;
+    njr15 = njmuted_above_low_match_mid;
+    njr16 = njmuted_above_low_match_high;
+    njr17 = njmuted_above_unusable_low;
+    njr18 = njmuted_above_unusable_mid;
+    njr19 = njmuted_above_unusable_high;
+    njr20 = njaudible_observations;
+    njr21 = njaudible_skipped;
+    njr22 = njaudible_first_window_start_sampleclock;
+    njr23 = njaudible_last_window_end_sampleclock;
+    njr24 = njaudible_within_low;
+    njr25 = njaudible_within_mid;
+    njr26 = njaudible_within_high;
+    njr27 = njaudible_intermittent_low;
+    njr28 = njaudible_intermittent_mid;
+    njr29 = njaudible_intermittent_high;
+    njr30 = njaudible_above_reference_low;
+    njr31 = njaudible_above_reference_mid;
+    njr32 = njaudible_above_reference_high;
+    njr33 = njaudible_above_low_match_low;
+    njr34 = njaudible_above_low_match_mid;
+    njr35 = njaudible_above_low_match_high;
+    njr36 = njaudible_above_unusable_low;
+    njr37 = njaudible_above_unusable_mid;
+    njr38 = njaudible_above_unusable_high;
+}
+
+if (newrequest) {
+    nresult0 = 0;
+    nresult1 = 0;
+    nresult2 = 0;
+    nresult3 = 0;
+    nresult4 = 0;
+    nresult5 = 0;
+    nresult6 = 0;
+    nresult7 = 0;
+    nresult8 = 0;
+    nresult9 = 0;
+    nresult10 = 0;
+    nresult11 = 0;
+    nresult12 = 0;
+    nresult13 = 0;
+    nresult14 = 0;
+    nresult15 = 0;
+    nresult16 = 0;
+    nresult17 = 0;
+    nresult18 = 0;
+    nresult19 = 0;
+    nresult20 = 0;
+    nresult21 = 0;
+    nresult22 = 0;
+    nresult23 = 0;
+    nresult24 = 0;
+    nresult25 = 0;
+    nresult26 = 0;
+    nresult27 = 0;
+    nresult28 = 0;
+    nresult29 = 0;
+    nresult30 = 0;
+    nresult31 = 0;
+    nresult32 = 0;
+    nresult33 = 0;
+    nresult34 = 0;
+    nresult35 = 0;
+    nresult36 = 0;
+    nresult37 = 0;
+    nresult38 = 0;
+    nresult39 = 0;
+    nresult40 = 0;
+    nresult41 = 0;
+    nresult42 = 0;
+    nresult43 = 0;
+    nresult44 = 0;
+    nresult45 = 0;
+    nresult46 = 0;
+    nresult47 = 0;
+    nresult48 = 0;
+    nresult49 = 0;
+    nresult50 = 0;
+    nresult51 = 0;
+} else if ((in1 == 5) && (lastphase != 5) && (in8 == 3) && (in20 == 10) && (in36 == 20) && (in6 == 1) && (in7 == 1)) {
+    nresult0 = 1;
+    nresult1 = in2;
+    nresult2 = in3;
+    nresult3 = in4;
+    nresult4 = samplerate;
+    nresult5 = in5;
+    nresult6 = in6;
+    nresult7 = in7;
+    nresult8 = in8;
+    nresult9 = in9;
+    nresult10 = in10;
+    nresult11 = in11;
+    nresult12 = in12;
+    nresult13 = in13;
+    nresult14 = in14;
+    nresult15 = in15;
+    nresult16 = in16;
+    nresult17 = in17;
+    nresult18 = in18;
+    nresult19 = in19;
+    nresult20 = in20;
+    nresult21 = in21;
+    nresult22 = in22;
+    nresult23 = in23;
+    nresult24 = in24;
+    nresult25 = in25;
+    nresult26 = in26;
+    nresult27 = in27;
+    nresult28 = in28;
+    nresult29 = in29;
+    nresult30 = in30;
+    nresult31 = in31;
+    nresult32 = in32;
+    nresult33 = in33;
+    nresult34 = in34;
+    nresult35 = in35;
+    nresult36 = in36;
+    nresult37 = in37;
+    nresult38 = in38;
+    nresult39 = in39;
+    nresult40 = in40;
+    nresult41 = in41;
+    nresult42 = in42;
+    nresult43 = in43;
+    nresult44 = in44;
+    nresult45 = in45;
+    nresult46 = in46;
+    nresult47 = in47;
+    nresult48 = in48;
+    nresult49 = in49;
+    nresult50 = in50;
+    nresult51 = in51;
+}
+out1 = nresult0;
+out2 = nresult1;
+out3 = nresult2;
+out4 = nresult3;
+out5 = nresult4;
+out6 = nresult5;
+out7 = nresult6;
+out8 = nresult7;
+out9 = nresult8;
+out10 = nresult9;
+out11 = nresult10;
+out12 = nresult11;
+out13 = nresult12;
+out14 = nresult13;
+out15 = nresult14;
+out16 = nresult15;
+out17 = nresult16;
+out18 = nresult17;
+out19 = nresult18;
+out20 = nresult19;
+out21 = nresult20;
+out22 = nresult21;
+out23 = nresult22;
+out24 = nresult23;
+out25 = nresult24;
+out26 = nresult25;
+out27 = nresult26;
+out28 = nresult27;
+out29 = nresult28;
+out30 = nresult29;
+out31 = nresult30;
+out32 = nresult31;
+out33 = nresult32;
+out34 = nresult33;
+out35 = nresult34;
+out36 = nresult35;
+out37 = nresult36;
+out38 = nresult37;
+out39 = nresult38;
+out40 = nresult39;
+out41 = nresult40;
+out42 = nresult41;
+out43 = nresult42;
+out44 = nresult43;
+out45 = nresult44;
+out46 = nresult45;
+out47 = nresult46;
+out48 = nresult47;
+out49 = nresult48;
+out50 = nresult49;
+out51 = nresult50;
+out52 = nresult51;
+out53 = (nresult0 == 1) && (in1 == 6) ? 7 : in1;
+result0 = nresult0;
+result1 = nresult1;
+result2 = nresult2;
+result3 = nresult3;
+result4 = nresult4;
+result5 = nresult5;
+result6 = nresult6;
+result7 = nresult7;
+result8 = nresult8;
+result9 = nresult9;
+result10 = nresult10;
+result11 = nresult11;
+result12 = nresult12;
+result13 = nresult13;
+result14 = nresult14;
+result15 = nresult15;
+result16 = nresult16;
+result17 = nresult17;
+result18 = nresult18;
+result19 = nresult19;
+result20 = nresult20;
+result21 = nresult21;
+result22 = nresult22;
+result23 = nresult23;
+result24 = nresult24;
+result25 = nresult25;
+result26 = nresult26;
+result27 = nresult27;
+result28 = nresult28;
+result29 = nresult29;
+result30 = nresult30;
+result31 = nresult31;
+result32 = nresult32;
+result33 = nresult33;
+result34 = nresult34;
+result35 = nresult35;
+result36 = nresult36;
+result37 = nresult37;
+result38 = nresult38;
+result39 = nresult39;
+result40 = nresult40;
+result41 = nresult41;
+result42 = nresult42;
+result43 = nresult43;
+result44 = nresult44;
+result45 = nresult45;
+result46 = nresult46;
+result47 = nresult47;
+result48 = nresult48;
+result49 = nresult49;
+result50 = nresult50;
+result51 = nresult51;
+lastphase = in1;
+lastrequest = in5;
+
+// Completed joint summaries never feed live analysis or authorization.
+out54 = njr0;
+out55 = njr1;
+out56 = njr2;
+out57 = njr3;
+out58 = njr4;
+out59 = njr5;
+out60 = njr6;
+out61 = njr7;
+out62 = njr8;
+out63 = njr9;
+out64 = njr10;
+out65 = njr11;
+out66 = njr12;
+out67 = njr13;
+out68 = njr14;
+out69 = njr15;
+out70 = njr16;
+out71 = njr17;
+out72 = njr18;
+out73 = njr19;
+out74 = njr20;
+out75 = njr21;
+out76 = njr22;
+out77 = njr23;
+out78 = njr24;
+out79 = njr25;
+out80 = njr26;
+out81 = njr27;
+out82 = njr28;
+out83 = njr29;
+out84 = njr30;
+out85 = njr31;
+out86 = njr32;
+out87 = njr33;
+out88 = njr34;
+out89 = njr35;
+out90 = njr36;
+out91 = njr37;
+out92 = njr38;
+
+// The same audible observations and frozen background thresholds serve all
+// cues. Skip observations 1, 6–7 and 14–15 to leave time for the UI and user.
+// Each packed total contains eight independent base-8 counters in the order
+// shown at the outlets. At most six observations per interval means no carry,
+// and all packed values remain exact even with 24 bits of binary precision.
+nguidedbefore = guidedbefore;
+nguidedspeech = guidedspeech;
+nguidedafter = guidedafter;
+if (newrequest) {
+    nguidedbefore = 0;
+    nguidedspeech = 0;
+    nguidedafter = 0;
+} else if (((in1 == 4) || (in1 == 5)) && (in36 > jlastaudible)) {
+    guidedvote = 8; // A rejected joint observation contributes one skip.
+    if (njaudible_observations > jaudible_observations) {
+        guidedvote = 1
+            + 64 * (jc0 >= 3) + 512 * (jc1 >= 3) + 4096 * (jc2 >= 3)
+            + 32768 * (jc0 == 4) + 262144 * (jc1 == 4) + 2097152 * (jc2 == 4);
+    }
+    if ((in36 >= 2) && (in36 <= 5)) {
+        nguidedbefore = guidedbefore + guidedvote;
+    } else if ((in36 >= 8) && (in36 <= 13)) {
+        nguidedspeech = guidedspeech + guidedvote;
+    } else if ((in36 >= 16) && (in36 <= 20)) {
+        nguidedafter = guidedafter + guidedvote;
+    }
+}
+// Scheduled instructions describe the requested action, never detected speech.
+out93 = ((in1 == 3) || (in1 == 4)) ? ((in36 < 5) ? 1 : ((in36 < 13) ? 2 : 3)) : (nresult0 ? 4 : ((in1 == 8) ? 5 : 0));
+out94 = nresult0 && ((nguidedbefore - 8 * floor(nguidedbefore / 8)) > 0)
+    && ((nguidedspeech - 8 * floor(nguidedspeech / 8)) > 0)
+    && ((nguidedafter - 8 * floor(nguidedafter / 8)) > 0);
+reportedbefore = nguidedbefore * nresult0;
+out95 = reportedbefore - 8 * floor(reportedbefore / 8); // observations
+out96 = floor(reportedbefore / 8) - 8 * floor(reportedbefore / 64); // skipped
+out97 = floor(reportedbefore / 64) - 8 * floor(reportedbefore / 512); // persistent_low
+out98 = floor(reportedbefore / 512) - 8 * floor(reportedbefore / 4096); // persistent_mid
+out99 = floor(reportedbefore / 4096) - 8 * floor(reportedbefore / 32768); // persistent_high
+out100 = floor(reportedbefore / 32768) - 8 * floor(reportedbefore / 262144); // low_match_low
+out101 = floor(reportedbefore / 262144) - 8 * floor(reportedbefore / 2097152); // low_match_mid
+out102 = floor(reportedbefore / 2097152) - 8 * floor(reportedbefore / 16777216); // low_match_high
+reportedspeech = nguidedspeech * nresult0;
+out103 = reportedspeech - 8 * floor(reportedspeech / 8); // observations
+out104 = floor(reportedspeech / 8) - 8 * floor(reportedspeech / 64); // skipped
+out105 = floor(reportedspeech / 64) - 8 * floor(reportedspeech / 512); // persistent_low
+out106 = floor(reportedspeech / 512) - 8 * floor(reportedspeech / 4096); // persistent_mid
+out107 = floor(reportedspeech / 4096) - 8 * floor(reportedspeech / 32768); // persistent_high
+out108 = floor(reportedspeech / 32768) - 8 * floor(reportedspeech / 262144); // low_match_low
+out109 = floor(reportedspeech / 262144) - 8 * floor(reportedspeech / 2097152); // low_match_mid
+out110 = floor(reportedspeech / 2097152) - 8 * floor(reportedspeech / 16777216); // low_match_high
+reportedafter = nguidedafter * nresult0;
+out111 = reportedafter - 8 * floor(reportedafter / 8); // observations
+out112 = floor(reportedafter / 8) - 8 * floor(reportedafter / 64); // skipped
+out113 = floor(reportedafter / 64) - 8 * floor(reportedafter / 512); // persistent_low
+out114 = floor(reportedafter / 512) - 8 * floor(reportedafter / 4096); // persistent_mid
+out115 = floor(reportedafter / 4096) - 8 * floor(reportedafter / 32768); // persistent_high
+out116 = floor(reportedafter / 32768) - 8 * floor(reportedafter / 262144); // low_match_low
+out117 = floor(reportedafter / 262144) - 8 * floor(reportedafter / 2097152); // low_match_mid
+out118 = floor(reportedafter / 2097152) - 8 * floor(reportedafter / 16777216); // low_match_high
+guidedbefore = nguidedbefore;
+guidedspeech = nguidedspeech;
+guidedafter = nguidedafter;
+
+jmuted_observations = njmuted_observations;
+jmuted_skipped = njmuted_skipped;
+jmuted_first_window_start_sampleclock = njmuted_first_window_start_sampleclock;
+jmuted_last_window_end_sampleclock = njmuted_last_window_end_sampleclock;
+jmuted_within_low = njmuted_within_low;
+jmuted_within_mid = njmuted_within_mid;
+jmuted_within_high = njmuted_within_high;
+jmuted_intermittent_low = njmuted_intermittent_low;
+jmuted_intermittent_mid = njmuted_intermittent_mid;
+jmuted_intermittent_high = njmuted_intermittent_high;
+jmuted_above_reference_low = njmuted_above_reference_low;
+jmuted_above_reference_mid = njmuted_above_reference_mid;
+jmuted_above_reference_high = njmuted_above_reference_high;
+jmuted_above_low_match_low = njmuted_above_low_match_low;
+jmuted_above_low_match_mid = njmuted_above_low_match_mid;
+jmuted_above_low_match_high = njmuted_above_low_match_high;
+jmuted_above_unusable_low = njmuted_above_unusable_low;
+jmuted_above_unusable_mid = njmuted_above_unusable_mid;
+jmuted_above_unusable_high = njmuted_above_unusable_high;
+jaudible_observations = njaudible_observations;
+jaudible_skipped = njaudible_skipped;
+jaudible_first_window_start_sampleclock = njaudible_first_window_start_sampleclock;
+jaudible_last_window_end_sampleclock = njaudible_last_window_end_sampleclock;
+jaudible_within_low = njaudible_within_low;
+jaudible_within_mid = njaudible_within_mid;
+jaudible_within_high = njaudible_within_high;
+jaudible_intermittent_low = njaudible_intermittent_low;
+jaudible_intermittent_mid = njaudible_intermittent_mid;
+jaudible_intermittent_high = njaudible_intermittent_high;
+jaudible_above_reference_low = njaudible_above_reference_low;
+jaudible_above_reference_mid = njaudible_above_reference_mid;
+jaudible_above_reference_high = njaudible_above_reference_high;
+jaudible_above_low_match_low = njaudible_above_low_match_low;
+jaudible_above_low_match_mid = njaudible_above_low_match_mid;
+jaudible_above_low_match_high = njaudible_above_low_match_high;
+jaudible_above_unusable_low = njaudible_above_unusable_low;
+jaudible_above_unusable_mid = njaudible_above_unusable_mid;
+jaudible_above_unusable_high = njaudible_above_unusable_high;
+jr0 = njr0;
+jr1 = njr1;
+jr2 = njr2;
+jr3 = njr3;
+jr4 = njr4;
+jr5 = njr5;
+jr6 = njr6;
+jr7 = njr7;
+jr8 = njr8;
+jr9 = njr9;
+jr10 = njr10;
+jr11 = njr11;
+jr12 = njr12;
+jr13 = njr13;
+jr14 = njr14;
+jr15 = njr15;
+jr16 = njr16;
+jr17 = njr17;
+jr18 = njr18;
+jr19 = njr19;
+jr20 = njr20;
+jr21 = njr21;
+jr22 = njr22;
+jr23 = njr23;
+jr24 = njr24;
+jr25 = njr25;
+jr26 = njr26;
+jr27 = njr27;
+jr28 = njr28;
+jr29 = njr29;
+jr30 = njr30;
+jr31 = njr31;
+jr32 = njr32;
+jr33 = njr33;
+jr34 = njr34;
+jr35 = njr35;
+jr36 = njr36;
+jr37 = njr37;
+jr38 = njr38;
+jlastmuted = in20;
+jlastaudible = in36;

@@ -1,0 +1,59 @@
+// Preserve the two verdicts and hold an eligible request for one Max poll.
+// The hold is reset at the start of a test or on invalidation of the take.
+// in1: test state, in2: event, in3: verdict, in4: deviation, in5: eligibility.
+Param cancel(0);
+History previousCancel(0);
+History count(0);
+History firstVerdict(0);
+History secondVerdict(0);
+History firstDeviation(0);
+History secondDeviation(0);
+History eligible(0);
+History held(0);
+
+nCount = count;
+nFirst = firstVerdict;
+nSecond = secondVerdict;
+nFirstDeviation = firstDeviation;
+nSecondDeviation = secondDeviation;
+nEligible = eligible;
+nHeld = held;
+if (in1 == 1) {
+    nCount = 0;
+    nFirst = 0;
+    nSecond = 0;
+    nFirstDeviation = 0;
+    nSecondDeviation = 0;
+    nEligible = 0;
+    nHeld = 0;
+} else if ((cancel != previousCancel) || (in1 == 6)) {
+    nHeld = 0;
+} else if (in2 == 1) {
+    nCount = count + 1;
+    if (count == 0) {
+        nFirst = in3;
+        nFirstDeviation = in4;
+    } else if (count == 1) {
+        nSecond = in3;
+        nSecondDeviation = in4;
+        nEligible = (in1 == 5) && (firstVerdict == 2) && (in3 == 3) && (in5 == 1);
+        nHeld = nEligible;
+    }
+}
+
+out1 = in1;
+out2 = nCount;
+out3 = nFirst;
+out4 = nSecond;
+out5 = nFirstDeviation;
+out6 = nSecondDeviation;
+out7 = nEligible;
+out8 = nHeld;
+count = nCount;
+firstVerdict = nFirst;
+secondVerdict = nSecond;
+firstDeviation = nFirstDeviation;
+secondDeviation = nSecondDeviation;
+eligible = nEligible;
+held = nHeld;
+previousCancel = cancel;

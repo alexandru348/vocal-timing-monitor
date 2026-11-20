@@ -1,0 +1,56 @@
+// Convert stereo microphone and beat signals to six aligned band levels.
+// out1..6 microphone and beat low/mid/high levels; out7 completed frame;
+// out8 processed milliseconds independent of the probe and band model.
+Param shortframes(0);
+History micLowL(0);
+
+History micLowR(0);
+History micMidL(0);
+History micMidR(0);
+History refLowL(0);
+History refLowR(0);
+History refMidL(0);
+History refMidR(0);
+History micSum0(0);
+History micSum1(0);
+History micSum2(0);
+History refSum0(0);
+History refSum1(0);
+History refSum2(0);
+History subcount(0);
+History frameCount(0);
+
+hop = max(1, floor(samplerate * (shortframes == 1 ? 0.002 : 0.005) + 0.5));
+lowcoef = exp(-6.28318530718 * 300 / samplerate);
+midcoef = exp(-6.28318530718 * 1600 / samplerate);
+nMicLowL = in1 + lowcoef * (micLowL - in1);
+nMicLowR = in2 + lowcoef * (micLowR - in2);
+nMicMidL = in1 + midcoef * (micMidL - in1);
+nMicMidR = in2 + midcoef * (micMidR - in2);
+nRefLowL = in3 + lowcoef * (refLowL - in3);
+nRefLowR = in4 + lowcoef * (refLowR - in4);
+nRefMidL = in3 + midcoef * (refMidL - in3);
+nRefMidR = in4 + midcoef * (refMidR - in4);
+m0 = micSum0 + max(abs(nMicLowL), abs(nMicLowR));
+m1 = micSum1 + max(abs(nMicMidL-nMicLowL), abs(nMicMidR-nMicLowR));
+m2 = micSum2 + max(abs(in1-nMicMidL), abs(in2-nMicMidR));
+r0 = refSum0 + max(abs(nRefLowL), abs(nRefLowR));
+r1 = refSum1 + max(abs(nRefMidL-nRefLowL), abs(nRefMidR-nRefLowR));
+r2 = refSum2 + max(abs(in3-nRefMidL), abs(in4-nRefMidR));
+sub = subcount + 1;
+packet = sub >= hop;
+nextFrameCount = frameCount + packet;
+out1 = packet ? m0 / hop : 0;
+out2 = packet ? m1 / hop : 0;
+out3 = packet ? m2 / hop : 0;
+out4 = packet ? r0 / hop : 0;
+out5 = packet ? r1 / hop : 0;
+out6 = packet ? r2 / hop : 0;
+out7 = packet;
+out8 = nextFrameCount * hop * 1000 / samplerate;
+micLowL = nMicLowL; micLowR = nMicLowR; micMidL = nMicMidL; micMidR = nMicMidR;
+refLowL = nRefLowL; refLowR = nRefLowR; refMidL = nRefMidL; refMidR = nRefMidR;
+micSum0 = packet ? 0 : m0; micSum1 = packet ? 0 : m1; micSum2 = packet ? 0 : m2;
+refSum0 = packet ? 0 : r0; refSum1 = packet ? 0 : r1; refSum2 = packet ? 0 : r2;
+subcount = packet ? 0 : sub;
+frameCount = nextFrameCount;

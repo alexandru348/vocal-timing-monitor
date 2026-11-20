@@ -1,0 +1,207 @@
+// Guided comparison of beat-only and speech-prompt intervals. The extra
+// envelope alignment scan is diagnostic and does not control the filter.
+// in1..4 mic L/R, digital reference L/R; in5 permit; in6 timing compensation;
+// in7..10 cumulative candidates/measured/rejected/uncertain; in11..12
+// filter comparison pulse and waveform similarity (0..1).
+Param proberequest(0);
+Param phraserequest(0);
+Param rhythmrequest(0);
+Data micFrames(1000);
+Data refFrames(1000);
+Data validFrames(1000);
+Data lagScores(161);
+History lastrequest(0);
+History lastPhraseRequest(0);
+History lastRhythmRequest(0);
+History phraseMode(0);
+History stage(0);
+History ticks(0);
+History blocked(0);
+History capturedOffset(0);
+History micBaseL(0);
+History micBaseR(0);
+History refBaseL(0);
+History refBaseR(0);
+History micSum(0);
+History refSum(0);
+History validSum(0);
+History lastCandidates(0);
+History lastMeasured(0);
+History lastRejected(0);
+History lastUncertain(0);
+History beatCandidates(0);
+History beatMeasured(0);
+History beatRejected(0);
+History beatUncertain(0);
+History beatValid(0);
+History beatScored(0);
+History beatSimilarity(0);
+History beatMicLevel(0);
+History beatRefLevel(0);
+History speechCandidates(0);
+History speechMeasured(0);
+History speechRejected(0);
+History speechUncertain(0);
+History speechValid(0);
+History speechScored(0);
+History speechSimilarity(0);
+History lag(-80);
+History pair(0);
+History pairsUsed(0);
+History sumX(0);
+History sumY(0);
+History sumXX(0);
+History sumYY(0);
+History sumXY(0);
+History bestScore(0);
+History bestLag(0);
+History runnerScore(0);
+History bestPairs(0);
+History calibratedScore(0);
+
+hop = max(1, floor(samplerate * 0.005 + 0.5));
+duration = 1000 * hop;
+permit = in5 == 1;
+busy = ((stage >= 1) && (stage <= 4)) || (stage == 7);
+newPhraseRequest = phraserequest != lastPhraseRequest;
+newRhythmRequest = rhythmrequest != lastRhythmRequest;
+newprobe = ((proberequest != lastrequest) || newPhraseRequest || newRhythmRequest) && !busy;
+nPhraseMode = newprobe ? (newRhythmRequest ? 2 : newPhraseRequest) : phraseMode;
+speechDuration = nPhraseMode == 1 ? 12 * samplerate : (nPhraseMode == 2 ? 1600 * hop : duration);
+ns = stage;
+nt = ticks;
+nb = permit ? 0 : blocked + 1;
+noffset = capturedOffset;
+nm = micSum; nr = refSum; nv = validSum;
+bc = beatCandidates; bm = beatMeasured; br = beatRejected; bu = beatUncertain;
+bv = beatValid; bs = beatScored; bsim = beatSimilarity;
+bml = beatMicLevel; brl = beatRefLevel;
+sc = speechCandidates; sm = speechMeasured; sr = speechRejected; su = speechUncertain;
+sv = speechValid; ss = speechScored; ssim = speechSimilarity;
+nl = lag; np = pair; nn = pairsUsed;
+nx = sumX; ny = sumY; nxx = sumXX; nyy = sumYY; nxy = sumXY;
+nscore = bestScore; nlag = bestLag; nrunner = runnerScore; nbestPairs = bestPairs;
+ncalScore = calibratedScore;
+dc = max(0, in7 - lastCandidates);
+dm = max(0, in8 - lastMeasured);
+dr = max(0, in9 - lastRejected);
+du = max(0, in10 - lastUncertain);
+scored = in11 == 1;
+hp = exp(-6.28318530718 * 65 / samplerate);
+nmicBaseL = in1 + hp * (micBaseL - in1);
+nmicBaseR = in2 + hp * (micBaseR - in2);
+nrefBaseL = in3 + hp * (refBaseL - in3);
+nrefBaseR = in4 + hp * (refBaseR - in4);
+
+if (newprobe) {
+    ns = 1; nt = 0; nb = 0; noffset = 0;
+    nm = 0; nr = 0; nv = 0;
+    bc = 0; bm = 0; br = 0; bu = 0; bv = 0; bs = 0; bsim = 0; bml = 0; brl = 0;
+    sc = 0; sm = 0; sr = 0; su = 0; sv = 0; ss = 0; ssim = 0;
+    nl = -80; np = 0; nn = 0;
+    nx = 0; ny = 0; nxx = 0; nyy = 0; nxy = 0;
+    nscore = 0; nlag = 0; nrunner = 0; nbestPairs = 0; ncalScore = 0;
+} else if (stage == 1) {
+    nt = ticks + 1;
+    if ((nt >= samplerate) && permit) {
+        ns = 2; nt = 0; noffset = in6;
+    } else if (nt >= 4 * samplerate) {
+        ns = 6;
+    }
+} else if ((stage == 2) || (stage == 3)) {
+    nt = ticks + 1;
+    if ((nb >= samplerate * 1.25) || (permit && (abs(in6 - capturedOffset) > 0.0001))) {
+        ns = 6;
+    } else if (stage == 2) {
+        micLevel = max(abs(in1 - nmicBaseL), abs(in2 - nmicBaseR));
+        refLevel = max(abs(in3 - nrefBaseL), abs(in4 - nrefBaseR));
+        nm = micSum + micLevel;
+        nr = refSum + refLevel;
+        nv = validSum + permit;
+        frame = floor(ticks / hop);
+        if (nt >= (frame + 1) * hop) {
+            poke(micFrames, nm / hop, frame);
+            poke(refFrames, nr / hop, frame);
+            poke(validFrames, nv == hop, frame);
+            nm = 0; nr = 0; nv = 0;
+        }
+        bc = beatCandidates + dc; bm = beatMeasured + dm;
+        br = beatRejected + dr; bu = beatUncertain + du; bv = beatValid + permit;
+        bs = beatScored + scored; bsim = beatSimilarity + (scored ? in12 : 0);
+        bml = beatMicLevel + (permit ? micLevel : 0);
+        brl = beatRefLevel + (permit ? refLevel : 0);
+        if (nt >= duration) { ns = 3; nt = 0; }
+    } else {
+        sc = speechCandidates + dc; sm = speechMeasured + dm;
+        sr = speechRejected + dr; su = speechUncertain + du; sv = speechValid + permit;
+        ss = speechScored + scored; ssim = speechSimilarity + (scored ? in12 : 0);
+        if (nt >= speechDuration) { ns = 4; nt = 0; }
+    }
+} else if (stage == 4) {
+    // Fixed overlap for every hypothesis, computing one frame pair per sample.
+    // Positive lag means the sound reached the mic after the digital reference.
+    mi = 80 + pair;
+    ri = mi - lag;
+    if ((peek(validFrames, mi) == 1) && (peek(validFrames, ri) == 1)) {
+        x = peek(micFrames, mi);
+        y = peek(refFrames, ri);
+        nn = pairsUsed + 1;
+        nx = sumX + x; ny = sumY + y;
+        nxx = sumXX + x*x; nyy = sumYY + y*y; nxy = sumXY + x*y;
+    }
+    np = pair + 1;
+    if (np >= 840) {
+        den = max(1, nn);
+        vx = max(0, nxx - nx*nx/den);
+        vy = max(0, nyy - ny*ny/den);
+        cov = max(0, nxy - nx*ny/den);
+        score = ((nn >= 500) && (min(vx, vy) >= 0.000001)) ?
+                clamp(cov / sqrt(max(0.0000000000000001, vx*vy)), 0, 1) : 0;
+        poke(lagScores, score, lag + 80);
+        if (score > bestScore) { nscore = score; nlag = lag; nbestPairs = nn; }
+        if (lag == floor(capturedOffset * samplerate / (1000 * hop) + 0.5)) { ncalScore = score; }
+        if (lag >= 80) { ns = 7; np = 0; }
+        nl = lag + 1; np = 0; nn = 0;
+        nx = 0; ny = 0; nxx = 0; nyy = 0; nxy = 0;
+    }
+} else if (stage == 7) {
+    // Keep the strongest alternative outside the local peak, for ambiguity.
+    if (abs(pair - 80 - bestLag) > 4) { nrunner = max(runnerScore, peek(lagScores, pair)); }
+    np = pair + 1;
+    if (np >= 161) { ns = 5; }
+}
+
+out1 = ns <= 6 ? ns : 4;
+out2 = noffset;
+out3 = ns == 5 ? nlag * hop * 1000 / samplerate : 0;
+out4 = ns == 5 ? nscore : 0;
+out5 = ns == 5 ? nrunner : 0;
+out6 = ns == 5 ? nbestPairs : 0;
+out7 = bv * 1000 / samplerate; out8 = bc; out9 = bm; out10 = br; out11 = bu;
+out12 = bs; out13 = bsim / max(1, bs);
+out14 = sv * 1000 / samplerate; out15 = sc; out16 = sm; out17 = sr; out18 = su;
+out19 = ss; out20 = ssim / max(1, ss);
+out21 = bml / max(1, bv); out22 = brl / max(1, bv);
+out23 = ns == 5 ? ncalScore : 0;
+out24 = nPhraseMode;
+out25 = speechDuration * 1000 / samplerate;
+// Keep the reporting windows in every mode. The reference capture has its own cues.
+cue = ns == 3 ? min(4, 1 + floor(4 * nt / speechDuration)) : 0;
+out26 = cue;
+out27 = nPhraseMode == 2 ? 0 : ((ns == 3) && (nPhraseMode == 1) ? 5 : cue);
+lastrequest = proberequest; stage = ns; ticks = nt; blocked = min(nb, 4 * samplerate);
+lastPhraseRequest = phraserequest; phraseMode = nPhraseMode;
+lastRhythmRequest = rhythmrequest;
+capturedOffset = noffset;
+micBaseL = nmicBaseL; micBaseR = nmicBaseR; refBaseL = nrefBaseL; refBaseR = nrefBaseR;
+micSum = nm; refSum = nr; validSum = nv;
+lastCandidates = in7; lastMeasured = in8; lastRejected = in9; lastUncertain = in10;
+beatCandidates = bc; beatMeasured = bm; beatRejected = br; beatUncertain = bu;
+beatValid = bv; beatScored = bs; beatSimilarity = bsim;
+beatMicLevel = bml; beatRefLevel = brl;
+speechCandidates = sc; speechMeasured = sm; speechRejected = sr; speechUncertain = su;
+speechValid = sv; speechScored = ss; speechSimilarity = ssim;
+lag = nl; pair = np; pairsUsed = nn;
+sumX = nx; sumY = ny; sumXX = nxx; sumYY = nyy; sumXY = nxy;
+bestScore = nscore; bestLag = nlag; runnerScore = nrunner; bestPairs = nbestPairs;
+calibratedScore = ncalScore;

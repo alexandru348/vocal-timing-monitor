@@ -1,0 +1,163 @@
+// Diagnostic sustained energy rises over the validated instrumental threshold.
+// in1/2: guided stage and cue; in3/4/5: eligible observation, raw level, frame pulse;
+// in6/7: learned threshold and baseline state; in8..11: host phase, period, delay and sample clock.
+// in12: guided mode (2 for the rhythm probe); in13/14: clip-only pause and clipping mask.
+// out12..16: event pulse and the first frame's timing. No speech identity or timing verdict.
+// out17: possible attack when microphone overload cuts off confirmation.
+Param shortframes(0);
+Data cueCounts(4);
+Data firstTimes(4);
+History previousStage(0);
+History previousObservation(0);
+History state(0);
+History speechSamples(0);
+History validationFrames(0);
+History validationEvents(0);
+History armed(0);
+History quietFrames(0);
+History highFrames(0);
+History onsetCue(0);
+History onsetMs(0);
+History previousFrame(0);
+History frameUsable(0);
+History framePhase(0);
+History framePeriod(0);
+History frameOffset(0);
+History onsetPhase(0);
+History onsetPeriod(0);
+History onsetOffset(0);
+History onsetClockMs(0);
+History onsetUsable(0);
+
+hop = max(1, floor(samplerate * (shortframes == 1 ? 0.002 : 0.005) + 0.5));
+// The short-frame comparison and the rhythm probe each require two clean
+// frames in both the speech interval and the beat-only control.
+// A third frame may contain the saturated vowel after a clean consonant onset.
+confirmationFrames = ((in12 == 2) || (shortframes == 1)) ? 2 : 3;
+stage = in1;
+newProbe = (stage == 1) && (previousStage != 1);
+newSpeech = (stage == 3) && (previousStage != 3);
+validating = (stage == 2) && (in3 == 1);
+ns = state;
+nSpeech = stage == 3 ? speechSamples + 1 : 0;
+nValidationFrames = validationFrames;
+nValidationEvents = validationEvents;
+// Treat an already loud control interval conservatively, even if its onset
+// happened immediately before the held-out interval began.
+nArmed = validating && !previousObservation ? 1 : armed;
+nQuiet = quietFrames;
+nHigh = highFrames;
+nCue = onsetCue;
+nOnset = onsetMs;
+frame = in5 == 1;
+clockUsable = (stage == 3) && (in3 == 1);
+nFrameUsable = clockUsable && (previousFrame || frameUsable);
+nFramePhase = previousFrame ? in8 : framePhase;
+nFramePeriod = previousFrame ? in9 : framePeriod;
+nFrameOffset = previousFrame ? in10 : frameOffset;
+nOnsetPhase = onsetPhase;
+nOnsetPeriod = onsetPeriod;
+nOnsetOffset = onsetOffset;
+nOnsetClockMs = onsetClockMs;
+nOnsetUsable = onsetUsable;
+timingEvent = 0;
+
+if (newProbe) {
+    ns = 0;
+    nValidationFrames = 0;
+    nValidationEvents = 0;
+    for (i = 0; i < 4; i += 1) {
+        poke(cueCounts, 0, i);
+        poke(firstTimes, -1, i);
+    }
+} else if ((stage == 6) || (in7 == 3)) {
+    ns = 3;
+} else if (newSpeech) {
+    ns = ((in7 == 2) && (validationFrames * hop >= samplerate) && (validationEvents == 0)) ? 2 : 3;
+} else if (validating) {
+    ns = 1;
+}
+
+observing = validating || ((stage == 3) && (ns == 2) && (in3 == 1));
+// Only preserve an onset already seen in a complete, usable frame. A missing
+// second frame is insufficient to confirm an attack, even at full scale.
+possible = (in12 == 2) && (stage == 3) && (ns == 2) && previousObservation && !observing &&
+           (in13 == 1) && (in14 == 1) && (highFrames == 1) && onsetUsable && (in10 == onsetOffset);
+if (!observing || newSpeech) {
+    // A gap may hide an onset. Wait for low energy before starting again.
+    nArmed = 0;
+    nQuiet = 0;
+    nHigh = 0;
+} else if (frame) {
+    nValidationFrames = validationFrames + validating;
+    if (!nArmed) {
+        nQuiet = in4 < 0.80 * in6 ? quietFrames + 1 : 0;
+        nArmed = nQuiet * hop >= 0.075 * samplerate;
+    } else if (in4 > in6) {
+        if (nHigh == 0) {
+            nCue = in2;
+            nOnset = max(0, (nSpeech - hop) * 1000 / samplerate);
+            nOnsetPhase = nFramePhase;
+            nOnsetPeriod = nFramePeriod;
+            nOnsetOffset = nFrameOffset;
+            nOnsetClockMs = (in11 - hop + 1) * 1000 / samplerate;
+            nOnsetUsable = nFrameUsable;
+        }
+        nHigh += 1;
+        if (nHigh == confirmationFrames) {
+            nArmed = 0;
+            nQuiet = 0;
+            nHigh = 0;
+            if (validating) {
+                nValidationEvents = validationEvents + 1;
+            } else if ((nCue >= 1) && (nCue <= 4)) {
+                slot = nCue - 1;
+                previousCount = peek(cueCounts, slot);
+                poke(cueCounts, previousCount + 1, slot);
+                if (previousCount == 0) { poke(firstTimes, nOnset, slot); }
+                timingEvent = nOnsetUsable;
+            }
+        }
+    } else {
+        nHigh = 0;
+    }
+}
+
+out1 = ns;
+out2 = nValidationFrames * hop * 1000 / samplerate;
+out3 = nValidationEvents;
+out4 = peek(cueCounts, 0);
+out5 = peek(cueCounts, 1);
+out6 = peek(cueCounts, 2);
+out7 = peek(cueCounts, 3);
+out8 = peek(firstTimes, 0);
+out9 = peek(firstTimes, 1);
+out10 = peek(firstTimes, 2);
+out11 = peek(firstTimes, 3);
+out12 = timingEvent;
+out13 = nOnsetPhase;
+out14 = nOnsetPeriod;
+out15 = nOnsetOffset;
+out16 = nOnsetClockMs;
+out17 = possible;
+previousStage = stage;
+previousObservation = observing;
+state = ns;
+speechSamples = nSpeech;
+validationFrames = nValidationFrames;
+validationEvents = nValidationEvents;
+armed = nArmed;
+quietFrames = nQuiet;
+highFrames = nHigh;
+onsetCue = nCue;
+onsetMs = nOnset;
+previousFrame = frame;
+frameUsable = nFrameUsable;
+framePhase = nFramePhase;
+framePeriod = nFramePeriod;
+frameOffset = nFrameOffset;
+onsetPhase = nOnsetPhase;
+onsetPeriod = nOnsetPeriod;
+onsetOffset = nOnsetOffset;
+onsetClockMs = nOnsetClockMs;
+onsetUsable = nOnsetUsable;

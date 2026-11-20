@@ -4,6 +4,8 @@ Două îmbunătățiri cerute: Oprire auto rămâne ON între take-uri, iar cali
 
 [Plugin RC1.7.1](dist/Vocal_Timing_Monitor_v0_9_RC1_7_1_Studio.amxd?raw=true) · [RC1.6 publicată, pentru revenire](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.9-rc1.6)
 
+Pentru asistentul vocal experimental, vezi [versiunea 0.2.52 și instrucțiunile](docs/ASSISTANT_SIGNAL_0_2_52.md).
+
 ## Prima folosire
 
 Folosește o copie a proiectului și o singură instanță VTM activă pe pista de analiză. Înlocuirea cu o instanță nouă nu transferă automat setările instanței vechi. Necesită Ableton cu Max for Live; componentele sunt incluse, fără Python la utilizare. Ieșirea pistei de analiză este mută; înregistrează pe o pistă separată.

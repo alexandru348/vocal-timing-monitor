@@ -1,0 +1,28 @@
+// Read-only timing projection for a candidate whose onset has a valid clock.
+// in1: candidate pulse; in2: observed quarter-note phase AT the onset;
+// in3: quarter-note duration ms; in4: validated delay applied once in ms;
+// in5: clock and timing context valid at the onset and at confirmation.
+// This projection measures distance to a musical grid, without a verdict.
+Param grid(4);
+History total(0);
+History lastdistance(0);
+
+divisionvalid = (grid == 4) || (grid == 8) || (grid == 16);
+phasevalid = (in2 >= 0) && (in2 <= 1);
+periodvalid = (in3 >= 60000 / 404) && (in3 <= 60000 / 19.8);
+offsetvalid = (in4 >= -500) && (in4 <= 500);
+eligible = (in1 == 1) && (in5 == 1) && divisionvalid && phasevalid && periodvalid && offsetvalid;
+
+stepms = max(1, in3) / (max(4, grid) / 4);
+position = (in2 * in3 - in4) / stepms;
+// A midpoint is assigned to the following grid mark.
+distance = (position - floor(position + 0.5)) * stepms;
+out1 = eligible;
+out2 = eligible ? distance : 0;
+out3 = eligible ? stepms : 0;
+ntotal = eligible ? min(1000000000, total + 1) : total;
+nlastdistance = eligible ? distance : lastdistance;
+out4 = ntotal;
+out5 = nlastdistance;
+total = ntotal;
+lastdistance = nlastdistance;

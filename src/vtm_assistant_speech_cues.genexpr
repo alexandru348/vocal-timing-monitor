@@ -1,0 +1,80 @@
+// Per-cue observations. No audio samples are saved and no events are classified as speech.
+// Inputs: stage, cue, permit, mic envelope, frame pulse, raw candidate, above-limit candidate, clip pause.
+// Outputs: four entries each for valid duration, mic peak, candidates, candidate peak,
+// above-limit count and time suspended for near-full-scale input on either source.
+Data validSamples(4);
+Data micPeaks(4);
+Data candidateCounts(4);
+Data candidatePeaks(4);
+Data aboveCounts(4);
+Data clipPauseSamples(4);
+History previousStage(0);
+
+stage = in1;
+cue = in2;
+if ((stage == 1) && (previousStage != 1)) {
+    for (i = 0; i < 4; i += 1) {
+        poke(validSamples, 0, i);
+        poke(micPeaks, 0, i);
+        poke(candidateCounts, 0, i);
+        poke(candidatePeaks, 0, i);
+        poke(aboveCounts, 0, i);
+        poke(clipPauseSamples, 0, i);
+    }
+} else if ((stage == 3) && (cue >= 1) && (cue <= 4) && (in3 == 1)) {
+    slot = cue - 1;
+    duration = peek(validSamples, slot);
+    poke(validSamples, duration + 1, slot);
+    if (in5 == 1) {
+        peak = peek(micPeaks, slot);
+        poke(micPeaks, max(peak, in4), slot);
+    }
+    if (in6 == 1) {
+        count = peek(candidateCounts, slot);
+        attackPeak = peek(candidatePeaks, slot);
+        poke(candidateCounts, count + 1, slot);
+        poke(candidatePeaks, max(attackPeak, in4), slot);
+    }
+    if (in7 == 1) {
+        above = peek(aboveCounts, slot);
+        poke(aboveCounts, above + 1, slot);
+    }
+} else if ((stage == 3) && (cue >= 1) && (cue <= 4) && (in8 == 1)) {
+    pausedSlot = cue - 1;
+    paused = peek(clipPauseSamples, pausedSlot);
+    poke(clipPauseSamples, paused + 1, pausedSlot);
+}
+
+valid0 = peek(validSamples, 0);
+valid1 = peek(validSamples, 1);
+valid2 = peek(validSamples, 2);
+valid3 = peek(validSamples, 3);
+out1 = valid0 * 1000 / samplerate;
+out2 = valid1 * 1000 / samplerate;
+out3 = valid2 * 1000 / samplerate;
+out4 = valid3 * 1000 / samplerate;
+out5 = peek(micPeaks, 0);
+out6 = peek(micPeaks, 1);
+out7 = peek(micPeaks, 2);
+out8 = peek(micPeaks, 3);
+out9 = peek(candidateCounts, 0);
+out10 = peek(candidateCounts, 1);
+out11 = peek(candidateCounts, 2);
+out12 = peek(candidateCounts, 3);
+out13 = peek(candidatePeaks, 0);
+out14 = peek(candidatePeaks, 1);
+out15 = peek(candidatePeaks, 2);
+out16 = peek(candidatePeaks, 3);
+out17 = peek(aboveCounts, 0);
+out18 = peek(aboveCounts, 1);
+out19 = peek(aboveCounts, 2);
+out20 = peek(aboveCounts, 3);
+pause0 = peek(clipPauseSamples, 0);
+pause1 = peek(clipPauseSamples, 1);
+pause2 = peek(clipPauseSamples, 2);
+pause3 = peek(clipPauseSamples, 3);
+out21 = pause0 * 1000 / samplerate;
+out22 = pause1 * 1000 / samplerate;
+out23 = pause2 * 1000 / samplerate;
+out24 = pause3 * 1000 / samplerate;
+previousStage = stage;

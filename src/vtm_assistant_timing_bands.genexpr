@@ -1,0 +1,170 @@
+// Fit and independently validate three band envelopes on beat-only frames.
+// in1..6 microphone and beat band levels, in7 completed frame,
+// in8..12 permit, epoch, delay, source and timing revisions; in13 guided stage.
+// out1..3 completed frame ID, compatibility and predicted beat level.
+Data micBands(1536);
+Data refBands(1536);
+Data fitStats(12);
+Data valStats(9);
+Data verified(3);
+History cursor(0);
+History processedSamples(0);
+History usableFrom(0);
+History previousPermit(0);
+History previousEpoch(0);
+History previousStage(0);
+History state(0);
+History captureStart(0);
+History delayFrames(0);
+History learnedOffset(0);
+History learnedSource(0);
+History learnedTiming(0);
+History fitFrames(0);
+History valFrames(0);
+History supportedMask(0);
+History score0(0);
+History score1(0);
+History score2(0);
+
+hop = max(1, floor(samplerate * 0.005 + 0.5));
+packet = in7 == 1;
+ncursor = cursor + packet;
+if (packet) {
+    slot = 3 * (cursor - 512 * floor(cursor / 512));
+    poke(micBands, in1, slot); poke(micBands, in2, slot+1); poke(micBands, in3, slot+2);
+    poke(refBands, in4, slot); poke(refBands, in5, slot+1); poke(refBands, in6, slot+2);
+}
+
+permit = in8 == 1;
+stable = permit && previousPermit && (in9 == previousEpoch);
+nusableFrom = stable ? usableFrom : cursor + 1;
+learningStage = in13;
+quiet = learningStage == 2;
+inProbe = quiet || (learningStage == 3);
+newCapture = quiet && (previousStage != 2);
+newProbe = (learningStage == 1) && (previousStage != 1);
+pathChanged = (in11 != learnedSource) || (in12 != learnedTiming) ||
+              (permit && (abs(in10 - learnedOffset) > 0.0001));
+ns = state;
+nStart = captureStart; nDelay = delayFrames;
+nOffset = learnedOffset; nSource = learnedSource; nTiming = learnedTiming;
+nFitFrames = fitFrames; nValFrames = valFrames;
+nMask = supportedMask;
+nScore0 = score0; nScore1 = score1; nScore2 = score2;
+frameId = 0; consistent = 0; refLevel = 0;
+if (newProbe || newCapture) {
+    ns = newCapture ? 1 : 0;
+    nFitFrames = 0; nValFrames = 0; nMask = 0;
+    nScore0 = 0; nScore1 = 0; nScore2 = 0;
+    if (newCapture) {
+        nStart = cursor; nDelay = in10 * samplerate / (1000 * hop);
+        nOffset = in10; nSource = in11; nTiming = in12;
+        for (b = 0; b < 3; b = b + 1) {
+            fitCell = b * 4;
+            valCell = b * 3;
+            poke(fitStats, 0, fitCell); poke(fitStats, 0, fitCell+1);
+            poke(fitStats, 0, fitCell+2); poke(fitStats, 0, fitCell+3);
+            poke(valStats, 0, valCell); poke(valStats, 0, valCell+1); poke(valStats, 0, valCell+2);
+            poke(verified, 0, b);
+        }
+    }
+} else if (((state == 1) || (state == 2)) && ((learningStage == 6) ||
+           (inProbe && pathChanged) || ((state == 1) && !quiet))) {
+    ns = 3;
+} else if (packet && inProbe && ((state == 1) || (state == 2))) {
+    elapsed = (cursor - captureStart) * hop / samplerate;
+    if ((state == 1) && (elapsed >= 3.5)) {
+        // R² against a constant microphone level, on the separate validation
+        // window. Only bands that generalize can contribute beat evidence.
+        for (bandNumber = 0; bandNumber < 3; bandNumber = bandNumber + 1) {
+            p = bandNumber * 3;
+            valMic = peek(valStats, p);
+            valMicSquared = peek(valStats, p+1);
+            valResidualSquared = peek(valStats, p+2);
+            v = max(0, valMicSquared - valMic*valMic/max(1, valFrames));
+            score = clamp(1 - valResidualSquared / max(0.000000000001, v), -1, 1);
+            good = (fitFrames * hop >= 1.25 * samplerate) && (valFrames * hop >= 0.60 * samplerate) &&
+                   (v >= valFrames * 0.00000004) && (score >= 0.45);
+            poke(verified, good, bandNumber);
+            bit = bandNumber == 0 ? 1 : (bandNumber == 1 ? 2 : 4);
+            nMask = nMask + bit * good;
+            nScore0 = bandNumber == 0 ? score : nScore0;
+            nScore1 = bandNumber == 1 ? score : nScore1;
+            nScore2 = bandNumber == 2 ? score : nScore2;
+        }
+        ns = nMask > 0 ? 2 : 3;
+    } else {
+        wholeDelay = floor(delayFrames);
+        delayBlend = delayFrames - wholeDelay;
+        ma = cursor - 1 - max(0, -wholeDelay);
+        ra = ma - wholeDelay;
+        prevRef = ra - 1;
+        oldest = min(ma, prevRef);
+        if (stable && (oldest >= usableFrom) && (ma >= captureStart) && (oldest > cursor - 512)) {
+            mi = 3 * (ma - 512 * floor(ma / 512));
+            ri = 3 * (ra - 512 * floor(ra / 512));
+            previousRefSlot = 3 * (prevRef - 512 * floor(prevRef / 512));
+            training = (state == 1) && (elapsed < 2.6);
+            nFitFrames = fitFrames + training;
+            nValFrames = valFrames + ((state == 1) && !training);
+            consistent = 1;
+            for (bandNumber = 0; bandNumber < 3; bandNumber = bandNumber + 1) {
+                y = peek(micBands, mi+bandNumber);
+                refValue = peek(refBands, ri+bandNumber);
+                previousRefValue = peek(refBands, previousRefSlot+bandNumber);
+                x = refValue + delayBlend * (previousRefValue - refValue);
+                k = bandNumber * 4;
+                sx = peek(fitStats, k);
+                sy = peek(fitStats, k+1);
+                xx = peek(fitStats, k+2);
+                xy = peek(fitStats, k+3);
+                if (training) {
+                    poke(fitStats, sx+x, k); poke(fitStats, sy+y, k+1);
+                    poke(fitStats, xx+x*x, k+2); poke(fitStats, xy+x*y, k+3);
+                } else {
+                    n = max(1, fitFrames);
+                    varX = max(0.000000000001, xx - sx*sx/n);
+                    gain = clamp((xy - sx*sy/n) / varX, 0, 4);
+                    prediction = gain*x + max(0, (sy-gain*sx)/n);
+                    residual = y-prediction;
+                    p = bandNumber * 3;
+                    // Keep the buffer read outside the conditional expression.
+                    bandVerified = peek(verified, bandNumber);
+                    sumResidualSquared = peek(valStats, p+2);
+                    if (state == 1) {
+                        sumMic = peek(valStats, p);
+                        sumMicSquared = peek(valStats, p+1);
+                        poke(valStats, sumMic+y, p);
+                        poke(valStats, sumMicSquared+y*y, p+1);
+                        poke(valStats, sumResidualSquared+residual*residual, p+2);
+                    } else if (bandVerified == 1) {
+                        sigma = sqrt(max(0, sumResidualSquared / max(1, valFrames)));
+                        limit = min(max(0.001, 2*sigma) + 0.15*prediction, 0.0025 + 0.20*prediction);
+                        consistent = consistent && (abs(residual) <= limit);
+                        refLevel = refLevel + gain*x;
+                    } else {
+                        // Keep an event if unexplained sound is present in
+                        // a band whose reference prediction failed validation.
+                        consistent = consistent && (y <= 0.0015);
+                    }
+                }
+            }
+            frameId = state == 2 ? ma + 1 : 0;
+        }
+    }
+}
+
+out1 = frameId; out2 = frameId > 0 && consistent; out3 = refLevel;
+out4 = ns; out5 = nMask; out6 = nValFrames * hop * 1000 / samplerate;
+out7 = nScore0; out8 = nScore1; out9 = nScore2;
+out10 = (processedSamples + 1) * 1000 / samplerate;
+out11 = nFitFrames * hop * 1000 / samplerate;
+out12 = learningStage;
+out13 = ncursor;
+cursor = ncursor; usableFrom = nusableFrom;
+previousPermit = permit; previousEpoch = in9; previousStage = learningStage;
+state = ns; captureStart = nStart; delayFrames = nDelay;
+learnedOffset = nOffset; learnedSource = nSource; learnedTiming = nTiming;
+fitFrames = nFitFrames; valFrames = nValFrames; supportedMask = nMask;
+score0 = nScore0; score1 = nScore1; score2 = nScore2;
+processedSamples = processedSamples + 1;

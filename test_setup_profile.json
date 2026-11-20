@@ -1,0 +1,19 @@
+{
+  "purpose": "Synthetic routing fixture for automated tests",
+  "instrumental": "Test Reference Beat",
+  "channel": "Post Mixer",
+  "observed_labels": {
+    "track_type": "Ext. In",
+    "track_channel": "1/2",
+    "main_type": "No Input",
+    "reference_type": "Test Reference Beat",
+    "reference_channel": "Post Mixer"
+  },
+  "last_measured_offset_ms": 91.25,
+  "controls": {
+    "enabled": 1,
+    "voice-gain": 1.0,
+    "beat-gain": 1.0,
+    "auto-calibrate": 1
+  }
+}

@@ -5,7 +5,7 @@ from pathlib import Path
 import wave
 import numpy as np
 
-def main():
+def main(target=None):
     sr=44100
     audio=np.zeros(1270080,dtype=np.float64) # 28.8 seconds, 12 bars at 100 BPM
     rng=np.random.default_rng(20261104)
@@ -18,7 +18,8 @@ def main():
             at=(section*16+beat)*26460+shift
             audio[at:at+len(pulse)]+=pulse
     pcm=np.round(audio*32767).astype('<i2')
-    target=Path(__file__).resolve().parent/'test_audio/VTM_REPER_100BPM_0_PLUS150_MINUS150.wav'
+    target = Path(target) if target is not None else (
+        Path(__file__).resolve().parent/'test_audio/VTM_REPER_100BPM_0_PLUS150_MINUS150.wav')
     target.parent.mkdir(parents=True,exist_ok=True)
     with wave.open(str(target),'wb') as f:
         f.setnchannels(1);f.setsampwidth(2);f.setframerate(sr);f.writeframes(pcm.tobytes())

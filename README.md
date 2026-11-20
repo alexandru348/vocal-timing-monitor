@@ -4,6 +4,8 @@ Session Auto Stop retains the visible ON choice across repeated takes. Optional 
 
 [Download RC1.7.1 AMXD](dist/Vocal_Timing_Monitor_v0_9_RC1_7_1_Studio.amxd?raw=true) · [Published RC1.6 recovery version](https://github.com/alexandru348/vocal-timing-monitor/releases/tag/v0.9-rc1.6) · [Romanian instructions](README_RO.md)
 
+The experimental vocal timing assistant has its own [0.2.52 prerelease and instructions](docs/ASSISTANT_SIGNAL_0_2_52.md).
+
 Use a copied Set and one active analyzer. The device outputs silence; record separately. A new instance uses its own defaults. Select the instrumental actually heard by the microphone, play varied audio without speaking and allow approximately 20 seconds for acquisition/confirmation. Save with Ctrl+S. Relevant audio-path changes require manual recalibration. Auto Stop starts OFF on reload; the automatic-calibration preference and validity marker are stored (12 saved values total).
 
 Owner-tested prerelease on Windows / Ableton Live 12 Suite at 44.1 kHz. The owner observed automatic first-use calibration (83.290486 ms), a second F9 take with Auto Stop still ON, manual OFF behavior, saved-OFF automatic-calibration preference and saved compensation after full application restart, and reuse of that value after turning automatic mode ON. See [native scope and observations](docs/HOST_VALIDATION.json). These checks do not certify every audio configuration or general vocal accuracy. Both GenExpr estimators are unchanged from RC1.6. Offline evidence is separate: the inherited 250-test RC1.7 run plus 30 targeted RC1.7.1 help/version correction checks; neither executes Max/Live.

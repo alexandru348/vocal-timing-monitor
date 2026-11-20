@@ -1,0 +1,437 @@
+// Compare each attack with the aligned stereo reference on the analysis path.
+// in1..4 mic L/R and digital reference L/R; in5..8 confirmed attack and its
+// original phase, period and offset; in9..10 preflight permit and epoch.
+// out1..4 retained event and original timing; out5..7 total, matched, uncertain.
+// out8..9 waveform comparison pulse and similarity for the guided report.
+// in11..13 calibrated delay, source changes, calibration changes. Learn and
+// fit prediction levels in the quiet interval, then test on fresh samples.
+// in14..17 completed band frame number, compatibility, beat level and model state.
+Param learningstage(0);
+Data microphonesL(8192);
+Data microphonesR(8192);
+Data referenceL(8192);
+Data referenceR(8192);
+Data anchors(32);
+Data phases(32);
+Data periods(32);
+Data offsets(32);
+Data weightsLL(241);
+Data weightsLR(241);
+Data weightsRL(241);
+Data weightsRR(241);
+Data modelResidual(8192);
+Data modelStamp(8192);
+Data bandStamp(512);
+Data bandConsistent(512);
+Data bandReferenceLevel(512);
+History sumML(0);
+History sumMR(0);
+History sumRL(0);
+History sumRR(0);
+History lp1ML(0);
+History lp1MR(0);
+History lp1RL(0);
+History lp1RR(0);
+History lp2ML(0);
+History lp2MR(0);
+History lp2RL(0);
+History lp2RR(0);
+History lp3ML(0);
+History lp3MR(0);
+History lp3RL(0);
+History lp3RR(0);
+History baseML(0);
+History baseMR(0);
+History baseRL(0);
+History baseRR(0);
+History subcount(0);
+History cursor(0);
+History start(0);
+History head(0);
+History pending(0);
+History lastepoch(0);
+History waspermitted(0);
+History total(0);
+History matched(0);
+History uncertain(0);
+History lastLearningStage(0);
+History modelStage(0);
+History learnTicks(0);
+History learnStart(0);
+History learnOffset(0);
+History learnSource(0);
+History learnCalibration(0);
+History trained(0);
+History fitSamples(0);
+History fitCrossL(0);
+History fitCrossR(0);
+History fitPredictionL(0);
+History fitPredictionR(0);
+History validationSamples(0);
+History validationMic(0);
+History validationError(0);
+History validationUnscaledError(0);
+History modelRejected(0);
+History modelBeatRejected(0);
+History modelSpeechRejected(0);
+History bandRejected(0);
+History bandBeatRejected(0);
+History bandSpeechRejected(0);
+
+hop = max(1, floor(samplerate / 6000));
+rate = samplerate / hop;
+width = max(2, floor(-2 * floor(-samplerate * 0.010) / hop));
+radius = floor(0.018 * rate);
+sub = subcount + 1;
+// Use the same anti-alias filter on all channels before decimation.
+// Averaging alone can make a fractional-sample reflection incoherent.
+aacoef = exp(-6.28318530718 * 1500 / samplerate);
+n1ML = in1 + aacoef * (lp1ML - in1);
+n1MR = in2 + aacoef * (lp1MR - in2);
+n1RL = in3 + aacoef * (lp1RL - in3);
+n1RR = in4 + aacoef * (lp1RR - in4);
+n2ML = n1ML + aacoef * (lp2ML - n1ML);
+n2MR = n1MR + aacoef * (lp2MR - n1MR);
+n2RL = n1RL + aacoef * (lp2RL - n1RL);
+n2RR = n1RR + aacoef * (lp2RR - n1RR);
+n3ML = n2ML + aacoef * (lp3ML - n2ML);
+n3MR = n2MR + aacoef * (lp3MR - n2MR);
+n3RL = n2RL + aacoef * (lp3RL - n2RL);
+n3RR = n2RR + aacoef * (lp3RR - n2RR);
+ml = sumML + n3ML;
+mr = sumMR + n3MR;
+rl = sumRL + n3RL;
+rr = sumRR + n3RR;
+nbaseML = baseML;
+nbaseMR = baseMR;
+nbaseRL = baseRL;
+nbaseRR = baseRR;
+ncursor = cursor;
+packet = sub >= hop;
+if (packet) {
+    // Decimation by averaging; remove slow DC or drift equally at all inputs.
+    c = exp(-6.28318530718 * 70 / rate);
+    nbaseML = ml / hop + c * (baseML - ml / hop);
+    nbaseMR = mr / hop + c * (baseMR - mr / hop);
+    nbaseRL = rl / hop + c * (baseRL - rl / hop);
+    nbaseRR = rr / hop + c * (baseRR - rr / hop);
+    slot = cursor - 8192 * floor(cursor / 8192);
+    poke(microphonesL, ml / hop - nbaseML, slot);
+    poke(microphonesR, mr / hop - nbaseMR, slot);
+    poke(referenceL, rl / hop - nbaseRL, slot);
+    poke(referenceR, rr / hop - nbaseRR, slot);
+    sub = 0;
+    ml = 0; mr = 0; rl = 0; rr = 0;
+    ncursor = cursor + 1;
+}
+
+permitted = in9 == 1;
+stable = permitted && waspermitted && (in10 == lastepoch);
+nmstage = modelStage;
+nlearnTicks = learnTicks;
+nlearnStart = learnStart;
+nlearnOffset = learnOffset;
+nlearnSource = learnSource;
+nlearnCalibration = learnCalibration;
+ntrained = trained;
+nfitSamples = fitSamples;
+nfitCrossL = fitCrossL; nfitCrossR = fitCrossR;
+nfitPredictionL = fitPredictionL; nfitPredictionR = fitPredictionR;
+nvalSamples = validationSamples;
+nvalMic = validationMic;
+nvalError = validationError;
+nvalUnscaled = validationUnscaledError;
+nmodelRejected = modelRejected;
+nmodelBeatRejected = modelBeatRejected;
+nmodelSpeechRejected = modelSpeechRejected;
+nBandRejected = bandRejected; nBandBeatRejected = bandBeatRejected;
+nBandSpeechRejected = bandSpeechRejected;
+inprobe = (learningstage == 2) || (learningstage == 3);
+bandHop = max(1, floor(samplerate * 0.005 + 0.5));
+if (in14 > 0) {
+    bandIndex = in14-1;
+    bandSlot = bandIndex - 512 * floor(bandIndex / 512);
+    poke(bandStamp, in14, bandSlot);
+    poke(bandConsistent, in15, bandSlot);
+    poke(bandReferenceLevel, in16, bandSlot);
+}
+span = min(120, floor(0.014 * rate));
+taps = 2 * span + 1;
+newlearn = (learningstage == 2) && (lastLearningStage != 2);
+newprobe = (learningstage == 1) && (lastLearningStage != 1);
+if (newprobe || newlearn) {
+    nmstage = newlearn ? 1 : 0;
+    nlearnTicks = 0; ntrained = 0;
+    nfitSamples = 0;
+    nfitCrossL = 0; nfitCrossR = 0; nfitPredictionL = 0; nfitPredictionR = 0;
+    nvalSamples = 0; nvalMic = 0; nvalError = 0; nvalUnscaled = 0;
+    nmodelRejected = 0; nmodelBeatRejected = 0; nmodelSpeechRejected = 0;
+    nBandRejected = 0; nBandBeatRejected = 0; nBandSpeechRejected = 0;
+    if (newlearn) {
+        nlearnStart = cursor;
+        nlearnOffset = in11; nlearnSource = in12; nlearnCalibration = in13;
+        for (tap = 0; tap < taps; tap = tap + 1) {
+            poke(weightsLL, 0, tap); poke(weightsLR, 0, tap);
+            poke(weightsRL, 0, tap); poke(weightsRR, 0, tap);
+        }
+    }
+} else if (((modelStage == 1) || (modelStage == 2)) && (learningstage == 6 ||
+           (inprobe && (in12 != learnSource || in13 != learnCalibration ||
+           (permitted && abs(in11 - learnOffset) > 0.0001))))) {
+    nmstage = 3;
+} else if ((modelStage == 1) && (learningstage != 2)) {
+    nmstage = 3;
+} else if (packet && inprobe && ((modelStage == 1) || (modelStage == 2))) {
+    nlearnTicks = learnTicks + 1;
+    // The same frozen predictor is level-matched and then tested on disjoint
+    // portions of the quiet interval. Prediction gain can only be attenuated.
+    train = (modelStage == 1) && (learnTicks < 2.60 * rate);
+    fit = (modelStage == 1) && !train && (learnTicks < 3.10 * rate);
+    validate = (modelStage == 1) && !train && !fit;
+    modelDelay = floor(learnOffset * rate / 1000 + 0.5);
+    micAt = cursor - 1 - max(0, span - modelDelay);
+    newestRef = micAt - modelDelay + span;
+    oldestRef = newestRef - taps + 1;
+    if (stable && (micAt >= max(start, learnStart)) && (oldestRef >= start)
+        && (oldestRef > cursor - 8192)) {
+        // Stereo normalized LMS models the speaker/microphone response,
+        // including short reflections and channel mixing, at the known delay.
+        estimateL = 0; estimateR = 0; refPower = 0;
+        for (tap = 0; tap < taps; tap = tap + 1) {
+            rt = newestRef - tap;
+            ri = rt - 8192 * floor(rt / 8192);
+            x = peek(referenceL, ri); y = peek(referenceR, ri);
+            estimateL = estimateL + peek(weightsLL, tap)*x + peek(weightsLR, tap)*y;
+            estimateR = estimateR + peek(weightsRL, tap)*x + peek(weightsRR, tap)*y;
+            refPower = refPower + x*x + y*y;
+        }
+        if (refPower >= taps * 0.0000001) {
+            mi = micAt - 8192 * floor(micAt / 8192);
+            micL = peek(microphonesL, mi); micR = peek(microphonesR, mi);
+            if (train) {
+                ntrained = trained + 1;
+                denom = refPower + taps * 0.000001;
+                stepL = 0.22 * (micL - estimateL) / denom;
+                stepR = 0.22 * (micR - estimateR) / denom;
+                for (tap = 0; tap < taps; tap = tap + 1) {
+                    rt = newestRef - tap;
+                    ri = rt - 8192 * floor(rt / 8192);
+                    x = peek(referenceL, ri); y = peek(referenceR, ri);
+                    poke(weightsLL, clamp(peek(weightsLL, tap) + stepL*x, -2, 2), tap);
+                    poke(weightsLR, clamp(peek(weightsLR, tap) + stepL*y, -2, 2), tap);
+                    poke(weightsRL, clamp(peek(weightsRL, tap) + stepR*x, -2, 2), tap);
+                    poke(weightsRR, clamp(peek(weightsRR, tap) + stepR*y, -2, 2), tap);
+                }
+            } else if (fit) {
+                nfitSamples = fitSamples + 1;
+                nfitCrossL = fitCrossL + micL * estimateL;
+                nfitCrossR = fitCrossR + micR * estimateR;
+                nfitPredictionL = fitPredictionL + estimateL * estimateL;
+                nfitPredictionR = fitPredictionR + estimateR * estimateR;
+            } else {
+                gainL = clamp(fitCrossL / max(0.000000000001, fitPredictionL), 0, 1);
+                gainR = clamp(fitCrossR / max(0.000000000001, fitPredictionR), 0, 1);
+                errL = micL - gainL * estimateL;
+                errR = micR - gainR * estimateR;
+                errorPower = errL*errL + errR*errR;
+                if (validate) {
+                    rawErrL = micL - estimateL;
+                    rawErrR = micR - estimateR;
+                    nvalSamples = validationSamples + 1;
+                    nvalMic = validationMic + micL*micL + micR*micR;
+                    nvalError = validationError + errorPower;
+                    nvalUnscaled = validationUnscaledError + rawErrL*rawErrL + rawErrR*rawErrR;
+                } else {
+                    poke(modelResidual, errorPower, mi);
+                    poke(modelStamp, micAt + 1, mi);
+                }
+            }
+        }
+    }
+    if (validate && (nlearnTicks >= 4 * rate)) {
+        enough = (ntrained >= 0.45 * rate) && (nfitSamples >= 0.20 * rate) &&
+                 (nvalSamples >= 0.35 * rate);
+        nmstage = enough && (nvalMic >= nvalSamples * 0.00000001) &&
+                  (nvalError <= 0.65 * nvalMic) ? 2 : 3;
+    }
+}
+
+event = 0;
+phase = 0;
+period = 0;
+offset = 0;
+comparison = 0;
+similarity = 0;
+ntotal = total;
+nmatched = matched;
+nuncertain = uncertain;
+nhead = head;
+npending = pending;
+nstart = start;
+if (!stable) {
+    // After a reset, skip the partially accumulated decimation frame too.
+    nstart = cursor + 1;
+    npending = 0;
+    nuncertain = min(1000000000, uncertain + pending);
+} else {
+    if (pending > 0) {
+        anchor = peek(anchors, head);
+        candidateoffset = peek(offsets, head);
+        delay = floor(candidateoffset * rate / 1000 + 0.5);
+        // Read completed frames only. Negative offsets can need future
+        // reference samples; the queued event retains its original timestamp.
+        modelwait = inprobe && (nmstage == 2) && (cursor <= anchor + max(0, span - delay) + 1);
+        bandAnchor = floor((anchor + 1) * hop / bandHop) - 1;
+        bandDelay = floor(candidateoffset * samplerate / (1000 * bandHop));
+        bandDue = (bandAnchor + max(0, -bandDelay) + 2) * bandHop;
+        bandEnabled = inprobe && (in17 == 2);
+        bandWait = bandEnabled && (cursor * hop <= bandDue);
+        if ((cursor > anchor - delay + radius) && !modelwait && !bandWait) {
+            nhead = head == 31 ? 0 : head + 1;
+            npending = pending - 1;
+            oldest = min(anchor, anchor - delay - radius) - width + 1;
+            if ((oldest < start) || (oldest <= cursor - 8192)) {
+                nuncertain = min(1000000000, uncertain + 1);
+            } else {
+                micenergy = 0;
+                modelenergy = 0;
+                modelcoverage = 0;
+                for (i = 0; i < width; i = i + 1) {
+                    at = anchor - i;
+                    mi = at - 8192 * floor(at / 8192);
+                    a = peek(microphonesL, mi);
+                    b = peek(microphonesR, mi);
+                    micenergy = micenergy + a*a + b*b;
+                    if (peek(modelStamp, mi) == at + 1) {
+                        modelcoverage = modelcoverage + 1;
+                        modelenergy = modelenergy + peek(modelResidual, mi);
+                    }
+                }
+                best = 0;
+                for (lag = -radius; lag <= radius; lag = lag + 1) {
+                    xx = 0; yy = 0; xy = 0;
+                    ax = 0; ay = 0; bx = 0; by = 0;
+                    for (i = 0; i < width; i = i + 1) {
+                        at = anchor - i;
+                        rt = at - delay - lag;
+                        mi = at - 8192 * floor(at / 8192);
+                        ri = rt - 8192 * floor(rt / 8192);
+                        a = peek(microphonesL, mi); b = peek(microphonesR, mi);
+                        x = peek(referenceL, ri); y = peek(referenceR, ri);
+                        xx = xx + x*x; yy = yy + y*y; xy = xy + x*y;
+                        ax = ax + a*x; ay = ay + a*y;
+                        bx = bx + b*x; by = by + b*y;
+                    }
+                    // Two-channel ridge projection, stable for mono references.
+                    ridge = max(0.00000001, (xx + yy) * 0.001);
+                    dx = xx + ridge; dy = yy + ridge;
+                    determinant = max(0.0000000000000001, dx * dy - xy * xy);
+                    explained = (dy * (ax*ax + bx*bx) - 2 * xy * (ax*ay + bx*by) +
+                                 dx * (ay*ay + by*by)) / determinant;
+                    best = max(best, explained);
+                }
+                share = clamp(best / max(0.000000000001, micenergy), 0, 1);
+                comparison = 1;
+                similarity = share;
+                residual = max(0, micenergy - best) / (2 * width);
+                // Preserve a simultaneous voice when the learned predictor
+                // leaves meaningful unexplained energy in the attack window.
+                residualLimit = clamp(3 * validationError / max(1, 2 * validationSamples),
+                                      0.000004, 0.000049);
+                modelmatch = inprobe && (modelStage == 2) && (nmstage == 2) &&
+                             (modelcoverage == width) && (micenergy >= 2 * width * 0.00000004) &&
+                             (modelenergy <= 0.35 * micenergy) &&
+                             (modelenergy <= 2 * width * residualLimit);
+                waveMatch = (share >= 0.90) && (residual <= 0.000016);
+                bandMatch = 0;
+                // A beat rejection needs both agreement on the attack window
+                // and a rise in the predicted reference over the preceding frames.
+                if (bandEnabled && !modelmatch && !waveMatch &&
+                    ((bandAnchor-5)*bandHop >= start*hop)) {
+                    allPresent = 1; allConsistent = 1;
+                    attackLevel = 0; precedingLevel = 0;
+                    for (i = 0; i < 6; i = i + 1) {
+                        b = bandAnchor - i;
+                        bi = b - 512 * floor(b / 512);
+                        allPresent = allPresent && (peek(bandStamp, bi) == b+1);
+                        level = peek(bandReferenceLevel, bi);
+                        if (i < 4) {
+                            allConsistent = allConsistent && (peek(bandConsistent, bi) == 1);
+                            attackLevel = max(attackLevel, level);
+                        } else {
+                            precedingLevel = precedingLevel + 0.5 * level;
+                        }
+                    }
+                    bandMatch = allPresent && allConsistent &&
+                                (attackLevel >= 0.002) && (attackLevel >= 1.25 * precedingLevel + 0.001);
+                }
+                if (modelmatch || waveMatch || bandMatch) {
+                    nmatched = min(1000000000, matched + 1);
+                    if (modelmatch) {
+                        nmodelRejected = min(1000000000, modelRejected + 1);
+                        nmodelBeatRejected = min(1000000000, modelBeatRejected + (learningstage == 2));
+                        nmodelSpeechRejected = min(1000000000, modelSpeechRejected + (learningstage == 3));
+                    }
+                    if (bandMatch) {
+                        nBandRejected = min(1000000000, bandRejected + 1);
+                        nBandBeatRejected = min(1000000000, bandBeatRejected + (learningstage == 2));
+                        nBandSpeechRejected = min(1000000000, bandSpeechRejected + (learningstage == 3));
+                    }
+                } else if ((share >= 0.55) && (residual <= 0.000036)) {
+                    nuncertain = min(1000000000, uncertain + 1);
+                } else {
+                    event = 1;
+                    phase = peek(phases, head);
+                    period = peek(periods, head);
+                    offset = candidateoffset;
+                }
+            }
+        }
+    }
+    if (in5 == 1) {
+        ntotal = min(1000000000, total + 1);
+        if ((pending < 32) && (in8 >= -500) && (in8 <= 500)) {
+            tail = head + pending;
+            tail = tail >= 32 ? tail - 32 : tail;
+            poke(anchors, cursor - 1, tail);
+            poke(phases, in6, tail);
+            poke(periods, in7, tail);
+            poke(offsets, in8, tail);
+            npending = npending + 1;
+        } else {
+            nuncertain = min(1000000000, nuncertain + 1);
+        }
+    }
+}
+
+out1 = event; out2 = phase; out3 = period; out4 = offset;
+out5 = ntotal; out6 = nmatched; out7 = nuncertain;
+out8 = comparison; out9 = similarity;
+out10 = nmstage;
+out11 = nvalSamples > 0 ? clamp(1 - nvalError / max(0.000000000001, nvalMic), -1, 1) : 0;
+out12 = nvalSamples * 1000 / rate;
+out13 = nmodelRejected; out14 = nmodelBeatRejected; out15 = nmodelSpeechRejected;
+out16 = nfitSamples * 1000 / rate;
+out17 = clamp(nfitCrossL / max(0.000000000001, nfitPredictionL), 0, 1);
+out18 = clamp(nfitCrossR / max(0.000000000001, nfitPredictionR), 0, 1);
+out19 = nvalSamples > 0 ? nvalUnscaled / max(0.000000000001, nvalMic) : 0;
+out20 = nBandRejected; out21 = nBandBeatRejected; out22 = nBandSpeechRejected;
+sumML = ml; sumMR = mr; sumRL = rl; sumRR = rr;
+lp1ML = n1ML; lp1MR = n1MR; lp1RL = n1RL; lp1RR = n1RR;
+lp2ML = n2ML; lp2MR = n2MR; lp2RL = n2RL; lp2RR = n2RR;
+lp3ML = n3ML; lp3MR = n3MR; lp3RL = n3RL; lp3RR = n3RR;
+baseML = nbaseML; baseMR = nbaseMR; baseRL = nbaseRL; baseRR = nbaseRR;
+subcount = sub; cursor = ncursor; start = nstart; head = nhead; pending = npending;
+lastepoch = in10; waspermitted = permitted;
+total = ntotal; matched = nmatched; uncertain = nuncertain;
+lastLearningStage = learningstage;
+modelStage = nmstage; learnTicks = nlearnTicks; learnStart = nlearnStart;
+learnOffset = nlearnOffset; learnSource = nlearnSource; learnCalibration = nlearnCalibration;
+trained = ntrained;
+fitSamples = nfitSamples; fitCrossL = nfitCrossL; fitCrossR = nfitCrossR;
+fitPredictionL = nfitPredictionL; fitPredictionR = nfitPredictionR;
+validationSamples = nvalSamples; validationMic = nvalMic; validationError = nvalError;
+validationUnscaledError = nvalUnscaled;
+modelRejected = nmodelRejected; modelBeatRejected = nmodelBeatRejected;
+modelSpeechRejected = nmodelSpeechRejected;
+bandRejected = nBandRejected; bandBeatRejected = nBandBeatRejected; bandSpeechRejected = nBandSpeechRejected;

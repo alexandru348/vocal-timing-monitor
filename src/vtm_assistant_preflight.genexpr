@@ -1,0 +1,473 @@
+// Stage 2 read-only preconditions. No voice identification or Stop command.
+// in1/2 = observed input stereo; in3/4 = digital reference stereo;
+// in5 = Live quarter-note plugphasor~. Host/source facts are supplied by caller.
+// Unknown is intentional: signal energy does not prove routing or voice identity.
+Param enabled(1);
+Param deviceon(1);
+Param apiready(0);
+Param hostseq(0);
+Param playing(-1);
+Param countingin(-1);
+Param recording(-1);
+Param sessionrecord(-1);
+Param sessionstatus(-1);
+Param sourcemode(0);
+Param voicebinding(0);
+Param referencebinding(0);
+Param quality(0);
+Param timingpolicy(0);
+Param calibrationvalid(0);
+Param audiorevision(0);
+Param calibratedrevision(-1);
+Param timelinevalid(0);
+Param timelinerevision(-1);
+Param positionseq(0);
+Param offsetms(0);
+Param micfloor(0.004);
+Param reffloor(0.0001);
+Param resetseq(0);
+History clock(0);
+History prevphase(0);
+History validrun(0);
+History periodms(600);
+History phasecount(0);
+History phasesum(0);
+History periodvalid(0);
+History stableperiod(600);
+History tempoage(0);
+History prevtempoquiet(0);
+History lastseq(0);
+History leaseage(1000000000);
+History micenv(0);
+History refenv(0);
+History michold(0);
+History refhold(0);
+History miccliphold(0);
+History refcliphold(0);
+History epoch(0);
+History prevfresh(0);
+History prevsync(0);
+History prevenabled(1);
+History prevdeviceon(1);
+History prevapi(0);
+History prevplaying(-1);
+History prevcountingin(-1);
+History prevrecording(-1);
+History prevsessionrecord(-1);
+History prevsessionstatus(-1);
+History prevsource(0);
+History prevvoice(0);
+History prevreference(0);
+History prevquality(0);
+History prevpolicy(0);
+History prevcalvalid(0);
+History prevaudiorevision(0);
+History prevcalibratedrevision(-1);
+History prevtimeline(0);
+History prevtimelinerevision(-1);
+History prevpositionseq(0);
+History prevclips(0);
+History prevoffset(0);
+History prevmicfloor(0.004);
+History prevreffloor(0.0001);
+History lastreset(0);
+// Read-only lifetime diagnostics; appended outputs never authorize evaluation.
+History lastboundarymask(0);
+History lastboundarytime(0);
+History controlchanges(0);
+History hostchanges(0);
+History sourcechanges(0);
+History timingchanges(0);
+History resetchanges(0);
+History freshchanges(0);
+History syncchanges(0);
+History clipchanges(0);
+History periodchanges(0);
+History tempochanges(0);
+History maxpollgap(0);
+History polltimeouts(0);
+History synclosses(0);
+History prevpermit(0);
+History lastpermitmask(0);
+History lastpermittime(0);
+History lastpermitboundarymask(0);
+History lastclipinputs(0);
+// Capture the sample that caused synchronization loss, before recovery hides it.
+History clockfaults(0);
+History lastfaultmask(0);
+History lastfaultprevious(0);
+History lastfaultphase(0);
+History lastfaultinc(0);
+History lastfaultperiod(0);
+History lastfaulttime(0);
+History lastfaultlength(0);
+History maxfaultlength(0);
+History lastrecoveryinc(0);
+History lastfaultplaying(-1);
+History lastfaultcountingin(-1);
+History lastrecoverytime(0);
+History faultactive(0);
+History prevrawphase(0);
+// Acoustic comparison uses sample time, not beat phase. Preserve its context
+// for a bounded endpoint duplicate AFTER lock, without inventing phase values.
+History endpointrun(0);
+History endpointclean(0);
+History endpointpending(0);
+History endpointepisodes(0);
+History endpointrecoveries(0);
+History lastendpointlength(0);
+History maxendpointlength(0);
+History lastendpointresumephase(0);
+History lastendpointresumeinc(0);
+History endpointcatchups(0);
+History endpointresumerejections(0);
+History lastendpointexpectedinc(0);
+History lastendpointerrorsamples(0);
+
+// Normalize upper endpoint roundoff on either side of 1. Live has produced
+// 1.000000000000007 and 0.999999999999801 at this boundary. The 1e-12 budget
+// is far below a sample step. Preserve raw input for fault captures.
+phaseepsilon = 0.000000000001;
+phase = (in5 >= 1 - phaseepsilon) ? 1 : clamp(in5, 0, 1);
+pd = phase - prevphase;
+inc = pd < -0.5 ? pd + 1 : pd;
+// Allow endpoint rounding in the incoming phase, then validate its rate over
+// a 10 ms window. A reciprocal of every single-sample increment amplifies
+// harmless phase quantization into perpetual apparent tempo changes.
+rawinrange = (in5 >= -phaseepsilon) && (in5 <= 1 + phaseepsilon);
+rawprogressok = rawinrange && (inc > 0) && (inc >= 19.8 / (60 * samplerate) - 0.00000012) && (inc <= 404 / (60 * samplerate) + 0.00000012);
+// Endpoint duplicates (including bounded roundoff) and the 1 -> 0 alias only.
+// Frozen zero/mid-ramp, out-of-range input and jumps keep their rejection.
+endpointduplicate = rawinrange && (inc == 0) && (prevphase == 1) && ((phase == 1) || (phase == 0));
+nendpointrun = endpointduplicate ? min(endpointrun + 1, 1000000000) : 0;
+endpointgrace = endpointduplicate && prevsync && (playing == 1) && (countingin == 0) && (nendpointrun <= floor(samplerate * 0.002));
+// A host vector may resume at the phase for ALL elapsed samples. Accept only
+// the expected elapsed advance after a bounded, already tolerated endpoint
+// hold. A large increment without that history remains an ordinary fault.
+endpointresume = (endpointrun > 0) && !endpointduplicate;
+expectedordinaryinc = 1000 / (max(1, periodms) * samplerate);
+expectedendpointinc = expectedordinaryinc * (endpointrun + 1);
+endpointcatchup = endpointresume && endpointpending && prevsync && (prevphase == 1) && (endpointrun <= floor(samplerate * 0.002)) && (playing == 1) && (countingin == 0) && rawinrange && (inc > 0) && (abs(inc - expectedendpointinc) <= max(0.00000024, expectedendpointinc * 0.0001));
+ordinaryresume = rawprogressok && (abs(inc - expectedordinaryinc) <= max(0.00000024, expectedordinaryinc * 0.0001));
+progressok = endpointresume ? (ordinaryresume || endpointcatchup) : rawprogressok;
+endpointbridge = endpointgrace || endpointcatchup;
+// The catch-up sample is observed phase, not one ordinary tempo increment.
+// Exclude it from both the period window and the 10 ms clean recovery run.
+nendpointclean = progressok && !endpointcatchup ? min(endpointclean + 1, samplerate) : 0;
+nendpointpending = endpointgrace ? 1 : ((!progressok || !prevsync) ? 0 : endpointpending);
+endpointrecovered = nendpointpending && progressok && (nendpointclean >= samplerate * 0.010);
+if (endpointrecovered) { nendpointpending = 0; }
+nendpointepisodes = min(1000000000, endpointepisodes + (endpointgrace && (endpointrun == 0)));
+nendpointrecoveries = min(1000000000, endpointrecoveries + endpointrecovered);
+nlastendpointlength = endpointduplicate ? nendpointrun : lastendpointlength;
+nmaxendpointlength = max(maxendpointlength, nlastendpointlength);
+nlastendpointresumephase = endpointresume ? in5 : lastendpointresumephase;
+nlastendpointresumeinc = endpointresume ? inc : lastendpointresumeinc;
+nendpointcatchups = min(1000000000, endpointcatchups + endpointcatchup);
+nendpointresumerejections = min(1000000000, endpointresumerejections + (endpointresume && !progressok));
+nlastendpointexpectedinc = endpointresume ? expectedendpointinc : lastendpointexpectedinc;
+nlastendpointerrorsamples = endpointresume ? (inc * periodms * samplerate / 1000 - (endpointrun + 1)) : lastendpointerrorsamples;
+nphasecount = progressok && !endpointcatchup ? phasecount + 1 : 0;
+nphasesum = progressok && !endpointcatchup ? phasesum + inc : 0;
+windowready = nphasecount >= max(1, floor(samplerate * 0.010));
+windowperiod = nphasecount > 0 ? 1000 * nphasecount / (max(0.000000000001, nphasesum) * samplerate) : periodms;
+nperiodvalid = endpointbridge ? periodvalid : (!progressok ? 0 : (windowready ? ((windowperiod >= 60000.0 / 404.0) && (windowperiod <= 60000.0 / 19.8)) : periodvalid));
+clockok = (progressok || endpointgrace) && nperiodvalid;
+nvalid = endpointbridge ? validrun : (clockok ? min(validrun + 1, samplerate) : 0);
+synced = nvalid >= samplerate * 0.010;
+// No phase-based evaluation on a duplicate or before 10 ms clean recovery.
+timingready = synced && progressok && (nendpointclean >= samplerate * 0.010);
+nperiod = windowready && clockok ? windowperiod : periodms;
+// Lease requires a positive, changing caller poll token, not just stale flags.
+nage = (hostseq > 0) && (hostseq != lastseq) ? 0 : min(leaseage + 1, 1000000000);
+fresh = (hostseq > 0) && (nage < samplerate * 0.250);
+hostknown = ((playing == 0) || (playing == 1)) && ((countingin == 0) || (countingin == 1)) && ((recording == 0) || (recording == 1)) && ((sessionrecord == 0) || (sessionrecord == 1)) && ((sessionstatus == 0) || (sessionstatus == 1) || (sessionstatus == 2));
+recordactive = (recording == 1) || (sessionrecord == 1) || (sessionstatus > 0);
+sourceknown = (sourcemode == 1) || (sourcemode == 2);
+// Binding 1 = unambiguous accepted source; 0 unknown; 2 ambiguous.
+bindingsok = (voicebinding == 1) && (referencebinding == 1);
+// Policy 1 applies calibrated offset once. Policy 2 bypasses it only for a
+// recorded source whose alignment AT THE OBSERVED INPUT is explicitly known.
+calok = (calibrationvalid == 1) && (calibratedrevision == audiorevision) && (audiorevision > 0) && (offsetms >= -500) && (offsetms <= 500);
+timelineok = (sourcemode == 2) && (timelinevalid == 1) && (audiorevision > 0) && (timelinerevision == audiorevision);
+timingok = ((timingpolicy == 1) && calok) || ((timingpolicy == 2) && timelineok);
+appliedoffset = (timingpolicy == 1) && calok ? offsetms : 0;
+// Phase-offset conversion assumes locally stable tempo. Suspend after a
+// meaningful period change; long offsets require a correspondingly long hold.
+periodshift = windowready && clockok && (abs(nperiod - stableperiod) > max(0.01, stableperiod * 0.0001));
+nstableperiod = periodshift ? nperiod : stableperiod;
+ntempoage = (!synced || periodshift) ? 0 : min(tempoage + 1, samplerate * 2);
+tempoquiet = ntempoage >= samplerate * max(0.050, abs(appliedoffset) / 1000);
+
+// Short holds tolerate gaps, without interpreting silence as a rhythm error.
+miclevel = max(abs(in1), abs(in2));
+reflevel = max(abs(in3), abs(in4));
+miccoef = exp(-1 / (samplerate * (miclevel > micenv ? 0.002 : 0.020)));
+refcoef = exp(-1 / (samplerate * (reflevel > refenv ? 0.002 : 0.020)));
+nmicenv = miclevel + miccoef * (micenv - miclevel);
+nrefenv = reflevel + refcoef * (refenv - reflevel);
+nmichold = nmicenv >= clamp(micfloor, 0.0001, 0.5) ? samplerate * 0.100 : max(0, michold - 1);
+nrefhold = nrefenv >= clamp(reffloor, 0.00001, 0.5) ? samplerate * 0.400 : max(0, refhold - 1);
+// The microphone can peak near full scale without overloading. Include
+// integer PCM rail values and wait two onset frames after the last rail sample.
+micatlimit = miclevel >= 0.9999;
+refatlimit = reflevel >= 0.98;
+nmicclip = micatlimit ? samplerate * 0.020 : max(0, miccliphold - 1);
+nrefclip = refatlimit ? samplerate * 0.250 : max(0, refcliphold - 1);
+controlchange = (enabled != prevenabled) || (deviceon != prevdeviceon) || (apiready != prevapi) || (quality != prevquality) || (micfloor != prevmicfloor) || (reffloor != prevreffloor);
+hostchange = (playing != prevplaying) || (countingin != prevcountingin) || (recording != prevrecording) || (sessionrecord != prevsessionrecord) || (sessionstatus != prevsessionstatus);
+sourcechange = (sourcemode != prevsource) || (voicebinding != prevvoice) || (referencebinding != prevreference) || (audiorevision != prevaudiorevision);
+timingchange = (timingpolicy != prevpolicy) || (calibrationvalid != prevcalvalid) || (calibratedrevision != prevcalibratedrevision) || (timelinevalid != prevtimeline) || (timelinerevision != prevtimelinerevision) || (offsetms != prevoffset);
+resetchange = (positionseq != prevpositionseq) || (resetseq != lastreset);
+configchanged = controlchange || hostchange || sourcechange || timingchange || resetchange;
+clips = (nmicclip > 0) + 2 * (nrefclip > 0);
+nonclipboundary = configchanged || (fresh != prevfresh) || (synced != prevsync) || periodshift || (tempoquiet != prevtempoquiet);
+clipboundary = clips != prevclips;
+boundary = nonclipboundary || clipboundary;
+boundarymask = 1 * controlchange + 2 * hostchange + 4 * sourcechange + 8 * timingchange + 16 * resetchange + 32 * (fresh != prevfresh) + 64 * (synced != prevsync) + 128 * (clips != prevclips) + 256 * periodshift + 512 * (tempoquiet != prevtempoquiet);
+nepoch = epoch + boundary;
+if (boundary) {
+    // Nothing heard before a new context can establish its signal presence.
+    nmichold = 0;
+    nrefhold = 0;
+    nmicenv = 0;
+    nrefenv = 0;
+    // Keep clip warning until its hold expires; context changes cannot hide it.
+}
+micpresent = nmichold > 0;
+refpresent = nrefhold > 0;
+transportcontext = (enabled == 1) && (deviceon == 1) && (apiready == 1) && fresh && hostknown && (playing == 1) && (countingin == 0) && synced && tempoquiet && sourceknown && bindingsok;
+contextok = transportcontext && !boundary;
+detectpermit = contextok && (clips == 0);
+// Recorded-voice review never pretends that a currently recording input is
+// a known playback-only source. No output constitutes a Stop permission.
+reviewconflict = (sourcemode == 2) && recordactive;
+evaluatepermit = detectpermit && timingready && timingok && (quality == 1) && micpresent && refpresent && !reviewconflict;
+
+// Stable reason priority; levels are evidence of SIGNAL, not detected singing.
+state = 0;
+if (enabled != 1) { state = 0; }
+else if (deviceon != 1) { state = 1; }
+else if ((apiready != 1) || !fresh || !hostknown) { state = 2; }
+else if (countingin == 1) { state = 4; }
+else if (playing == 0) { state = 3; }
+else if (!synced || !tempoquiet || boundary || !timingready) { state = 5; }
+else if (!sourceknown || (voicebinding != 1)) { state = 6; }
+else if (referencebinding != 1) { state = 7; }
+else if (!timingok) { state = 8; }
+else if (nmicclip > 0) { state = 9; }
+else if (nrefclip > 0) { state = 10; }
+else if (quality != 1) { state = 11; }
+else if (reviewconflict) { state = 17; }
+else if (!refpresent) { state = 12; }
+else if (!micpresent) { state = 13; }
+else if (sourcemode == 2) { state = 16; }
+else if (recordactive) { state = 14; }
+else { state = 15; }
+
+corrected = phase - appliedoffset / max(1, nperiod);
+wrapped = corrected - floor(corrected);
+out1 = state;
+out2 = detectpermit;
+out3 = evaluatepermit;
+out4 = phase;
+out5 = evaluatepermit ? wrapped : 0;
+out6 = nperiod;
+out7 = micpresent;
+out8 = refpresent;
+out9 = clips;
+out10 = nepoch;
+out11 = clock;
+out12 = timingok ? appliedoffset : 0;
+out13 = synced;
+// A recovery may replace the last boundary, so preserve the falling-permission
+// cause independently. These masks are diagnostic facts, never Stop permission.
+permitmask = (enabled != 1) + 2 * (deviceon != 1) + 4 * (apiready != 1) + 8 * (!fresh) + 16 * (!hostknown) + 32 * (playing != 1) + 64 * (countingin != 0) + 128 * (!synced) + 256 * (!tempoquiet) + 512 * (!sourceknown) + 1024 * (!bindingsok) + 2048 * boundary + 4096 * (clips != 0);
+permitlost = (prevpermit == 1) && !detectpermit;
+nboundarymask = boundary ? boundarymask : lastboundarymask;
+nboundarytime = boundary ? clock : lastboundarytime;
+ncontrolchanges = min(1000000000, controlchanges + controlchange);
+nhostchanges = min(1000000000, hostchanges + hostchange);
+nsourcechanges = min(1000000000, sourcechanges + sourcechange);
+ntimingchanges = min(1000000000, timingchanges + timingchange);
+nresetchanges = min(1000000000, resetchanges + resetchange);
+nfreshchanges = min(1000000000, freshchanges + (fresh != prevfresh));
+nsyncchanges = min(1000000000, syncchanges + (synced != prevsync));
+nclipchanges = min(1000000000, clipchanges + (clips != prevclips));
+nperiodchanges = min(1000000000, periodchanges + periodshift);
+ntempochanges = min(1000000000, tempochanges + (tempoquiet != prevtempoquiet));
+// Include the interval up to a returning token, ignoring startup's sentinel age.
+nmaxpollgap = lastseq > 0 ? max(maxpollgap, min(1000000000, leaseage + 1)) : maxpollgap;
+npolltimeouts = min(1000000000, polltimeouts + (prevfresh && !fresh));
+nsynclosses = min(1000000000, synclosses + (prevsync && !synced));
+nlastpermitmask = permitlost ? permitmask : lastpermitmask;
+nlastpermittime = permitlost ? clock : lastpermittime;
+nlastpermitboundarymask = permitlost ? boundarymask : lastpermitboundarymask;
+out14 = nboundarymask;
+out15 = 1000 * nboundarytime / samplerate;
+out16 = ncontrolchanges;
+out17 = nhostchanges;
+out18 = nsourcechanges;
+out19 = ntimingchanges;
+out20 = nresetchanges;
+out21 = nfreshchanges;
+out22 = nsyncchanges;
+out23 = nclipchanges;
+out24 = nperiodchanges;
+out25 = ntempochanges;
+out26 = 1000 * nage / samplerate;
+out27 = 1000 * nmaxpollgap / samplerate;
+out28 = npolltimeouts;
+out29 = nsynclosses;
+out30 = nlastpermitmask;
+out31 = 1000 * nlastpermittime / samplerate;
+out32 = nlastpermitboundarymask;
+// Masks describe the raw clock transition, not its hardware/host cause.
+// Count synchronized -> unsynchronized transitions including transport stops;
+// retain host flags so an expected stop is not called a playback defect.
+clockfault = prevsync && !synced;
+faultmask = (inc == 0) + 2 * (inc < 0) + 4 * ((inc > 0) && (inc < 19.8 / (60 * samplerate) - 0.00000012)) + 8 * (inc > 404 / (60 * samplerate) + 0.00000012) + 16 * (!rawinrange) + 32 * ((prevphase == 1) && (phase == 0)) + 64 * (progressok && !nperiodvalid);
+nclockfaults = min(1000000000, clockfaults + clockfault);
+nlastfaultmask = clockfault ? faultmask : lastfaultmask;
+nlastfaultprevious = clockfault ? prevrawphase : lastfaultprevious;
+nlastfaultphase = clockfault ? in5 : lastfaultphase;
+nlastfaultinc = clockfault ? inc : lastfaultinc;
+nlastfaultperiod = clockfault ? periodms : lastfaultperiod;
+nlastfaulttime = clockfault ? clock : lastfaulttime;
+// Length counts consecutive non-progressing/out-of-range samples only. It
+// excludes the following 10 ms period and stability reacquisition intervals.
+nlastfaultlength = clockfault ? !progressok : ((faultactive && !progressok) ? min(1000000000, lastfaultlength + 1) : lastfaultlength);
+nmaxfaultlength = max(maxfaultlength, nlastfaultlength);
+nlastrecoveryinc = clockfault ? 0 : ((faultactive && progressok) ? inc : lastrecoveryinc);
+nlastrecoverytime = clockfault ? 0 : ((faultactive && progressok) ? clock : lastrecoverytime);
+nfaultactive = clockfault ? !progressok : (faultactive && !progressok);
+nlastfaultplaying = clockfault ? playing : lastfaultplaying;
+nlastfaultcountingin = clockfault ? countingin : lastfaultcountingin;
+out33 = nclockfaults;
+out34 = nlastfaultmask;
+out35 = nlastfaultprevious;
+out36 = nlastfaultphase;
+out37 = nlastfaultinc;
+out38 = nlastfaultperiod;
+out39 = 1000 * nlastfaulttime / samplerate;
+out40 = nlastfaultlength;
+out41 = nmaxfaultlength;
+out42 = nlastrecoveryinc;
+out43 = nlastfaultplaying;
+out44 = nlastfaultcountingin;
+out45 = 1000 * nlastrecoverytime / samplerate;
+out46 = endpointgrace;
+out47 = nendpointepisodes;
+out48 = nendpointrecoveries;
+out49 = nlastendpointlength;
+out50 = nmaxendpointlength;
+out51 = timingready;
+out52 = nlastendpointresumephase;
+out53 = nlastendpointresumeinc;
+out54 = nendpointcatchups;
+out55 = nendpointresumerejections;
+out56 = nlastendpointexpectedinc;
+out57 = nlastendpointerrorsamples;
+// A diagnostic probe can wait through a clip-only interruption, including
+// its release boundary. The actual analysis and scoring permits stay closed.
+out58 = transportcontext && !nonclipboundary && ((clips != 0) || clipboundary);
+instantclipinputs = micatlimit + 2 * refatlimit;
+nlastclipinputs = instantclipinputs > 0 ? instantclipinputs : lastclipinputs;
+out59 = nlastclipinputs;
+// Diagnostic sample alignment is available before speech identity is known.
+// Deliberately narrower than detectpermit and unrelated to musical quality.
+out60 = detectpermit && timingready && timingok && (sourcemode == 1);
+lastclipinputs = nlastclipinputs;
+
+clock = clock + 1;
+prevphase = phase;
+validrun = nvalid;
+periodms = nperiod;
+phasecount = windowready ? 0 : nphasecount;
+phasesum = windowready ? 0 : nphasesum;
+periodvalid = nperiodvalid;
+stableperiod = nstableperiod;
+tempoage = ntempoage;
+prevtempoquiet = tempoquiet;
+lastseq = hostseq;
+leaseage = nage;
+micenv = nmicenv;
+refenv = nrefenv;
+michold = nmichold;
+refhold = nrefhold;
+miccliphold = nmicclip;
+refcliphold = nrefclip;
+epoch = nepoch;
+prevfresh = fresh;
+prevsync = synced;
+prevenabled = enabled;
+prevdeviceon = deviceon;
+prevapi = apiready;
+prevplaying = playing;
+prevcountingin = countingin;
+prevrecording = recording;
+prevsessionrecord = sessionrecord;
+prevsessionstatus = sessionstatus;
+prevsource = sourcemode;
+prevvoice = voicebinding;
+prevreference = referencebinding;
+prevquality = quality;
+prevpolicy = timingpolicy;
+prevcalvalid = calibrationvalid;
+prevaudiorevision = audiorevision;
+prevcalibratedrevision = calibratedrevision;
+prevtimeline = timelinevalid;
+prevtimelinerevision = timelinerevision;
+prevpositionseq = positionseq;
+prevclips = clips;
+prevoffset = offsetms;
+prevmicfloor = micfloor;
+prevreffloor = reffloor;
+lastreset = resetseq;
+lastboundarymask = nboundarymask;
+lastboundarytime = nboundarytime;
+controlchanges = ncontrolchanges;
+hostchanges = nhostchanges;
+sourcechanges = nsourcechanges;
+timingchanges = ntimingchanges;
+resetchanges = nresetchanges;
+freshchanges = nfreshchanges;
+syncchanges = nsyncchanges;
+clipchanges = nclipchanges;
+periodchanges = nperiodchanges;
+tempochanges = ntempochanges;
+maxpollgap = nmaxpollgap;
+polltimeouts = npolltimeouts;
+synclosses = nsynclosses;
+prevpermit = detectpermit;
+lastpermitmask = nlastpermitmask;
+lastpermittime = nlastpermittime;
+lastpermitboundarymask = nlastpermitboundarymask;
+clockfaults = nclockfaults;
+lastfaultmask = nlastfaultmask;
+lastfaultprevious = nlastfaultprevious;
+lastfaultphase = nlastfaultphase;
+lastfaultinc = nlastfaultinc;
+lastfaultperiod = nlastfaultperiod;
+lastfaulttime = nlastfaulttime;
+lastfaultlength = nlastfaultlength;
+maxfaultlength = nmaxfaultlength;
+lastrecoveryinc = nlastrecoveryinc;
+lastfaultplaying = nlastfaultplaying;
+lastfaultcountingin = nlastfaultcountingin;
+lastrecoverytime = nlastrecoverytime;
+faultactive = nfaultactive;
+prevrawphase = in5;
+endpointrun = nendpointrun;
+endpointclean = nendpointclean;
+endpointpending = nendpointpending;
+endpointepisodes = nendpointepisodes;
+endpointrecoveries = nendpointrecoveries;
+lastendpointlength = nlastendpointlength;
+maxendpointlength = nmaxendpointlength;
+lastendpointresumephase = nlastendpointresumephase;
+lastendpointresumeinc = nlastendpointresumeinc;
+endpointcatchups = nendpointcatchups;
+endpointresumerejections = nendpointresumerejections;
+lastendpointexpectedinc = nlastendpointexpectedinc;
+lastendpointerrorsamples = nlastendpointerrorsamples;

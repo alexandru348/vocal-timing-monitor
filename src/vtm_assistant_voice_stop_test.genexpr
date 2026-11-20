@@ -1,0 +1,69 @@
+// One private test request, bound to the same recording and control generation.
+// in1/2 guided stage and mode; in3/4 current Arrangement REC and probe permit;
+// in5/6 confirmed and possible events; in7 associated slot; in8/9 verdict and
+// deviation; in10 voiced confirmation supported by clean samples;
+// in11 evaluator Stop eligibility; in12 current review context, including a
+// microphone-only clip pause. Dispatch separately requires the normal permit.
+// out1..4 considered count and first eligible slot, verdict and deviation;
+// out5 a pending generation for the native relay; out6 probe reset level;
+// out7 count of requests whose clip pause exceeded the deadline.
+Param generation(0);
+History previousStage(0);
+History probeGeneration(0);
+History lastSlot(0);
+History count(0);
+History stopSlot(0);
+History stopVerdict(0);
+History stopDeviation(0);
+History pending(0);
+History waitSamples(0);
+History queuedSlot(0);
+History queuedVerdict(0);
+History queuedDeviation(0);
+History expired(0);
+
+rhythm = in2 == 2;
+reset = rhythm && (in1 == 1) && (previousStage != 1);
+probe = reset ? (in3 == 1 ? generation : 0) : probeGeneration;
+valid = rhythm && (in1 == 3) && (in3 == 1) && (in12 == 1) && (probe > 0) && (probe == generation);
+knownSlot = (in7 >= 1) && (in7 <= 4);
+nextLastSlot = reset ? 0 : lastSlot;
+firstInSlot = knownSlot && (in7 > nextLastSlot);
+if (rhythm && (in1 == 3) && knownSlot && ((in5 == 1) || (in6 == 1))) {
+    nextLastSlot = max(lastSlot, in7);
+}
+nextCount = reset ? 0 : count + (valid && (in5 == 1));
+request = valid && firstInSlot && (stopSlot == 0) && (waitSamples == 0) && (in10 == 1) && (in11 == 1);
+duplicate = (waitSamples > 0) && (in7 == queuedSlot) && ((in5 == 1) || (in6 == 1));
+nextWait = request ? 1 : ((valid && !duplicate && (waitSamples > 0)) ? waitSamples + 1 : 0);
+nextQueuedSlot = request ? in7 : queuedSlot;
+nextQueuedVerdict = request ? in8 : queuedVerdict;
+nextQueuedDeviation = request ? in9 : queuedDeviation;
+timedOut = nextWait > 0.45 * samplerate;
+dispatch = (nextWait > 0) && !timedOut && (in4 == 1);
+nextPending = valid && (pending || dispatch);
+nextSlot = reset ? 0 : (dispatch ? nextQueuedSlot : stopSlot);
+nextVerdict = reset ? 0 : (dispatch ? nextQueuedVerdict : stopVerdict);
+nextDeviation = reset ? 0 : (dispatch ? nextQueuedDeviation : stopDeviation);
+nextExpired = reset ? 0 : expired + timedOut;
+
+out1 = nextCount;
+out2 = nextSlot;
+out3 = nextVerdict;
+out4 = nextDeviation;
+out5 = nextPending && (in4 == 1) ? probe : 0;
+out6 = rhythm && (in1 == 1);
+out7 = nextExpired;
+previousStage = in1;
+probeGeneration = probe;
+lastSlot = nextLastSlot;
+count = nextCount;
+stopSlot = nextSlot;
+stopVerdict = nextVerdict;
+stopDeviation = nextDeviation;
+pending = nextPending;
+waitSamples = timedOut || dispatch ? 0 : nextWait;
+queuedSlot = nextQueuedSlot;
+queuedVerdict = nextQueuedVerdict;
+queuedDeviation = nextQueuedDeviation;
+expired = nextExpired;

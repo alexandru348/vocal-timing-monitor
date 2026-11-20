@@ -1,0 +1,57 @@
+// Check the six detected test pulses against their independent schedule.
+// in1 stimulus stage, in2 confirmed event, in3 verdict, in4 deviation,
+// in5 Stop eligibility with a simulated recording flag.
+Data verdicts(6);
+History count(0);
+History maxError(0);
+History unexpected(0);
+History firstStop(0);
+History previousStage(0);
+
+stage = in1;
+nCount = count;
+nMaxError = maxError;
+nUnexpected = unexpected;
+nFirstStop = firstStop;
+if (stage == 1 && previousStage != 1) {
+    nCount = 0;
+    nMaxError = 0;
+    nUnexpected = 0;
+    nFirstStop = 0;
+    for (i = 0; i < 6; i += 1) { poke(verdicts, 0, i); }
+} else if (stage == 3 && in2 == 1) {
+    if (count < 6) {
+        // Select the six integral indices directly. Rounding a quotient near
+        // the start of the second group can yield the wrong expected offset.
+        expectedEarly = (count == 0) || (count == 3);
+        expectedLate = (count == 2) || (count == 5);
+        expected = expectedEarly ? -150 : (expectedLate ? 150 : 0);
+        expectedVerdict = expectedEarly ? 3 : (expectedLate ? 4 : 2);
+        expectedStop = expectedEarly || expectedLate;
+        nMaxError = max(maxError, abs(in4 - expected));
+        nUnexpected = unexpected + ((in3 != expectedVerdict) || (in5 != expectedStop));
+        poke(verdicts, in3, count);
+    }
+    nCount = count + 1;
+    if (in5 == 1 && firstStop == 0) { nFirstStop = nCount; }
+}
+
+finished = stage == 5;
+passed = finished && nCount == 6 && nMaxError <= 8 && nUnexpected == 0;
+v0 = peek(verdicts, 0); v1 = peek(verdicts, 1); v2 = peek(verdicts, 2);
+v3 = peek(verdicts, 3); v4 = peek(verdicts, 4); v5 = peek(verdicts, 5);
+out1 = finished && !passed ? 7 : stage;
+out2 = finished ? nCount : 0;
+out3 = finished ? nMaxError : 0;
+out4 = finished ? nFirstStop : 0;
+out5 = finished ? v0 : 0;
+out6 = finished ? v1 : 0;
+out7 = finished ? v2 : 0;
+out8 = finished ? v3 : 0;
+out9 = finished ? v4 : 0;
+out10 = finished ? v5 : 0;
+count = nCount;
+maxError = nMaxError;
+unexpected = nUnexpected;
+firstStop = nFirstStop;
+previousStage = stage;

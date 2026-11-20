@@ -1,0 +1,1165 @@
+// Acoustic envelope comparison only: NOT voice recognition or separation.
+// in1/2: raw mic stereo; in3/4: digital reference stereo.
+// in5: preflight detectpermit; in6: preflight epoch; in7: validated offset ms.
+// Compare 600 ms of three-band envelopes, allowing +/-20 ms around the
+// existing calibration. Four fixed stereo reference views: peak, mono, L, R.
+// No fitted acoustic model, automatic offset learning or audio output.
+Param profilevalid(0);
+Param sourcemode(0);
+// Explicit user-declared quiet capture; never infer that speakers are muted.
+Param backgroundrequest(0);
+// User-declared speaker reactivation. It does not change Windows or Live.
+Param speakersrequest(0);
+History jointbaselineend(0);
+History jointend(0);
+History jointcodes(0);
+History jointcounts(0);
+History testphase(0);
+History testrequest(0);
+History testgate(0);
+History mutedwindows(0);
+History mutedwithin(0);
+History mutedabove(0);
+History muteduncertain(0);
+History mutedstart(0);
+History mutedend(0);
+History mutedmean0(0);
+History mutedfraction0(0);
+History mutedbandwindows0(0);
+History mutedmean1(0);
+History mutedfraction1(0);
+History mutedbandwindows1(0);
+History mutedmean2(0);
+History mutedfraction2(0);
+History mutedbandwindows2(0);
+History audiblewindows(0);
+History audiblewithin(0);
+History audibleabove(0);
+History audibleuncertain(0);
+History audiblestart(0);
+History audibleend(0);
+History audiblemean0(0);
+History audiblefraction0(0);
+History audiblebandwindows0(0);
+History audiblemean1(0);
+History audiblefraction1(0);
+History audiblebandwindows1(0);
+History audiblemean2(0);
+History audiblefraction2(0);
+History audiblebandwindows2(0);
+History bgstate(0);
+History bgrequest(0);
+History bgcount(0);
+History bgskipframe(0);
+History bgmean0(0);
+History bgmean1(0);
+History bgmean2(0);
+History bgm20(0);
+History bgm21(0);
+History bgm22(0);
+
+History bgcmpstate(0);
+History bgcmpcount(0);
+History bgcmpframes(0);
+History bgcmpwindows(0);
+History bgcmpmask(0);
+History bgcmpend(0);
+History bgcmpwithin(0);
+History bgcmpabove(0);
+History bgcmpuncertain(0);
+History bgcmpsum0(0);
+History bgcmpexceed0(0);
+History bgcmplevel0(0);
+History bgcmpfraction0(0);
+History bgcmpsum1(0);
+History bgcmpexceed1(0);
+History bgcmplevel1(0);
+History bgcmpfraction1(0);
+History bgcmpsum2(0);
+History bgcmpexceed2(0);
+History bgcmplevel2(0);
+History bgcmpfraction2(0);
+
+History lastepoch(-1);
+History lastoffset(0);
+History lastprofile(0);
+History lastmode(0);
+History framesamples(0);
+History writepos(0);
+History filled(0);
+History hop(0);
+History state(0);
+History match(0);
+History distinct(0);
+History inputlevel(0);
+History reflevel(0);
+History activity(0);
+History bestmodel(0);
+History bestlagms(0);
+History bandmatch0(0);
+History bandmatch1(0);
+History bandmatch2(0);
+History usablebands(0);
+History micvariationindex(0);
+History peakmatch(0);
+History band_input_level_low(0);
+History band_input_level_mid(0);
+History band_input_level_high(0);
+History band_reference_level_low(0);
+History band_reference_level_mid(0);
+History band_reference_level_high(0);
+History band_input_variation_low(0);
+History band_input_variation_mid(0);
+History band_input_variation_high(0);
+History band_reference_variation_low(0);
+History band_reference_variation_mid(0);
+History band_reference_variation_high(0);
+History band_weight_low(0);
+History band_weight_mid(0);
+History band_weight_high(0);
+History usable_band_mask(0);
+History reference_supported_band_mask(0);
+History partial_reference_windows(0);
+History band_reference_windows_low(0);
+History band_reference_windows_mid(0);
+History band_reference_windows_high(0);
+History lastclass(0);
+History classrun(0);
+History cliphold(0);
+History referencewindows(0);
+History distinctwindows(0);
+History uncertainwindows(0);
+// Lifetime diagnostics survive invalidations but NEVER authorize evaluation.
+History runlength(0);
+History longestrun(0);
+History resetepisodes(0);
+History previousreset(0);
+History lastreason(0);
+History windowscomputed(0);
+History epochchanges(0);
+History offsetchanges(0);
+History permitlosses(0);
+History profilechanges(0);
+History modechanges(0);
+History lastpermit(0);
+History clock(0);
+History mldc(0);
+History mllow(0);
+History mlupper(0);
+History mrdc(0);
+History mrlow(0);
+History mrupper(0);
+History rldc(0);
+History rllow(0);
+History rlupper(0);
+History rrdc(0);
+History rrlow(0);
+History rrupper(0);
+History rmdc(0);
+History rmlow(0);
+History rmupper(0);
+History msum0(0);
+Data mdata0(256);
+History rsum0(0);
+Data rdata0(256);
+History msum1(0);
+Data mdata1(256);
+History rsum1(0);
+Data rdata1(256);
+History msum2(0);
+Data mdata2(256);
+History rsum2(0);
+Data rdata2(256);
+History rlframe0(0);
+History rlframe1(0);
+History rlframe2(0);
+History rrframe0(0);
+History rrframe1(0);
+History rrframe2(0);
+History rmframe0(0);
+History rmframe1(0);
+History rmframe2(0);
+Data rleft0(256);
+Data rleft1(256);
+Data rleft2(256);
+Data rright0(256);
+Data rright1(256);
+Data rright2(256);
+Data rmono0(256);
+Data rmono1(256);
+Data rmono2(256);
+
+operating = (in5 == 1) && (profilevalid == 1) && (sourcemode == 1);
+epochchanged = in6 != lastepoch;
+// A stable anchor ignores sub-nanosecond numerical noise; cumulative drift
+// still crosses the threshold. Meaningful offset edits always invalidate.
+offsetchanged = abs(in7 - lastoffset) > 0.000001;
+profilechanged = profilevalid != lastprofile;
+modechanged = sourcemode != lastmode;
+changed = epochchanged || offsetchanged || profilechanged || modechanged;
+peak = max(max(abs(in1), abs(in2)), max(abs(in3), abs(in4)));
+ncliphold = peak >= 0.98 ? samplerate * 0.250 : max(0, cliphold - 1);
+resetnow = !operating || changed || (ncliphold > 0);
+reason = (in5 != 1) + 2 * epochchanged + 4 * offsetchanged + 8 * (profilevalid != 1 || profilechanged) + 16 * (sourcemode != 1 || modechanged) + 32 * (ncliphold > 0);
+nrunlength = resetnow ? 0 : min(runlength + 1, 1000000000);
+nlongestrun = max(longestrun, nrunlength);
+nresetepisodes = min(1000000000, resetepisodes + (resetnow && !previousreset));
+nlastreason = resetnow ? reason : lastreason;
+nwindowscomputed = windowscomputed;
+nepochchanges = min(1000000000, epochchanges + epochchanged);
+noffsetchanges = min(1000000000, offsetchanges + offsetchanged);
+npermitlosses = min(1000000000, permitlosses + ((in5 != 1) && (lastpermit == 1)));
+nprofilechanges = min(1000000000, profilechanges + profilechanged);
+nmodechanges = min(1000000000, modechanges + modechanged);
+// Smooth DC rejection and broad bands, independently per stereo channel.
+c20 = exp(-6.28318530718 * 20 / samplerate);
+c400 = exp(-6.28318530718 * 400 / samplerate);
+c1800 = exp(-6.28318530718 * 1800 / samplerate);
+nmldc = in1 + c20 * (mldc - in1);
+mlhp = in1 - nmldc;
+nmllow = mlhp + c400 * (mllow - mlhp);
+nmlupper = mlhp + c1800 * (mlupper - mlhp);
+nmrdc = in2 + c20 * (mrdc - in2);
+mrhp = in2 - nmrdc;
+nmrlow = mrhp + c400 * (mrlow - mrhp);
+nmrupper = mrhp + c1800 * (mrupper - mrhp);
+nrldc = in3 + c20 * (rldc - in3);
+rlhp = in3 - nrldc;
+nrllow = rlhp + c400 * (rllow - rlhp);
+nrlupper = rlhp + c1800 * (rlupper - rlhp);
+nrrdc = in4 + c20 * (rrdc - in4);
+rrhp = in4 - nrrdc;
+nrrlow = rrhp + c400 * (rrlow - rrhp);
+nrrupper = rrhp + c1800 * (rrupper - rrhp);
+// Mix before rectification: summing envelopes would miss stereo cancellation.
+rm = (in3 + in4) * 0.5;
+nrmdc = rm + c20 * (rmdc - rm);
+rmhp = rm - nrmdc;
+nrmlow = rmhp + c400 * (rmlow - rmhp);
+nrmupper = rmhp + c1800 * (rmupper - rmhp);
+nrlframe0 = rlframe0 + abs(nrllow);
+nrlframe1 = rlframe1 + abs(nrlupper - nrllow);
+nrlframe2 = rlframe2 + abs(rlhp - nrlupper);
+nrrframe0 = rrframe0 + abs(nrrlow);
+nrrframe1 = rrframe1 + abs(nrrupper - nrrlow);
+nrrframe2 = rrframe2 + abs(rrhp - nrrupper);
+nrmframe0 = rmframe0 + abs(nrmlow);
+nrmframe1 = rmframe1 + abs(nrmupper - nrmlow);
+nrmframe2 = rmframe2 + abs(rmhp - nrmupper);
+nmsum0 = msum0 + max(abs(nmllow), abs(nmrlow));
+nmsum1 = msum1 + max(abs(nmlupper - nmllow), abs(nmrupper - nmrlow));
+nmsum2 = msum2 + max(abs(mlhp - nmlupper), abs(mrhp - nmrupper));
+nrsum0 = rsum0 + max(abs(nrllow), abs(nrrlow));
+nrsum1 = rsum1 + max(abs(nrlupper - nrllow), abs(nrrupper - nrrlow));
+nrsum2 = rsum2 + max(abs(rlhp - nrlupper), abs(rrhp - nrrupper));
+nframesamples = framesamples + 1;
+nwritepos = writepos;
+nfilled = filled;
+nhop = hop;
+nstate = state;
+nmatch = match;
+ndistinct = distinct;
+ninputlevel = inputlevel;
+nreflevel = reflevel;
+nactivity = activity;
+nmodel = bestmodel;
+nlagms = bestlagms;
+nbandmatch0 = bandmatch0;
+nbandmatch1 = bandmatch1;
+nbandmatch2 = bandmatch2;
+nusablebands = usablebands;
+nmicvariationindex = micvariationindex;
+npeakmatch = peakmatch;
+nband_input_level_low = band_input_level_low;
+nband_input_level_mid = band_input_level_mid;
+nband_input_level_high = band_input_level_high;
+nband_reference_level_low = band_reference_level_low;
+nband_reference_level_mid = band_reference_level_mid;
+nband_reference_level_high = band_reference_level_high;
+nband_input_variation_low = band_input_variation_low;
+nband_input_variation_mid = band_input_variation_mid;
+nband_input_variation_high = band_input_variation_high;
+nband_reference_variation_low = band_reference_variation_low;
+nband_reference_variation_mid = band_reference_variation_mid;
+nband_reference_variation_high = band_reference_variation_high;
+nband_weight_low = band_weight_low;
+nband_weight_mid = band_weight_mid;
+nband_weight_high = band_weight_high;
+nusable_band_mask = usable_band_mask;
+nreference_supported_band_mask = reference_supported_band_mask;
+npartial_reference_windows = partial_reference_windows;
+nband_reference_windows_low = band_reference_windows_low;
+nband_reference_windows_mid = band_reference_windows_mid;
+nband_reference_windows_high = band_reference_windows_high;
+nlastclass = lastclass;
+nclassrun = classrun;
+nreferencewindows = referencewindows;
+ndistinctwindows = distinctwindows;
+nuncertainwindows = uncertainwindows;
+// The background profile is session/context-scoped and diagnostic only.
+// Starting a new request discards the partial leading 10 ms frame and waits
+// at least 500 ms so the button click is not part of the declared baseline.
+framelen = max(1, floor(samplerate * 0.010));
+nbgstate = bgstate;
+nbgrequest = bgrequest;
+nbgcount = bgcount;
+nbgskipframe = bgskipframe;
+nbgmean0 = bgmean0;
+nbgmean1 = bgmean1;
+nbgmean2 = bgmean2;
+nbgm20 = bgm20;
+nbgm21 = bgm21;
+nbgm22 = bgm22;
+nbgcmpstate = bgcmpstate;
+nbgcmpcount = bgcmpcount;
+nbgcmpframes = bgcmpframes;
+nbgcmpwindows = bgcmpwindows;
+nbgcmpmask = bgcmpmask;
+nbgcmpend = bgcmpend;
+nbgcmpwithin = bgcmpwithin;
+nbgcmpabove = bgcmpabove;
+nbgcmpuncertain = bgcmpuncertain;
+nbgcmpsum0 = bgcmpsum0;
+nbgcmpexceed0 = bgcmpexceed0;
+nbgcmplevel0 = bgcmplevel0;
+nbgcmpfraction0 = bgcmpfraction0;
+nbgcmpsum1 = bgcmpsum1;
+nbgcmpexceed1 = bgcmpexceed1;
+nbgcmplevel1 = bgcmplevel1;
+nbgcmpfraction1 = bgcmpfraction1;
+nbgcmpsum2 = bgcmpsum2;
+nbgcmpexceed2 = bgcmpexceed2;
+nbgcmplevel2 = bgcmplevel2;
+nbgcmpfraction2 = bgcmpfraction2;
+// Joint observations use the SAME microphone frames as reference matching.
+// Their fixed quiet baseline is never adapted to later loud sounds.
+njointbaselineend = jointbaselineend;
+njointend = jointend;
+njointcodes = jointcodes;
+njointcounts = jointcounts;
+bgnewrequest = backgroundrequest != bgrequest;
+if (resetnow || bgnewrequest) {
+    njointbaselineend = 0; njointend = 0; njointcodes = 0; njointcounts = 0;
+}
+if (bgnewrequest) {
+    nbgstate = backgroundrequest > 0 ? 1 : 0;
+    nbgrequest = backgroundrequest;
+    nbgcount = 0;
+    nbgskipframe = 1 + floor(samplerate * 0.5 / framelen + 0.999999999);
+    nbgmean0 = 0;
+    nbgmean1 = 0;
+    nbgmean2 = 0;
+    nbgm20 = 0;
+    nbgm21 = 0;
+    nbgm22 = 0;
+}
+if (resetnow) {
+    nbgstate = (bgstate != 0 || bgnewrequest) ? 3 : 0;
+    nbgcount = 0;
+    nbgskipframe = 0;
+    nbgmean0 = 0;
+    nbgmean1 = 0;
+    nbgmean2 = 0;
+    nbgm20 = 0;
+    nbgm21 = 0;
+    nbgm22 = 0;
+}
+// Heuristic limits on the SAME disjoint 10 ms envelopes as acquisition.
+// Three population SDs is a margin, NOT a confidence interval or voice test.
+// Relative/absolute floors avoid hypersensitivity to constant/zero baselines.
+bgcmplimit0 = nbgmean0 + max(0.00001, max(0.1 * nbgmean0, 3 * sqrt(max(0, nbgm20 / max(1, nbgcount)))));
+bgcmplimit1 = nbgmean1 + max(0.00001, max(0.1 * nbgmean1, 3 * sqrt(max(0, nbgm21 / max(1, nbgcount)))));
+bgcmplimit2 = nbgmean2 + max(0.00001, max(0.1 * nbgmean2, 3 * sqrt(max(0, nbgm22 / max(1, nbgcount)))));
+if (resetnow || bgnewrequest || (nbgstate != 2)) {
+    nbgcmpstate = 0;
+    nbgcmpcount = 0;
+    nbgcmpframes = 0;
+    nbgcmpwindows = 0;
+    nbgcmpmask = 0;
+    nbgcmpend = 0;
+    nbgcmpwithin = 0;
+    nbgcmpabove = 0;
+    nbgcmpuncertain = 0;
+    nbgcmpsum0 = 0;
+    nbgcmpexceed0 = 0;
+    nbgcmplevel0 = 0;
+    nbgcmpfraction0 = 0;
+    nbgcmpsum1 = 0;
+    nbgcmpexceed1 = 0;
+    nbgcmplevel1 = 0;
+    nbgcmpfraction1 = 0;
+    nbgcmpsum2 = 0;
+    nbgcmpexceed2 = 0;
+    nbgcmplevel2 = 0;
+    nbgcmpfraction2 = 0;
+}
+// Separate declared-condition phases. No mute inference and no timed
+// assumption about when the user reactivates the speakers.
+ntestphase = testphase;
+ntestrequest = testrequest;
+ntestgate = testgate;
+nmutedwindows = mutedwindows;
+nmutedwithin = mutedwithin;
+nmutedabove = mutedabove;
+nmuteduncertain = muteduncertain;
+nmutedstart = mutedstart;
+nmutedend = mutedend;
+nmutedmean0 = mutedmean0;
+nmutedfraction0 = mutedfraction0;
+nmutedbandwindows0 = mutedbandwindows0;
+nmutedmean1 = mutedmean1;
+nmutedfraction1 = mutedfraction1;
+nmutedbandwindows1 = mutedbandwindows1;
+nmutedmean2 = mutedmean2;
+nmutedfraction2 = mutedfraction2;
+nmutedbandwindows2 = mutedbandwindows2;
+naudiblewindows = audiblewindows;
+naudiblewithin = audiblewithin;
+naudibleabove = audibleabove;
+naudibleuncertain = audibleuncertain;
+naudiblestart = audiblestart;
+naudibleend = audibleend;
+naudiblemean0 = audiblemean0;
+naudiblefraction0 = audiblefraction0;
+naudiblebandwindows0 = audiblebandwindows0;
+naudiblemean1 = audiblemean1;
+naudiblefraction1 = audiblefraction1;
+naudiblebandwindows1 = audiblebandwindows1;
+naudiblemean2 = audiblemean2;
+naudiblefraction2 = audiblefraction2;
+naudiblebandwindows2 = audiblebandwindows2;
+testnewrequest = speakersrequest != testrequest;
+ntestrequest = speakersrequest;
+if (bgnewrequest || resetnow || (nbgstate != 2)) {
+    ntestphase = 0;
+    ntestgate = 0;
+    nmutedwindows = 0;
+    nmutedwithin = 0;
+    nmutedabove = 0;
+    nmuteduncertain = 0;
+    nmutedstart = 0;
+    nmutedend = 0;
+    nmutedmean0 = 0;
+    nmutedfraction0 = 0;
+    nmutedbandwindows0 = 0;
+    nmutedmean1 = 0;
+    nmutedfraction1 = 0;
+    nmutedbandwindows1 = 0;
+    nmutedmean2 = 0;
+    nmutedfraction2 = 0;
+    nmutedbandwindows2 = 0;
+    naudiblewindows = 0;
+    naudiblewithin = 0;
+    naudibleabove = 0;
+    naudibleuncertain = 0;
+    naudiblestart = 0;
+    naudibleend = 0;
+    naudiblemean0 = 0;
+    naudiblefraction0 = 0;
+    naudiblebandwindows0 = 0;
+    naudiblemean1 = 0;
+    naudiblefraction1 = 0;
+    naudiblebandwindows1 = 0;
+    naudiblemean2 = 0;
+    naudiblefraction2 = 0;
+    naudiblebandwindows2 = 0;
+    ntestphase = (nbgstate == 3) ? 6 : 0;
+} else if (testnewrequest && (testphase == 2) && (speakersrequest > 0)) {
+    // Wait at least 500 ms after the declaration/click. Accept only comparison
+    // windows whose ENTIRE raw envelope span begins after this gate.
+    ntestphase = 3;
+    ntestgate = clock + floor(samplerate * 0.5 + 0.999999999);
+} else if ((testphase == 3) && (clock >= testgate)) {
+    ntestphase = 4;
+}
+framems = 1000 * framelen / samplerate;
+// Signed offsets: delay the reference for positive offsets and microphone
+// envelopes for negative offsets. Never read unwritten or previous-epoch data.
+rdelay = floor(max(0, clamp(in7, -500, 500)) / framems + 0.5);
+mdelay = floor(max(0, -clamp(in7, -500, 500)) / framems + 0.5);
+if (resetnow) {
+    nframesamples = 0;
+    nwritepos = 0;
+    nfilled = 0;
+    nhop = 0;
+    nstate = 1;
+    nmatch = 0;
+    ndistinct = 0;
+    ninputlevel = 0;
+    nreflevel = 0;
+    nactivity = 0;
+    nmodel = 0;
+    nlagms = 0;
+    nbandmatch0 = 0;
+    nbandmatch1 = 0;
+    nbandmatch2 = 0;
+    nusablebands = 0;
+    nmicvariationindex = 0;
+    npeakmatch = 0;
+    nband_input_level_low = 0;
+    nband_input_level_mid = 0;
+    nband_input_level_high = 0;
+    nband_reference_level_low = 0;
+    nband_reference_level_mid = 0;
+    nband_reference_level_high = 0;
+    nband_input_variation_low = 0;
+    nband_input_variation_mid = 0;
+    nband_input_variation_high = 0;
+    nband_reference_variation_low = 0;
+    nband_reference_variation_mid = 0;
+    nband_reference_variation_high = 0;
+    nband_weight_low = 0;
+    nband_weight_mid = 0;
+    nband_weight_high = 0;
+    nusable_band_mask = 0;
+    nreference_supported_band_mask = 0;
+    npartial_reference_windows = 0;
+    nband_reference_windows_low = 0;
+    nband_reference_windows_mid = 0;
+    nband_reference_windows_high = 0;
+    nlastclass = 0;
+    nclassrun = 0;
+    nreferencewindows = 0;
+    ndistinctwindows = 0;
+    nuncertainwindows = 0;
+    nmsum0 = 0;
+    nrsum0 = 0;
+    nmsum1 = 0;
+    nrsum1 = 0;
+    nmsum2 = 0;
+    nrsum2 = 0;
+    nmldc = 0;
+    nmllow = 0;
+    nmlupper = 0;
+    nmrdc = 0;
+    nmrlow = 0;
+    nmrupper = 0;
+    nrldc = 0;
+    nrllow = 0;
+    nrlupper = 0;
+    nrrdc = 0;
+    nrrlow = 0;
+    nrrupper = 0;
+    nrmdc = 0;
+    nrmlow = 0;
+    nrmupper = 0;
+    nrlframe0 = 0; nrlframe1 = 0; nrlframe2 = 0;
+    nrrframe0 = 0; nrrframe1 = 0; nrrframe2 = 0;
+    nrmframe0 = 0; nrmframe1 = 0; nrmframe2 = 0;
+} else if (nframesamples >= framelen) {
+    // Capture disjoint complete microphone frames, independent of reference
+    // matching, lag selection, or overlapping comparison windows. Welford
+    // moments retain the mean and population variance without cancellation.
+    if (nbgstate == 1) {
+        if (nbgskipframe > 0) { nbgskipframe = nbgskipframe - 1; }
+        else {
+            nbgcount = nbgcount + 1;
+            bgvalue0 = nmsum0 / nframesamples;
+            bgdelta0 = bgvalue0 - nbgmean0;
+            nbgmean0 = nbgmean0 + bgdelta0 / nbgcount;
+            nbgm20 = nbgm20 + bgdelta0 * (bgvalue0 - nbgmean0);
+            bgvalue1 = nmsum1 / nframesamples;
+            bgdelta1 = bgvalue1 - nbgmean1;
+            nbgmean1 = nbgmean1 + bgdelta1 / nbgcount;
+            nbgm21 = nbgm21 + bgdelta1 * (bgvalue1 - nbgmean1);
+            bgvalue2 = nmsum2 / nframesamples;
+            bgdelta2 = bgvalue2 - nbgmean2;
+            nbgmean2 = nbgmean2 + bgdelta2 / nbgcount;
+            nbgm22 = nbgm22 + bgdelta2 * (bgvalue2 - nbgmean2);
+            if (nbgcount * framelen >= samplerate * 5) { nbgstate = 2; njointbaselineend = clock; }
+        }
+    }
+
+    // Start on the first full frame AFTER acquisition; never compare the
+    // acquisition's final frame with a baseline containing that same frame.
+    if ((bgstate == 2) && (nbgstate == 2) && !bgnewrequest) {
+        nbgcmpstate = bgcmpstate == 0 ? 1 : bgcmpstate;
+        nbgcmpcount = bgcmpcount + 1;
+        nbgcmpsum0 = bgcmpsum0 + nmsum0 / nframesamples;
+        nbgcmpexceed0 = bgcmpexceed0 + (nmsum0 / nframesamples > bgcmplimit0);
+        nbgcmpsum1 = bgcmpsum1 + nmsum1 / nframesamples;
+        nbgcmpexceed1 = bgcmpexceed1 + (nmsum1 / nframesamples > bgcmplimit1);
+        nbgcmpsum2 = bgcmpsum2 + nmsum2 / nframesamples;
+        nbgcmpexceed2 = bgcmpexceed2 + (nmsum2 / nframesamples > bgcmplimit2);
+        if (nbgcmpcount * framelen >= samplerate) {
+            nbgcmpframes = nbgcmpcount;
+            nbgcmpwindows = min(1000000000, bgcmpwindows + 1);
+            nbgcmpend = clock;
+            nbgcmplevel0 = nbgcmpsum0 / nbgcmpcount;
+            nbgcmpfraction0 = nbgcmpexceed0 / nbgcmpcount;
+            nbgcmplevel1 = nbgcmpsum1 / nbgcmpcount;
+            nbgcmpfraction1 = nbgcmpexceed1 / nbgcmpcount;
+            nbgcmplevel2 = nbgcmpsum2 / nbgcmpcount;
+            nbgcmpfraction2 = nbgcmpexceed2 / nbgcmpcount;
+            // >=60% over the limit is persistent in this one-second window.
+            // <=10% in every band is within; intermediate occupancy is uncertain.
+            nbgcmpmask = (nbgcmpfraction0 >= 0.6) + 2 * (nbgcmpfraction1 >= 0.6) + 4 * (nbgcmpfraction2 >= 0.6);
+            bgcmpquiet = max(nbgcmpfraction0, max(nbgcmpfraction1, nbgcmpfraction2)) <= 0.1;
+            nbgcmpstate = nbgcmpmask > 0 ? 3 : (bgcmpquiet ? 2 : 4);
+            nbgcmpwithin = min(1000000000, bgcmpwithin + (nbgcmpstate == 2));
+            nbgcmpabove = min(1000000000, bgcmpabove + (nbgcmpstate == 3));
+            nbgcmpuncertain = min(1000000000, bgcmpuncertain + (nbgcmpstate == 4));
+            nbgcmpcount = 0;
+            nbgcmpsum0 = 0; nbgcmpexceed0 = 0;
+            nbgcmpsum1 = 0; nbgcmpexceed1 = 0;
+            nbgcmpsum2 = 0; nbgcmpexceed2 = 0;
+        }
+    }
+
+    poke(mdata0, nmsum0 / nframesamples, writepos);
+    poke(rdata0, nrsum0 / nframesamples, writepos);
+    poke(mdata1, nmsum1 / nframesamples, writepos);
+    poke(rdata1, nrsum1 / nframesamples, writepos);
+    poke(mdata2, nmsum2 / nframesamples, writepos);
+    poke(rdata2, nrsum2 / nframesamples, writepos);
+    poke(rleft0, nrlframe0 / nframesamples, writepos);
+    poke(rleft1, nrlframe1 / nframesamples, writepos);
+    poke(rleft2, nrlframe2 / nframesamples, writepos);
+    poke(rright0, nrrframe0 / nframesamples, writepos);
+    poke(rright1, nrrframe1 / nframesamples, writepos);
+    poke(rright2, nrrframe2 / nframesamples, writepos);
+    poke(rmono0, nrmframe0 / nframesamples, writepos);
+    poke(rmono1, nrmframe1 / nframesamples, writepos);
+    poke(rmono2, nrmframe2 / nframesamples, writepos);
+    nfilled = min(256, filled + 1);
+    nhop = hop + 1;
+    // Ring guard covers the full window, both delay signs and all search lags.
+    if ((nfilled >= 64 + max(rdelay, mdelay)) && (nhop >= 10)) {
+        nwindowscomputed = min(1000000000, windowscomputed + 1);
+        bestmatch = -1;
+        bestmic = 0;
+        bestref = 0;
+        bestactivity = 0;
+        bestvariation = 0;
+        bestbands = 0;
+        peakviewmatch = 0;
+        bestband0 = 0; bestband1 = 0; bestband2 = 0;
+        // GenExpr locals belong to their defining block. These counters are
+        // also read AFTER the loops, so define them in that enclosing block.
+        jexceed0 = 0; jexceed1 = 0; jexceed2 = 0;
+        // Fixed reference views only. A good match can also contain other
+        // sounds; a poor match does not establish an independent source.
+        for (model = 0; model < 4; model = model + 1) {
+        // 5 hypotheses in ENVELOPE frames. This is not a delay estimator.
+        for (lag = -2; lag <= 2; lag = lag + 1) {
+            weighted = 0;
+            weight = 0;
+            micmean = 0;
+            refmean = 0;
+            micvariation = 0;
+            bands = 0;
+            activeframes = 0;
+            jexceed0 = 0; jexceed1 = 0; jexceed2 = 0;
+            sx0 = 0; sy0 = 0; sxx0 = 0; syy0 = 0; sxy0 = 0;
+            sx1 = 0; sy1 = 0; sxx1 = 0; syy1 = 0; sxy1 = 0;
+            sx2 = 0; sy2 = 0; sxx2 = 0; syy2 = 0; sxy2 = 0;
+            for (k = 0; k < 60; k = k + 1) {
+                mi = writepos - 2 - mdelay - k;
+                ri = writepos - 2 - rdelay - lag - k;
+                mi = mi < 0 ? mi + 256 : mi;
+                ri = ri < 0 ? ri + 256 : ri;
+                micframe = 0;
+                x0 = peek(mdata0, mi);
+                jexceed0 = jexceed0 + (x0 > bgcmplimit0);
+                y0 = model == 0 ? peek(rdata0, ri) : (model == 1 ? peek(rmono0, ri) : (model == 2 ? peek(rleft0, ri) : peek(rright0, ri)));
+                sx0 = sx0 + x0; sy0 = sy0 + y0;
+                sxx0 = sxx0 + x0 * x0; syy0 = syy0 + y0 * y0;
+                sxy0 = sxy0 + x0 * y0;
+                micframe = micframe + x0;
+                x1 = peek(mdata1, mi);
+                jexceed1 = jexceed1 + (x1 > bgcmplimit1);
+                y1 = model == 0 ? peek(rdata1, ri) : (model == 1 ? peek(rmono1, ri) : (model == 2 ? peek(rleft1, ri) : peek(rright1, ri)));
+                sx1 = sx1 + x1; sy1 = sy1 + y1;
+                sxx1 = sxx1 + x1 * x1; syy1 = syy1 + y1 * y1;
+                sxy1 = sxy1 + x1 * y1;
+                micframe = micframe + x1;
+                x2 = peek(mdata2, mi);
+                jexceed2 = jexceed2 + (x2 > bgcmplimit2);
+                y2 = model == 0 ? peek(rdata2, ri) : (model == 1 ? peek(rmono2, ri) : (model == 2 ? peek(rleft2, ri) : peek(rright2, ri)));
+                sx2 = sx2 + x2; sy2 = sy2 + y2;
+                sxx2 = sxx2 + x2 * x2; syy2 = syy2 + y2 * y2;
+                sxy2 = sxy2 + x2 * y2;
+                micframe = micframe + x2;
+                activeframes = activeframes + (micframe >= 0.004);
+            }
+            vx0 = max(0, sxx0 - sx0 * sx0 / 60);
+            vy0 = max(0, syy0 - sy0 * sy0 / 60);
+            cov0 = max(0, sxy0 - sx0 * sy0 / 60);
+            varied0 = (vx0 > max(0.00000001, sx0 * sx0 / 60 * 0.01)) && (vy0 > max(0.00000001, sy0 * sy0 / 60 * 0.01));
+            usable0 = varied0 && (sx0 / 60 >= 0.0003) && (sy0 / 60 >= 0.0001);
+            score0 = clamp(cov0 * cov0 / max(0.000000000000000000000001, vx0 * vy0), 0, 1);
+            weighted = weighted + (usable0 ? score0 * vx0 : 0);
+            weight = weight + (usable0 ? vx0 : 0);
+            micmean = micmean + sx0 / 60;
+            refmean = refmean + sy0 / 60;
+            micvariation = micvariation + vx0 / 60;
+            bands = bands + usable0;
+            vx1 = max(0, sxx1 - sx1 * sx1 / 60);
+            vy1 = max(0, syy1 - sy1 * sy1 / 60);
+            cov1 = max(0, sxy1 - sx1 * sy1 / 60);
+            varied1 = (vx1 > max(0.00000001, sx1 * sx1 / 60 * 0.01)) && (vy1 > max(0.00000001, sy1 * sy1 / 60 * 0.01));
+            usable1 = varied1 && (sx1 / 60 >= 0.0003) && (sy1 / 60 >= 0.0001);
+            score1 = clamp(cov1 * cov1 / max(0.000000000000000000000001, vx1 * vy1), 0, 1);
+            weighted = weighted + (usable1 ? score1 * vx1 : 0);
+            weight = weight + (usable1 ? vx1 : 0);
+            micmean = micmean + sx1 / 60;
+            refmean = refmean + sy1 / 60;
+            micvariation = micvariation + vx1 / 60;
+            bands = bands + usable1;
+            vx2 = max(0, sxx2 - sx2 * sx2 / 60);
+            vy2 = max(0, syy2 - sy2 * sy2 / 60);
+            cov2 = max(0, sxy2 - sx2 * sy2 / 60);
+            varied2 = (vx2 > max(0.00000001, sx2 * sx2 / 60 * 0.01)) && (vy2 > max(0.00000001, sy2 * sy2 / 60 * 0.01));
+            usable2 = varied2 && (sx2 / 60 >= 0.0003) && (sy2 / 60 >= 0.0001);
+            score2 = clamp(cov2 * cov2 / max(0.000000000000000000000001, vx2 * vy2), 0, 1);
+            weighted = weighted + (usable2 ? score2 * vx2 : 0);
+            weight = weight + (usable2 ? vx2 : 0);
+            micmean = micmean + sx2 / 60;
+            refmean = refmean + sy2 / 60;
+            micvariation = micvariation + vx2 / 60;
+            bands = bands + usable2;
+            score = weight > 0 ? weighted / weight : 0;
+            if (model == 0) { peakviewmatch = max(peakviewmatch, score); }
+            if (score > bestmatch) {
+                bestmatch = score;
+                bestmic = micmean;
+                bestref = refmean;
+                bestactivity = activeframes / 60;
+                bestvariation = micvariation / max(0.00000001, micmean * micmean);
+                bestbands = bands;
+                bestband0 = usable0 ? score0 : 0;
+                bestband1 = usable1 ? score1 : 0;
+                bestband2 = usable2 ? score2 : 0;
+                nmodel = model;
+                nlagms = lag * framems;
+                nband_input_level_low = sx0 / 60;
+                nband_reference_level_low = sy0 / 60;
+                nband_input_variation_low = vx0 / max(0.000000000001, sx0 * sx0 / 60);
+                nband_reference_variation_low = vy0 / max(0.000000000001, sy0 * sy0 / 60);
+                nband_weight_low = usable0 ? vx0 / max(0.000000000000000000000001, weight) : 0;
+                nband_input_level_mid = sx1 / 60;
+                nband_reference_level_mid = sy1 / 60;
+                nband_input_variation_mid = vx1 / max(0.000000000001, sx1 * sx1 / 60);
+                nband_reference_variation_mid = vy1 / max(0.000000000001, sy1 * sy1 / 60);
+                nband_weight_mid = usable1 ? vx1 / max(0.000000000000000000000001, weight) : 0;
+                nband_input_level_high = sx2 / 60;
+                nband_reference_level_high = sy2 / 60;
+                nband_input_variation_high = vx2 / max(0.000000000001, sx2 * sx2 / 60);
+                nband_reference_variation_high = vy2 / max(0.000000000001, sy2 * sy2 / 60);
+                nband_weight_high = usable2 ? vx2 / max(0.000000000000000000000001, weight) : 0;
+                nusable_band_mask = usable0 + 2 * usable1 + 4 * usable2;
+                nreference_supported_band_mask = (usable0 && (score0 > 0.50)) + 2 * (usable1 && (score1 > 0.50)) + 4 * (usable2 && (score2 > 0.50));
+            }
+        }
+        }
+        ninputlevel = bestmic;
+        nreflevel = bestref;
+        nactivity = bestactivity;
+        nmatch = max(0, bestmatch);
+        nbandmatch0 = bestband0;
+        nbandmatch1 = bestband1;
+        nbandmatch2 = bestband2;
+        nusablebands = bestbands;
+        nmicvariationindex = bestvariation;
+        npeakmatch = peakviewmatch;
+        // Pack only small exact integers into THREE extra telemetry ports.
+        // Categories: 1 within quiet limits; 2 intermittent; 3 persistent
+        // with reference support; 4 persistent low resemblance but usable;
+        // 5 persistent with unusable reference evidence. No category is voice.
+        jend = clock - (2 + mdelay) * framelen;
+        jstart = jend - 60 * framelen + 1;
+        if ((nbgstate == 2) && (jstart > njointbaselineend)) {
+            jusable0 = floor(nusable_band_mask / 1) - 2 * floor(nusable_band_mask / 2);
+            jsupported0 = floor(nreference_supported_band_mask / 1) - 2 * floor(nreference_supported_band_mask / 2);
+            jcode0 = jexceed0 <= 6 ? 1 : (jexceed0 < 36 ? 2 : (jsupported0 ? 3 : (jusable0 ? 4 : 5)));
+            jusable1 = floor(nusable_band_mask / 2) - 2 * floor(nusable_band_mask / 4);
+            jsupported1 = floor(nreference_supported_band_mask / 2) - 2 * floor(nreference_supported_band_mask / 4);
+            jcode1 = jexceed1 <= 6 ? 1 : (jexceed1 < 36 ? 2 : (jsupported1 ? 3 : (jusable1 ? 4 : 5)));
+            jusable2 = floor(nusable_band_mask / 4) - 2 * floor(nusable_band_mask / 8);
+            jsupported2 = floor(nreference_supported_band_mask / 4) - 2 * floor(nreference_supported_band_mask / 8);
+            jcode2 = jexceed2 <= 6 ? 1 : (jexceed2 < 36 ? 2 : (jsupported2 ? 3 : (jusable2 ? 4 : 5)));
+            njointend = jend;
+            njointcodes = jcode0 + 8 * jcode1 + 64 * jcode2;
+            njointcounts = jexceed0 + 64 * jexceed1 + 4096 * jexceed2;
+        } else { njointend = 0; njointcodes = 0; njointcounts = 0; }
+        // This index is unexplained envelope VARIATION, not residual audio,
+        // SNR, voice probability, or a calibrated confidence score.
+        ndistinct = bestbands >= 2 ? 1 - nmatch : 0;
+        rawclass = 7;
+        if (bestref < 0.0004) { rawclass = 4; }
+        else if ((bestmic < 0.004) || (bestactivity < 0.20)) { rawclass = 3; }
+        else if ((bestbands >= 2) && (nmatch >= 0.72)) { rawclass = 5; }
+        // Preserve uncertainty if any usable band still follows the reference.
+        // Class 6 means only LOW resemblance, never proven distinct sound.
+        else if ((bestbands >= 2) && (nmatch <= 0.35) && (max(bestband0, max(bestband1, bestband2)) <= 0.50) && (bestvariation >= 0.05) && (bestactivity >= 0.50)) { rawclass = 6; }
+        // Explain the previous uncertainty veto without claiming a source or
+        // discarding the other bands. No threshold or matching score changes.
+        else if ((bestbands >= 2) && (max(bestband0, max(bestband1, bestband2)) > 0.50)) { rawclass = 10; }
+        nclassrun = rawclass == lastclass ? min(3, classrun + 1) : 1;
+        nlastclass = rawclass;
+        // Stabilize claims across three overlapping windows. These are not
+        // independent experiments; counters are diagnostic observations only.
+        nstate = ((rawclass == 5) || (rawclass == 6) || (rawclass == 10)) && (nclassrun < 3) ? 7 : rawclass;
+        npartial_reference_windows = min(1000000000, partial_reference_windows + (nstate == 10));
+        nband_reference_windows_low = min(1000000000, band_reference_windows_low + ((rawclass != 3) && (rawclass != 4) && (bestband0 > 0.50)));
+        nband_reference_windows_mid = min(1000000000, band_reference_windows_mid + ((rawclass != 3) && (rawclass != 4) && (bestband1 > 0.50)));
+        nband_reference_windows_high = min(1000000000, band_reference_windows_high + ((rawclass != 3) && (rawclass != 4) && (bestband2 > 0.50)));
+        nreferencewindows = referencewindows + (nstate == 5);
+        ndistinctwindows = distinctwindows + (nstate == 6);
+        nuncertainwindows = uncertainwindows + (nstate == 7);
+        nhop = 0;
+    }
+    nwritepos = writepos >= 255 ? 0 : writepos + 1;
+    nframesamples = 0;
+    nmsum0 = 0;
+    nrsum0 = 0;
+    nmsum1 = 0;
+    nrsum1 = 0;
+    nmsum2 = 0;
+    nrsum2 = 0;
+    nrlframe0 = 0; nrlframe1 = 0; nrlframe2 = 0;
+    nrrframe0 = 0; nrrframe1 = 0; nrrframe2 = 0;
+    nrmframe0 = 0; nrmframe1 = 0; nrmframe2 = 0;
+}
+// Only a newly completed one-second comparison can update a phase.
+// The existing comparison path and its first 86 outputs are not modified.
+if (!resetnow && !bgnewrequest && (nbgstate == 2)) {
+    if (bgstate == 1) { ntestphase = 1; }
+    testwindowstart = clock - nbgcmpframes * framelen + 1;
+    if (nbgcmpwindows > bgcmpwindows) {
+        if (ntestphase == 1) {
+            nmutedwindows = mutedwindows + 1;
+            nmutedwithin = mutedwithin + (nbgcmpstate == 2);
+            nmutedabove = mutedabove + (nbgcmpstate == 3);
+            nmuteduncertain = muteduncertain + (nbgcmpstate == 4);
+            nmutedstart = mutedwindows == 0 ? testwindowstart : mutedstart;
+            nmutedend = clock;
+            nmutedmean0 = mutedmean0 + (nbgcmplevel0 - mutedmean0) / nmutedwindows;
+            nmutedfraction0 = mutedfraction0 + (nbgcmpfraction0 - mutedfraction0) / nmutedwindows;
+            nmutedbandwindows0 = mutedbandwindows0 + (nbgcmpfraction0 >= 0.6);
+            nmutedmean1 = mutedmean1 + (nbgcmplevel1 - mutedmean1) / nmutedwindows;
+            nmutedfraction1 = mutedfraction1 + (nbgcmpfraction1 - mutedfraction1) / nmutedwindows;
+            nmutedbandwindows1 = mutedbandwindows1 + (nbgcmpfraction1 >= 0.6);
+            nmutedmean2 = mutedmean2 + (nbgcmplevel2 - mutedmean2) / nmutedwindows;
+            nmutedfraction2 = mutedfraction2 + (nbgcmpfraction2 - mutedfraction2) / nmutedwindows;
+            nmutedbandwindows2 = mutedbandwindows2 + (nbgcmpfraction2 >= 0.6);
+            if (nmutedwindows >= 10) { ntestphase = 2; }
+        }
+        if ((ntestphase == 4) && (testwindowstart >= ntestgate)) {
+            naudiblewindows = audiblewindows + 1;
+            naudiblewithin = audiblewithin + (nbgcmpstate == 2);
+            naudibleabove = audibleabove + (nbgcmpstate == 3);
+            naudibleuncertain = audibleuncertain + (nbgcmpstate == 4);
+            naudiblestart = audiblewindows == 0 ? testwindowstart : audiblestart;
+            naudibleend = clock;
+            naudiblemean0 = audiblemean0 + (nbgcmplevel0 - audiblemean0) / naudiblewindows;
+            naudiblefraction0 = audiblefraction0 + (nbgcmpfraction0 - audiblefraction0) / naudiblewindows;
+            naudiblebandwindows0 = audiblebandwindows0 + (nbgcmpfraction0 >= 0.6);
+            naudiblemean1 = audiblemean1 + (nbgcmplevel1 - audiblemean1) / naudiblewindows;
+            naudiblefraction1 = audiblefraction1 + (nbgcmpfraction1 - audiblefraction1) / naudiblewindows;
+            naudiblebandwindows1 = audiblebandwindows1 + (nbgcmpfraction1 >= 0.6);
+            naudiblemean2 = audiblemean2 + (nbgcmplevel2 - audiblemean2) / naudiblewindows;
+            naudiblefraction2 = audiblefraction2 + (nbgcmpfraction2 - audiblefraction2) / naudiblewindows;
+            naudiblebandwindows2 = audiblebandwindows2 + (nbgcmpfraction2 >= 0.6);
+            if (naudiblewindows >= 20) { ntestphase = 5; }
+        }
+    }
+}
+// Immediate revocation takes priority over any stored observation.
+outstate = nstate;
+if (ncliphold > 0) { outstate = 2; }
+else if (in5 != 1) { outstate = 0; }
+else if (sourcemode != 1) { outstate = 9; }
+else if (profilevalid != 1) { outstate = 8; }
+out1 = outstate;
+out2 = nmatch;
+out3 = ndistinct;
+out4 = ninputlevel;
+out5 = nreflevel;
+out6 = nfilled >= 64 + max(rdelay, mdelay) ? 60 * framems : 0;
+out7 = nactivity;
+out8 = in6;
+// Deliberately never promote quality: unrelated sound can also be noise.
+out9 = 0;
+out10 = nreferencewindows;
+out11 = ndistinctwindows;
+out12 = nuncertainwindows;
+// Diagnostic histories below span contexts; they are not current evidence.
+out13 = nfilled;
+out14 = nframesamples;
+out15 = nrunlength * 1000 / samplerate;
+out16 = nlongestrun * 1000 / samplerate;
+out17 = nlastreason;
+out18 = nresetepisodes;
+out19 = nwindowscomputed;
+out20 = nepochchanges;
+out21 = noffsetchanges;
+out22 = npermitlosses;
+out23 = nprofilechanges;
+out24 = nmodechanges;
+out25 = clock;
+// Descriptive scores for the chosen fixed view, not confidence or voice SNR.
+out26 = nmodel;
+out27 = nlagms;
+out28 = nbandmatch0;
+out29 = nbandmatch1;
+out30 = nbandmatch2;
+out31 = nusablebands;
+out32 = nmicvariationindex;
+out33 = npeakmatch;
+out34 = nband_input_level_low;
+out35 = nband_input_level_mid;
+out36 = nband_input_level_high;
+out37 = nband_reference_level_low;
+out38 = nband_reference_level_mid;
+out39 = nband_reference_level_high;
+out40 = nband_input_variation_low;
+out41 = nband_input_variation_mid;
+out42 = nband_input_variation_high;
+out43 = nband_reference_variation_low;
+out44 = nband_reference_variation_mid;
+out45 = nband_reference_variation_high;
+out46 = nband_weight_low;
+out47 = nband_weight_mid;
+out48 = nband_weight_high;
+out49 = nusable_band_mask;
+out50 = nreference_supported_band_mask;
+out51 = npartial_reference_windows;
+out52 = nband_reference_windows_low;
+out53 = nband_reference_windows_mid;
+out54 = nband_reference_windows_high;
+// Background fields stay separate from current comparison evidence.
+out55 = nbgstate;
+out56 = nbgrequest;
+out57 = nbgcount;
+out58 = nbgcount * framelen * 1000 / samplerate;
+out59 = nbgmean0;
+out60 = nbgmean1;
+out61 = nbgmean2;
+out62 = max(0, nbgm20 / max(1, nbgcount));
+out63 = max(0, nbgm21 / max(1, nbgcount));
+out64 = max(0, nbgm22 / max(1, nbgcount));
+// Independent completed comparison window, never a voice/SNR estimate.
+out65 = nbgcmpstate;
+out66 = nbgcmpframes;
+out67 = nbgcmpframes * framelen * 1000 / samplerate;
+out68 = nbgcmpwindows;
+out69 = nbgcmpmask;
+out70 = nbgcmpend;
+out71 = nbgcmplevel0;
+out72 = nbgcmplevel1;
+out73 = nbgcmplevel2;
+out74 = nbgstate == 2 ? bgcmplimit0 : 0;
+out75 = nbgstate == 2 ? bgcmplimit1 : 0;
+out76 = nbgstate == 2 ? bgcmplimit2 : 0;
+out77 = nbgcmpfraction0;
+out78 = nbgcmpfraction1;
+out79 = nbgcmpfraction2;
+out80 = nbgcmpframes > 0 ? (nbgmean0 > 0.00000001) + 2 * (nbgmean1 > 0.00000001) + 4 * (nbgmean2 > 0.00000001) : 0;
+out81 = (nbgcmpframes > 0) && (nbgmean0 > 0.00000001) ? nbgcmplevel0 / max(0.00000001, nbgmean0) : 0;
+out82 = (nbgcmpframes > 0) && (nbgmean1 > 0.00000001) ? nbgcmplevel1 / max(0.00000001, nbgmean1) : 0;
+out83 = (nbgcmpframes > 0) && (nbgmean2 > 0.00000001) ? nbgcmplevel2 / max(0.00000001, nbgmean2) : 0;
+out84 = nbgcmpwithin;
+out85 = nbgcmpabove;
+out86 = nbgcmpuncertain;
+// Phase summaries are frozen on completion and revoked on context loss.
+out87 = ntestphase;
+out88 = ntestrequest;
+out89 = ntestgate;
+out90 = (nmutedwindows >= 10) + 2 * (naudiblewindows >= 20);
+out91 = nmutedwindows;
+out92 = nmutedwindows * nbgcmpframes * framelen * 1000 / samplerate;
+out93 = nmutedwithin;
+out94 = nmutedabove;
+out95 = nmuteduncertain;
+out96 = nmutedstart;
+out97 = nmutedend;
+out98 = nmutedmean0;
+out99 = nmutedmean1;
+out100 = nmutedmean2;
+out101 = nmutedfraction0;
+out102 = nmutedfraction1;
+out103 = nmutedfraction2;
+out104 = nmutedbandwindows0;
+out105 = nmutedbandwindows1;
+out106 = nmutedbandwindows2;
+out107 = naudiblewindows;
+out108 = naudiblewindows * nbgcmpframes * framelen * 1000 / samplerate;
+out109 = naudiblewithin;
+out110 = naudibleabove;
+out111 = naudibleuncertain;
+out112 = naudiblestart;
+out113 = naudibleend;
+out114 = naudiblemean0;
+out115 = naudiblemean1;
+out116 = naudiblemean2;
+out117 = naudiblefraction0;
+out118 = naudiblefraction1;
+out119 = naudiblefraction2;
+out120 = naudiblebandwindows0;
+out121 = naudiblebandwindows1;
+out122 = naudiblebandwindows2;
+testphase = ntestphase;
+testrequest = ntestrequest;
+testgate = ntestgate;
+mutedwindows = nmutedwindows;
+mutedwithin = nmutedwithin;
+mutedabove = nmutedabove;
+muteduncertain = nmuteduncertain;
+mutedstart = nmutedstart;
+mutedend = nmutedend;
+mutedmean0 = nmutedmean0;
+mutedfraction0 = nmutedfraction0;
+mutedbandwindows0 = nmutedbandwindows0;
+mutedmean1 = nmutedmean1;
+mutedfraction1 = nmutedfraction1;
+mutedbandwindows1 = nmutedbandwindows1;
+mutedmean2 = nmutedmean2;
+mutedfraction2 = nmutedfraction2;
+mutedbandwindows2 = nmutedbandwindows2;
+audiblewindows = naudiblewindows;
+audiblewithin = naudiblewithin;
+audibleabove = naudibleabove;
+audibleuncertain = naudibleuncertain;
+audiblestart = naudiblestart;
+audibleend = naudibleend;
+audiblemean0 = naudiblemean0;
+audiblefraction0 = naudiblefraction0;
+audiblebandwindows0 = naudiblebandwindows0;
+audiblemean1 = naudiblemean1;
+audiblefraction1 = naudiblefraction1;
+audiblebandwindows1 = naudiblebandwindows1;
+audiblemean2 = naudiblemean2;
+audiblefraction2 = naudiblefraction2;
+audiblebandwindows2 = naudiblebandwindows2;
+bgcmpstate = nbgcmpstate;
+bgcmpcount = nbgcmpcount;
+bgcmpframes = nbgcmpframes;
+bgcmpwindows = nbgcmpwindows;
+bgcmpmask = nbgcmpmask;
+bgcmpend = nbgcmpend;
+bgcmpwithin = nbgcmpwithin;
+bgcmpabove = nbgcmpabove;
+bgcmpuncertain = nbgcmpuncertain;
+bgcmpsum0 = nbgcmpsum0;
+bgcmpexceed0 = nbgcmpexceed0;
+bgcmplevel0 = nbgcmplevel0;
+bgcmpfraction0 = nbgcmpfraction0;
+bgcmpsum1 = nbgcmpsum1;
+bgcmpexceed1 = nbgcmpexceed1;
+bgcmplevel1 = nbgcmplevel1;
+bgcmpfraction1 = nbgcmpfraction1;
+bgcmpsum2 = nbgcmpsum2;
+bgcmpexceed2 = nbgcmpexceed2;
+bgcmplevel2 = nbgcmplevel2;
+bgcmpfraction2 = nbgcmpfraction2;
+bgstate = nbgstate;
+bgrequest = nbgrequest;
+bgcount = nbgcount;
+bgskipframe = nbgskipframe;
+bgmean0 = nbgmean0;
+bgmean1 = nbgmean1;
+bgmean2 = nbgmean2;
+bgm20 = nbgm20;
+bgm21 = nbgm21;
+bgm22 = nbgm22;
+lastepoch = in6;
+lastoffset = offsetchanged ? in7 : lastoffset;
+lastprofile = profilevalid;
+lastmode = sourcemode;
+framesamples = nframesamples;
+writepos = nwritepos;
+filled = nfilled;
+hop = nhop;
+state = nstate;
+match = nmatch;
+distinct = ndistinct;
+inputlevel = ninputlevel;
+reflevel = nreflevel;
+activity = nactivity;
+bestmodel = nmodel;
+bestlagms = nlagms;
+bandmatch0 = nbandmatch0;
+bandmatch1 = nbandmatch1;
+bandmatch2 = nbandmatch2;
+usablebands = nusablebands;
+micvariationindex = nmicvariationindex;
+peakmatch = npeakmatch;
+band_input_level_low = nband_input_level_low;
+band_input_level_mid = nband_input_level_mid;
+band_input_level_high = nband_input_level_high;
+band_reference_level_low = nband_reference_level_low;
+band_reference_level_mid = nband_reference_level_mid;
+band_reference_level_high = nband_reference_level_high;
+band_input_variation_low = nband_input_variation_low;
+band_input_variation_mid = nband_input_variation_mid;
+band_input_variation_high = nband_input_variation_high;
+band_reference_variation_low = nband_reference_variation_low;
+band_reference_variation_mid = nband_reference_variation_mid;
+band_reference_variation_high = nband_reference_variation_high;
+band_weight_low = nband_weight_low;
+band_weight_mid = nband_weight_mid;
+band_weight_high = nband_weight_high;
+usable_band_mask = nusable_band_mask;
+reference_supported_band_mask = nreference_supported_band_mask;
+partial_reference_windows = npartial_reference_windows;
+band_reference_windows_low = nband_reference_windows_low;
+band_reference_windows_mid = nband_reference_windows_mid;
+band_reference_windows_high = nband_reference_windows_high;
+lastclass = nlastclass;
+classrun = nclassrun;
+cliphold = ncliphold;
+referencewindows = nreferencewindows;
+distinctwindows = ndistinctwindows;
+uncertainwindows = nuncertainwindows;
+runlength = nrunlength;
+longestrun = nlongestrun;
+resetepisodes = nresetepisodes;
+previousreset = resetnow;
+lastreason = nlastreason;
+windowscomputed = nwindowscomputed;
+epochchanges = nepochchanges;
+offsetchanges = noffsetchanges;
+permitlosses = npermitlosses;
+profilechanges = nprofilechanges;
+modechanges = nmodechanges;
+lastpermit = in5;
+clock = clock + 1;
+mldc = nmldc;
+mllow = nmllow;
+mlupper = nmlupper;
+mrdc = nmrdc;
+mrlow = nmrlow;
+mrupper = nmrupper;
+rldc = nrldc;
+rllow = nrllow;
+rlupper = nrlupper;
+rrdc = nrrdc;
+rrlow = nrrlow;
+rrupper = nrrupper;
+rmdc = nrmdc;
+rmlow = nrmlow;
+rmupper = nrmupper;
+rlframe0 = nrlframe0; rlframe1 = nrlframe1; rlframe2 = nrlframe2;
+rrframe0 = nrrframe0; rrframe1 = nrrframe1; rrframe2 = nrrframe2;
+rmframe0 = nrmframe0; rmframe1 = nrmframe1; rmframe2 = nrmframe2;
+msum0 = nmsum0;
+rsum0 = nrsum0;
+msum1 = nmsum1;
+rsum1 = nrsum1;
+msum2 = nmsum2;
+rsum2 = nrsum2;
+
+// Context passed to the lightweight result keeper, below the observed failing port range.
+out123 = sourcemode;
+out124 = profilevalid;
+
+// Joint categories and threshold occupancy over the exact matched 60 frames.
+// The 128th outlet is intentionally not used.
+out125 = njointend;
+out126 = njointcodes;
+out127 = njointcounts;
+jointbaselineend = njointbaselineend;
+jointend = njointend;
+jointcodes = njointcodes;
+jointcounts = njointcounts;

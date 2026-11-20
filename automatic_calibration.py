@@ -76,3 +76,63 @@ def apply_automatic_parent(p):
     p.obj('ac-nonzero','expr ($f1 < -0.000001) || ($f1 > 0.000001)')
     p.obj('ac-manual-valid','sel 1',1,2);p.wire('control-route','ac-nonzero',5)
     p.wire('ac-nonzero','ac-manual-valid');p.wire('ac-manual-valid','ac-mark-valid')
+
+
+def add_diagnostic_calibration_retries(p):
+    """Give the diagnostic up to three automatic requests per playback/context."""
+    p.obj('ac-attempt-count', 'i 0', 2, 1)
+    p.obj('ac-increment-attempt', '+ 1', 2, 1)
+    p.obj('ac-retry-available', 'expr $i1 < 3', 1, 1)
+    p.wire('ac-launch', 'ac-attempt-count', 2)
+    p.wire('ac-attempt-count', 'ac-increment-attempt')
+    p.wire('ac-increment-attempt', 'ac-attempt-count', 0, 1)
+    p.wire('ac-increment-attempt', 'ac-retry-available')
+    p.wire('ac-retry', 'ac-attempt-count', 0, 1)
+    p.wire('ac-retry', 'ac-retry-available')
+
+    # A terminal event may rearm only a measurement started by the automatic
+    # scheduler. Read its ownership before clearing it for the next request.
+    p.obj('ac-failure', 't b b', 1, 2)
+    for wrapped in p.p['lines']:
+        line = wrapped['patchline']
+        if line['source'][0] == 'lat-terminal' and line['destination'] == ['ac-inactive', 0]:
+            line['destination'] = ['ac-failure', 0]
+    p.wire('ac-failure', 'ac-inactive')
+    p.obj('ac-failure-owner', 'gate 1 0', 2, 1)
+    p.wire('ac-active', 'ac-failure-owner')
+    p.wire('ac-inactive', 'ac-failure-owner')
+    p.wire('ac-failure', 'ac-failure-owner', 1, 1)
+    p.obj('ac-failure-budget', 'gate 1 0', 2, 1)
+    p.wire('ac-failure-owner', 'ac-failure-budget', 0, 1)
+    p.wire('ac-retry-available', 'ac-failure-budget')
+    p.obj('ac-retry-delay', 'delay 3000', 2, 1)
+    p.wire('ac-failure-budget', 'ac-retry-delay')
+    p.msg('ac-rearm', '0')
+    p.wire('ac-retry-delay', 'ac-rearm')
+    p.wire('ac-rearm', 'ac-state', 0, 5)
+    p.msg('ac-stop-retry', 'stop')
+    for source, outlet in (('ac-retry', 0), ('ac-manual', 1), ('lat-commit-applied', 0)):
+        p.wire(source, 'ac-stop-retry', outlet)
+    p.wire('ac-stop-retry', 'ac-retry-delay')
+
+    for kind, source, outlet in (('automatic', 'ac-launch', 0), ('manual', 'ac-manual', 0)):
+        count = 'ac-'+kind+'-requests'
+        p.obj(count, 'counter 1 1000000000', 5, 4)
+        p.wire(source, count, outlet)
+        p.obj(count+'-store', 'i 0', 2, 1)
+        p.wire(count, count+'-store')
+        p.wire('aq-export-capture', count+'-store', 7)
+    for key, source, outlet in (
+            ('automatic_requests', 'ac-automatic-requests-store', 0),
+            ('manual_requests', 'ac-manual-requests-store', 0),
+            ('automatic_enabled', 'ac-control', 0),
+            ('status', 'lat-status-tag', 0),
+            ('reason', 'lat-snapshot-5', 0)):
+        node = 'ac-report-'+key
+        if key == 'status':
+            p.obj('ac-report-status-route', 'route latencystatus', 1, 2)
+            p.wire(source, 'ac-report-status-route', outlet)
+            source = 'ac-report-status-route'
+        p.obj(node, 'prepend replace calibration_'+key)
+        p.wire(source, node, outlet)
+        p.wire(node, 'asrc-report')

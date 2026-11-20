@@ -1,0 +1,94 @@
+// Read-only 100 BPM reference for four attacks, 1500 ms apart.
+// in1 stage, in2 mode, in3 phase, in4 period, in5 sync, in6 probe permit,
+// in7 sample clock, in8 attack pulse, in9 attack ms, in10 compensation,
+// in11 energy detector state, in12 possible attack pulse during a clip-only pause,
+// in13/14 the possible attack's clock and compensation; in15..17 clip-only
+// pause, last clipped-input mask and current clipping mask (private test).
+// out1 state, out2 event, out3 reference ms, out4 attack ms, out5 slot,
+// out6 valid context, out7 unique slot, out8 visual cue, out9 anchor after prompt ms.
+// out10 possible attack pulse, out11 its deviation from the associated slot;
+// out12 current review context, including a microphone-only clip pause.
+Param secondcuedelayms(0);
+History state(0);
+History anchorSample(0);
+History promptSample(0);
+History previousStage(0);
+
+stage = in1;
+firstms = 1800;
+spacingms = 1500;
+correctTempo = abs(in4 - 600) <= 0.12;
+beatSamples = samplerate * 0.6;
+relative = in7 - anchorSample;
+phaseDifference = in3 - relative / beatSamples;
+phaseError = abs(phaseDifference - floor(phaseDifference + 0.5)) * 600;
+nextState = state;
+nextAnchor = anchorSample;
+nextPrompt = ((stage == 3) && (previousStage != 3)) ? in7 : promptSample;
+
+if (in2 != 2) {
+    nextState = 0;
+} else if (stage == 1) {
+    nextState = 1;
+    nextAnchor = 0;
+} else if (stage == 6) {
+    nextState = 6;
+} else if (stage == 3) {
+    if ((state == 1) && (in6 == 1) && correctTempo && (in3 >= 0) && (in3 <= 0.04)) {
+        nextAnchor = in7 - floor(in3 * beatSamples + 0.5);
+        nextState = 2;
+    } else if ((state == 2) && ((in5 != 1) || !correctTempo || (phaseError > 4))) {
+        nextState = 6;
+    }
+} else if ((stage == 5) && (state != 5)) {
+    nextState = (state == 2) && (in11 == 2) ? 5 : 6;
+}
+
+active = (stage == 3) && (state == 2) && (nextState == 2) && (in11 == 2);
+micPause = (in15 == 1) && (in16 == 1) && (in17 <= 1);
+reviewContext = active && ((in6 == 1) || micPause);
+event = reviewContext && (in8 == 1);
+possible = active && !event && (in12 == 1) && (in6 == 0);
+observed = (possible ? in13 - in14 : in9 - in10) - nextAnchor * 1000 / samplerate;
+index = floor((observed - firstms) / spacingms + 0.5);
+target = firstms + spacingms * index;
+unique = (index >= 0) && (index < 4) && (abs(observed - target) <= 240);
+
+// Count in 300 ms steps and slightly lead the marker to allow for UI polling.
+cue = 0;
+if ((stage == 3) && (nextState == 1)) { cue = 9; }
+else if ((stage == 3) && (nextState == 2)) {
+    elapsedMs = (in7 - nextAnchor) * 1000 / samplerate;
+    upcoming = floor((elapsedMs - firstms - 170) / spacingms) + 1;
+    upcoming = clamp(upcoming, 0, 4);
+    // In the private test, deliberately cue the second TA late while keeping
+    // its scoring reference fixed. Hold the marker long enough to display it.
+    secondDelay = clamp(secondcuedelayms, 0, 220);
+    secondTarget = firstms + spacingms;
+    if ((elapsedMs >= secondTarget) && (elapsedMs < secondTarget + 170 + secondDelay)) {
+        upcoming = 1;
+    }
+    untilMs = firstms + spacingms * upcoming - elapsedMs + (upcoming == 1 ? secondDelay : 0);
+    countdown = untilMs > 600 ? 0 : (untilMs > 300 ? 1 : 2);
+    if (upcoming >= 4) { cue = 10; }
+    else if (untilMs <= 25) { cue = 5 + upcoming; }
+    else if (untilMs > 900) { cue = 1 + upcoming; }
+    else { cue = 12 + 3 * upcoming + countdown; }
+} else if (nextState == 6) { cue = 11; }
+
+out1 = nextState;
+out2 = event;
+out3 = target;
+out4 = observed;
+out5 = (event || possible) && unique ? index + 1 : 0;
+out6 = active;
+out7 = unique;
+out8 = cue;
+out9 = (nextState == 2) || (nextState == 5) ? (nextAnchor - nextPrompt) * 1000 / samplerate : 0;
+out10 = possible;
+out11 = possible && unique ? observed - target : 0;
+out12 = reviewContext;
+state = nextState;
+anchorSample = nextAnchor;
+promptSample = nextPrompt;
+previousStage = stage;

@@ -1,0 +1,78 @@
+// Retain the first 12 timing measurements in the guided speaking interval.
+// in1 grid event, in2 signed grid distance, in3 microphone onset clock (ms),
+// in4 current sample clock, in5 guided stage, in6 baseline state.
+// out1 retained count, out2 overflow, out3..14 onset time relative to prompt,
+// out15..26 signed grid distance. Use only the first out1 entries.
+Data onsetTimes(12);
+Data gridDistances(12);
+History count(0);
+History speechStart(0);
+History previousStage(0);
+
+stage = in5;
+stageChanged = stage != previousStage;
+clearLog = (stageChanged && ((stage == 1) || (stage == 2))) || (stage == 6) || (in6 == 3);
+nStart = (stageChanged && (stage == 3)) ? in4 * 1000 / samplerate : speechStart;
+nCount = clearLog ? 0 : count;
+if (!clearLog && (stage == 3) && (in6 == 2) && (in1 == 1)) {
+    if (count < 12) {
+        poke(onsetTimes, in3 - nStart, count);
+        poke(gridDistances, in2, count);
+    }
+    nCount = count + 1;
+}
+
+time0 = peek(onsetTimes, 0);
+time1 = peek(onsetTimes, 1);
+time2 = peek(onsetTimes, 2);
+time3 = peek(onsetTimes, 3);
+time4 = peek(onsetTimes, 4);
+time5 = peek(onsetTimes, 5);
+time6 = peek(onsetTimes, 6);
+time7 = peek(onsetTimes, 7);
+time8 = peek(onsetTimes, 8);
+time9 = peek(onsetTimes, 9);
+time10 = peek(onsetTimes, 10);
+time11 = peek(onsetTimes, 11);
+delta0 = peek(gridDistances, 0);
+delta1 = peek(gridDistances, 1);
+delta2 = peek(gridDistances, 2);
+delta3 = peek(gridDistances, 3);
+delta4 = peek(gridDistances, 4);
+delta5 = peek(gridDistances, 5);
+delta6 = peek(gridDistances, 6);
+delta7 = peek(gridDistances, 7);
+delta8 = peek(gridDistances, 8);
+delta9 = peek(gridDistances, 9);
+delta10 = peek(gridDistances, 10);
+delta11 = peek(gridDistances, 11);
+
+out1 = min(12, nCount);
+out2 = max(0, nCount - 12);
+out3 = nCount > 0 ? time0 : 0;
+out4 = nCount > 1 ? time1 : 0;
+out5 = nCount > 2 ? time2 : 0;
+out6 = nCount > 3 ? time3 : 0;
+out7 = nCount > 4 ? time4 : 0;
+out8 = nCount > 5 ? time5 : 0;
+out9 = nCount > 6 ? time6 : 0;
+out10 = nCount > 7 ? time7 : 0;
+out11 = nCount > 8 ? time8 : 0;
+out12 = nCount > 9 ? time9 : 0;
+out13 = nCount > 10 ? time10 : 0;
+out14 = nCount > 11 ? time11 : 0;
+out15 = nCount > 0 ? delta0 : 0;
+out16 = nCount > 1 ? delta1 : 0;
+out17 = nCount > 2 ? delta2 : 0;
+out18 = nCount > 3 ? delta3 : 0;
+out19 = nCount > 4 ? delta4 : 0;
+out20 = nCount > 5 ? delta5 : 0;
+out21 = nCount > 6 ? delta6 : 0;
+out22 = nCount > 7 ? delta7 : 0;
+out23 = nCount > 8 ? delta8 : 0;
+out24 = nCount > 9 ? delta9 : 0;
+out25 = nCount > 10 ? delta10 : 0;
+out26 = nCount > 11 ? delta11 : 0;
+count = nCount;
+speechStart = nStart;
+previousStage = stage;

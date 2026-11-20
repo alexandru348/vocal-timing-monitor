@@ -165,6 +165,23 @@ class Graph:
             return
         if op == 'zl' and words[1:] == ['rev']:
             self.emit(id,tuple(reversed(msg)));return
+        if op == 'zl' and words[1] in ('compare', 'join'):
+            if inlet == 1:
+                s['right'] = msg
+                return
+            right = s.get('right', ())
+            self.emit(id, (int(msg == right),) if words[1] == 'compare' else msg + right)
+            return
+        if op == 'zl' and words[1] in ('slice', 'len'):
+            if words[1] == 'len':
+                self.emit(id, (len(msg),))
+            else:
+                left, right = msg[:int(words[2])], msg[int(words[2]):]
+                if right:
+                    self.emit(id, right, 1)
+                if left:
+                    self.emit(id, left)
+            return
         if op == 'pattr':
             if '@bindto' in words:
                 target=words[words.index('@bindto')+1]
@@ -339,8 +356,12 @@ class Graph:
             attrs=b.get('saved_attribute_attributes',{}).get('valueof',{})
             if not parameter_enabled(b) or attrs.get('parameter_invisible')!=1:continue
             name=attrs['parameter_longname']
-            default=attrs.get('parameter_initial',b.get('restore',[0]))
-            value=saved.get(name,default[0])
+            # A patcher's pattr restore payload is NOT a Live parameter initial
+            # value. In particular @autorestore 0 cannot seed a fresh Blob from
+            # that payload. Saved host parameters still take precedence.
+            initial=attrs.get('parameter_initial',[0]) if attrs.get('parameter_initial_enable') else [0]
+            default=tuple(initial) if attrs.get('parameter_type')==3 else initial[0]
+            value=saved.get(name,default)
             self.send(id,tuple(value) if isinstance(value,(tuple,list)) else (value,))
 
     def saved_parameters(self):

@@ -1,0 +1,173 @@
+// Diagnostic evidence of a voiced sound following a clean short-frame onset.
+// in1/2 mic channels; in3/4 guided stage and onset detector state;
+// in5/6 timing permit and clip-only pause; in7 last clipped input mask;
+// in8..12 onset pulse, phase, period, offset, and clock in ms.
+// out1..5 voiced pulse and original onset metadata; out6 unconfirmed count;
+// out7 voiced events with microphone clipping during confirmation;
+// out8 voiced pulse supported by clean samples, eligible for further review.
+Param maskrails(0);
+Data leftAudio(256);
+Data rightAudio(256);
+Data leftClean(256);
+Data rightClean(256);
+Data correlations(96);
+History leftLow(0);
+History rightLow(0);
+History leftHigh(0);
+History rightHigh(0);
+History writeIndex(0);
+History elapsed(0);
+History checkAt(0);
+History pending(0);
+History previousLag(0);
+History sawClip(0);
+History onsetPhase(0);
+History onsetPeriod(0);
+History onsetOffset(0);
+History onsetClock(0);
+History unconfirmed(0);
+History voicedWithClip(0);
+
+stage = in3;
+resetResults = (stage <= 2) || (stage == 6) || (in4 == 3);
+micClipPause = (in6 == 1) && (in7 == 1);
+valid = (stage == 3) && (in4 == 2) && ((in5 == 1) || micClipPause);
+newAttack = valid && (in5 == 1) && (in8 == 1);
+hop = max(1, floor(samplerate / 4000 + 0.5));
+rate = samplerate / hop;
+span = floor(0.026 * rate + 0.5);
+minLag = -floor(-rate / 440);
+maxLag = floor(rate / 80);
+firstCheck = floor(0.042 * rate + 0.5) * hop;
+checkStep = floor(0.012 * rate + 0.5) * hop;
+evidenceEnd = firstCheck + 7 * checkStep;
+
+nPending = valid && (newAttack || pending);
+nElapsed = newAttack ? 0 : elapsed + 1;
+nWrite = newAttack ? 0 : writeIndex;
+nCheck = newAttack ? firstCheck : checkAt;
+nLag = newAttack ? 0 : previousLag;
+nClip = newAttack ? 0 : (sawClip || micClipPause);
+nUnconfirmed = resetResults ? 0 : unconfirmed + (pending && (!valid || newAttack));
+nVoicedWithClip = resetResults ? 0 : voicedWithClip;
+voiced = 0;
+
+lowMix = 1 - exp(-6.28318530718 * 85 / samplerate);
+highMix = 1 - exp(-6.28318530718 * 1100 / samplerate);
+nLeftLow = newAttack ? 0 : leftLow;
+nRightLow = newAttack ? 0 : rightLow;
+nLeftHigh = newAttack ? 0 : leftHigh;
+nRightHigh = newAttack ? 0 : rightHigh;
+if (nPending) {
+    nLeftLow += lowMix * (in1 - nLeftLow);
+    nRightLow += lowMix * (in2 - nRightLow);
+    nLeftHigh += highMix * (in1 - nLeftHigh);
+    nRightHigh += highMix * (in2 - nRightHigh);
+    if (nElapsed == floor(nElapsed / hop) * hop) {
+        poke(leftAudio, nLeftHigh - nLeftLow, nWrite);
+        poke(rightAudio, nRightHigh - nRightLow, nWrite);
+        if (maskrails == 1) {
+            poke(leftClean, abs(in1) < 0.995, nWrite);
+            poke(rightClean, abs(in2) < 0.995, nWrite);
+        }
+        if (nElapsed == nCheck) {
+            // Use the clearer stereo channel without cancelling opposite phases.
+            leftPower = 0;
+            rightPower = 0;
+            for (i = 0; i < span; i += 1) {
+                pos = nWrite - i;
+                index = pos < 0 ? pos + 256 : pos;
+                left = peek(leftAudio, index);
+                right = peek(rightAudio, index);
+                cleanLeft = 1;
+                cleanRight = 1;
+                if (maskrails == 1) {
+                    cleanLeft = peek(leftClean, index);
+                    cleanRight = peek(rightClean, index);
+                }
+                leftPower += cleanLeft * left * left;
+                rightPower += cleanRight * right * right;
+            }
+            useLeft = leftPower >= rightPower;
+            strongest = 0;
+            for (lag = minLag - 1; lag <= maxLag + 1; lag += 1) {
+                dot = 0;
+                olderPower = 0;
+                recentPower = 0;
+                pairs = 0;
+                for (i = 0; i < span; i += 1) {
+                    pos = nWrite - i;
+                    earlier = pos - lag;
+                    index = pos < 0 ? pos + 256 : pos;
+                    oldIndex = earlier < 0 ? earlier + 256 : earlier;
+                    left = peek(leftAudio, index);
+                    right = peek(rightAudio, index);
+                    oldLeft = peek(leftAudio, oldIndex);
+                    oldRight = peek(rightAudio, oldIndex);
+                    recent = useLeft ? left : right;
+                    older = useLeft ? oldLeft : oldRight;
+                    keep = 1;
+                    if (maskrails == 1) {
+                        leftHere = peek(leftClean, index);
+                        leftThere = peek(leftClean, oldIndex);
+                        rightHere = peek(rightClean, index);
+                        rightThere = peek(rightClean, oldIndex);
+                        keep = useLeft ? leftHere * leftThere : rightHere * rightThere;
+                    }
+                    dot += keep * recent * older;
+                    olderPower += keep * older * older;
+                    recentPower += keep * recent * recent;
+                    pairs += keep;
+                }
+                audible = (pairs >= 0.60 * span) && (min(recentPower, olderPower) >= span * 0.004 * 0.004);
+                comparable = min(recentPower, olderPower) >= 0.15 * max(recentPower, olderPower);
+                score = audible && comparable ? dot / sqrt(max(1e-12, recentPower * olderPower)) : 0;
+                poke(correlations, score, lag);
+                if ((lag >= minLag) && (lag <= maxLag)) { strongest = max(strongest, score); }
+            }
+            // Prefer the shortest strong peak to avoid doubling a pitch period.
+            chosen = 0;
+            for (lag = minLag; lag <= maxLag; lag += 1) {
+                score = peek(correlations, lag);
+                before = peek(correlations, lag - 1);
+                after = peek(correlations, lag + 1);
+                peak = (score >= before) && (score > after);
+                if ((chosen == 0) && peak && (score >= max(0.80, strongest - 0.09))) { chosen = lag; }
+            }
+            voiced = (chosen > 0) && (nLag > 0) && (abs(chosen - nLag) <= 0.15 * nLag);
+            nLag = chosen;
+            nCheck += checkStep;
+            if (voiced || (nElapsed == evidenceEnd)) {
+                nPending = 0;
+                nUnconfirmed += !voiced;
+                nVoicedWithClip += voiced && nClip;
+            }
+        }
+        nWrite = nWrite == 255 ? 0 : nWrite + 1;
+    }
+}
+
+out1 = voiced;
+out2 = onsetPhase;
+out3 = onsetPeriod;
+out4 = onsetOffset;
+out5 = onsetClock;
+out6 = nUnconfirmed;
+out7 = nVoicedWithClip;
+out8 = voiced && (!nClip || (maskrails == 1));
+leftLow = nLeftLow;
+rightLow = nRightLow;
+leftHigh = nLeftHigh;
+rightHigh = nRightHigh;
+writeIndex = nWrite;
+elapsed = nPending ? nElapsed : 0;
+checkAt = nCheck;
+pending = nPending;
+previousLag = nLag;
+sawClip = nClip;
+onsetPhase = newAttack ? in9 : onsetPhase;
+onsetPeriod = newAttack ? in10 : onsetPeriod;
+onsetOffset = newAttack ? in11 : onsetOffset;
+onsetClock = newAttack ? in12 : onsetClock;
+unconfirmed = nUnconfirmed;
+voicedWithClip = nVoicedWithClip;

@@ -1,0 +1,238 @@
+// Assistant stage 1: diagnostic onset candidates, NOT musical verdicts.
+// in1/in2 = unprocessed stereo input; in3 = Live quarter-note plugphasor~.
+// Native mode uses preflight phase, permit, epoch, period and offset (in3..7).
+// Two complementary cues: frame energy rise and coarse band redistribution.
+// The latter is a three-band approximation, not FFT spectral flux.
+// No voice identification, bleed rejection, confidence probability or Stop.
+Param enabled(1);
+Param gateamp(0.006);
+Param minintervalms(60);
+Param resetseq(0);
+Param hostcontext(0);
+History prevphase(0);
+History validrun(0);
+History clock(0);
+History previousenabled(1);
+History lastresetseq(0);
+History lowleft(0);
+History lowright(0);
+History midleft(0);
+History midright(0);
+History framesamples(0);
+History lowtotal(0);
+History midtotal(0);
+History hightotal(0);
+History framemax(0);
+History frameclipped(0);
+History previousenergy(0);
+History previouslow(0);
+History previousmid(0);
+History previoushigh(0);
+History primed(0);
+History armed(1);
+History pending(0);
+History pendingtime(0);
+History pendingcue(0);
+History pendingclip(0);
+History cooldown(0);
+History total(0);
+History lasttime(0);
+History lastcue(0);
+History lastclip(0);
+History framelevel(0);
+History bandchange(0);
+History lastepoch(0);
+History framephase(0);
+History frameperiod(0);
+History frameoffset(0);
+History pendingphase(0);
+History pendingperiod(0);
+History pendingoffset(0);
+
+phase = clamp(in3, 0, 1);
+pd = phase - prevphase;
+inc = pd < -0.5 ? pd + 1 : pd;
+clockok = (inc >= 19.8 / (60 * samplerate)) && (inc <= 404 / (60 * samplerate));
+nvalid = clockok ? min(validrun + 1, samplerate) : 0;
+synced = hostcontext == 1 ? (in4 == 1) : (nvalid >= samplerate * 0.010);
+operating = (enabled > 0) && synced;
+resetnow = (resetseq != lastresetseq) || (enabled != previousenabled);
+contextchanged = (hostcontext == 1) && (in5 != lastepoch);
+
+// Independent channels; summing stereo samples could cancel an inverted input.
+c400 = exp(-6.28318530718 * 400 / samplerate);
+c1800 = exp(-6.28318530718 * 1800 / samplerate);
+nlowleft = in1 + c400 * (lowleft - in1);
+nlowright = in2 + c400 * (lowright - in2);
+nmidleft = in1 + c1800 * (midleft - in1);
+nmidright = in2 + c1800 * (midright - in2);
+low = max(abs(nlowleft), abs(nlowright));
+mid = max(abs(nmidleft - nlowleft), abs(nmidright - nlowright));
+high = max(abs(in1 - nmidleft), abs(in2 - nmidright));
+nframesamples = framesamples + 1;
+nlowtotal = lowtotal + low;
+nmidtotal = midtotal + mid;
+nhightotal = hightotal + high;
+nframemax = max(framemax, max(abs(in1), abs(in2)));
+nframeclipped = max(frameclipped, max(abs(in1), abs(in2)) >= 0.9999);
+npreviousenergy = previousenergy;
+npreviouslow = previouslow;
+npreviousmid = previousmid;
+nprevioushigh = previoushigh;
+nprimed = primed;
+narmed = armed;
+npending = pending;
+npendingtime = pendingtime;
+npendingcue = pendingcue;
+npendingclip = pendingclip;
+ncooldown = max(0, cooldown - 1);
+ntotal = total;
+nlasttime = lasttime;
+nlastcue = lastcue;
+nlastclip = lastclip;
+nframelevel = framelevel;
+nbandchange = bandchange;
+event = 0;
+onsetphase = 0;
+onsetperiod = 0;
+onsetoffset = 0;
+nframephase = framesamples == 0 ? phase : framephase;
+nframeperiod = framesamples == 0 ? in6 : frameperiod;
+nframeoffset = framesamples == 0 ? in7 : frameoffset;
+npendingphase = pendingphase;
+npendingperiod = pendingperiod;
+npendingoffset = pendingoffset;
+
+if (!operating || resetnow || contextchanged) {
+    // Cancel an unfinished candidate on pause, clock loss or settings reset.
+    nframesamples = 0;
+    nlowtotal = 0;
+    nmidtotal = 0;
+    nhightotal = 0;
+    nframemax = 0;
+    nframeclipped = 0;
+    npreviousenergy = 0;
+    nprimed = 0;
+    narmed = 1;
+    npending = 0;
+    ncooldown = 0;
+    nframelevel = 0;
+    nbandchange = 0;
+} else if (nframesamples >= samplerate * 0.010) {
+    // Causal 10 ms frames; event confirmation uses the following frame.
+    e = (nlowtotal + nmidtotal + nhightotal) / nframesamples;
+    den = max(0.000001, nlowtotal + nmidtotal + nhightotal);
+    plow = nlowtotal / den;
+    pmid = nmidtotal / den;
+    phigh = nhightotal / den;
+    redistribution = primed ? abs(plow - previouslow) + abs(pmid - previousmid) + abs(phigh - previoushigh) : 0;
+    rise = max(0, e - previousenergy) / max(0.002, previousenergy);
+    audible = e >= clamp(gateamp, 0.001, 0.5);
+    energycue = audible && (rise >= 0.35);
+    bandcue = audible && primed && (redistribution >= 0.22);
+    cues = energycue + 2 * bandcue;
+    nbandchange = redistribution;
+    nframelevel = e;
+
+    if (pending > 0) {
+        // A single-sample spike should not become a sustained onset candidate.
+        if (audible) {
+            event = 1;
+            ntotal = total + 1;
+            nlasttime = pendingtime;
+            nlastcue = pendingcue;
+            nlastclip = max(pendingclip, nframeclipped);
+            onsetphase = pendingphase;
+            onsetperiod = pendingperiod;
+            onsetoffset = pendingoffset;
+            ncooldown = samplerate * clamp(minintervalms, 20, 200) / 1000;
+        }
+        npending = 0;
+    } else if (armed && (ncooldown == 0) && (cues > 0)) {
+        npending = 1;
+        // Coarse frame-start estimate, not a sample-accurate vocal timestamp.
+        npendingtime = (clock - framesamples) * 1000 / samplerate;
+        npendingcue = cues;
+        npendingclip = nframeclipped;
+        npendingphase = nframephase;
+        npendingperiod = nframeperiod;
+        npendingoffset = nframeoffset;
+        narmed = 0;
+    }
+    if (!audible || ((rise < 0.15) && (redistribution < 0.12))) {
+        narmed = 1;
+    }
+    npreviousenergy = e;
+    npreviouslow = plow;
+    npreviousmid = pmid;
+    nprevioushigh = phigh;
+    nprimed = 1;
+    nframesamples = 0;
+    nlowtotal = 0;
+    nmidtotal = 0;
+    nhightotal = 0;
+    nframemax = 0;
+    nframeclipped = 0;
+}
+if (resetnow) {
+    ntotal = 0;
+    nlasttime = 0;
+    nlastcue = 0;
+    nlastclip = 0;
+}
+
+// No output here is a musical confidence score or an Auto Stop request.
+out1 = event;
+out2 = ntotal;
+out3 = nlasttime;
+out4 = nlastcue;
+out5 = nframelevel;
+out6 = nbandchange;
+out7 = nlastclip;
+out8 = operating && !resetnow && !contextchanged;
+out9 = npending;
+out10 = synced;
+out11 = clock;
+out12 = onsetphase;
+out13 = onsetperiod;
+out14 = onsetoffset;
+
+prevphase = phase;
+validrun = nvalid;
+clock = clock + 1;
+previousenabled = enabled;
+lastresetseq = resetseq;
+lowleft = nlowleft;
+lowright = nlowright;
+midleft = nmidleft;
+midright = nmidright;
+framesamples = nframesamples;
+lowtotal = nlowtotal;
+midtotal = nmidtotal;
+hightotal = nhightotal;
+framemax = nframemax;
+frameclipped = nframeclipped;
+previousenergy = npreviousenergy;
+previouslow = npreviouslow;
+previousmid = npreviousmid;
+previoushigh = nprevioushigh;
+primed = nprimed;
+armed = narmed;
+pending = npending;
+pendingtime = npendingtime;
+pendingcue = npendingcue;
+pendingclip = npendingclip;
+cooldown = ncooldown;
+total = ntotal;
+lasttime = nlasttime;
+lastcue = nlastcue;
+lastclip = nlastclip;
+framelevel = nframelevel;
+bandchange = nbandchange;
+lastepoch = in5;
+framephase = nframephase;
+frameperiod = nframeperiod;
+frameoffset = nframeoffset;
+pendingphase = npendingphase;
+pendingperiod = npendingperiod;
+pendingoffset = npendingoffset;
